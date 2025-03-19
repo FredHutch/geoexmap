@@ -220,4 +220,12 @@ server <- function(input, output, session) {
 }
 
 # -------- CREATE SHINY APP --------
-shinyApp(ui = ui, server = server)
+
+options <- list()
+
+if (!interactive()) {
+  options$shiny.port = 3838
+  options$shiny.host = "0.0.0.0"
+}
+
+shinyApp(ui = ui, server = server, options = options)
