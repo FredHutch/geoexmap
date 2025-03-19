@@ -30,7 +30,7 @@ library(rlang)
 # NDVI
 #ndvi <- st_read("Demo Data/wa_tracts_ndvi.gpkg")
 
-data <- readRDS("../Data_Processed/wa_tracts_pm25_ndvi_lan.rds")
+data <- readRDS("Data_Processed/wa_tracts_pm25_ndvi_lan.rds")
 
 df_vars <- data %>% 
   dplyr::select(c(NAMELSAD, pm2.5_t, ndvi_r, avg_rad))
