@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <citation>
+            <citeinfo>
+                <origin/>
+                <pubdate>20230222</pubdate>
+                <title>Transit Stops</title>
+                <geoform>vector digital data</geoform>
+                <onlink>https://data.wsdot.wa.gov/arcgis/rest/services/Shared/TransitData/MapServer/2</onlink>
+                <onlink>https://data.wsdot.wa.gov/geospatial/DOT_PubTrans/TransitStops.zip</onlink>
+            </citeinfo>
+        </citation>
+        <descript>
+            <abstract>This dataset provides information on fixed-route transit stops for the State of Washington as of 8/15/22. Stop data was extracted from General Transit Feed Specification (GTFS) data. Because GTFS data is typically created and managed by each individual transit agency, WSDOT cannot guarantee the accuracy of these data.Most data points are provided direct from GTFS feeds according to the specification at https://gtfs.org/. The stop_id field has been prepended with a code for each agency to ensure every stop has a distinct stop_id.Some fields are added describing the frequency level of service at each stop, based on the levels and methodology described in the WSDOT Frequent Transit Service Study (more information at https://engage.wsdot.wa.gov/frequent-transit-service-study/)Please send comments and questions to gtfs@wsdot.wa.gov</abstract>
+            <purpose>Fixed-route transit stops for the State of Washington.</purpose>
+        </descript>
+        <timeperd>
+            <timeinfo>
+                <sngdate>
+                    <caldate>20220815</caldate>
+                </sngdate>
+            </timeinfo>
+            <current>Data collected during August 2022.</current>
+        </timeperd>
+        <status>
+            <progress>In work</progress>
+            <update>Annually</update>
+        </status>
+        <spdom>
+            <bounding>
+                <westbc>-124.672653</westbc>
+                <eastbc>-116.960042</eastbc>
+                <northbc>48.999197</northbc>
+                <southbc>45.319304</southbc>
+            </bounding>
+        </spdom>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>bus stops</themekey>
+                <themekey>washington</themekey>
+                <themekey>transit</themekey>
+                <themekey>rural</themekey>
+                <themekey>tribes</themekey>
+                <themekey>multimodal</themekey>
+                <themekey>ferry</themekey>
+                <themekey>rail</themekey>
+            </theme>
+            <theme>
+                <themekt>ISO 19115 Topic Categories</themekt>
+                <themekey>transportation</themekey>
+            </theme>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>
+For Planning use only. The Washington State Department of Transportation (WSDOT) shall not be liable for any activity involving the use of the data, including, but not limited to, lost profits or savings or any other economic or consequential damages. Nor does the WSDOT warrant the fitness of the data for use for a particular purpose, or the installation of the data, its use, or the results obtained.
+To the fullest extent permitted by law, the Data User shall hold harmless, defend at its own expense, and indemnify WSDOT, its officers, employees, agents, and volunteers, against any and all liability, claims, losses, damages, or expenses, including reasonable attorney’s fees, arising from all acts or omissions of the Data User or its officers, agents, or employees in its use of the WSDOT data.
+</useconst>
+        <ptcontac>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>Public Transportation Division, WSDOT</cntorg>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>mailing</addrtype>
+                    <city>Olympia</city>
+                    <state>WA</state>
+                    <postal>98504</postal>
+                </cntaddr>
+                <cntvoice>360-709-7976</cntvoice>
+                <cntemail>gtfs@wsdot.wa.gov</cntemail>
+            </cntinfo>
+        </ptcontac>
+        <datacred>Washington State Department of Transportation</datacred>
+        <native> Version 6.2 (Build 9200) ; Esri ArcGIS 10.9.1.28388</native>
+    </idinfo>
+    <dataqual>
+        <lineage>
+            <srcinfo>
+                <typesrc>None</typesrc>
+                <srccontr>Publicly-available GTFS feeds were acquired from TransitLand (https://transit.land/), TransitFeeds (http://transitfeeds.com/), and agency websites. All other GTFS feeds were acquired from or produced on behalf of transit agencies.</srccontr>
+            </srcinfo>
+            <procstep>
+                <procdesc>This data was created by compiling GTFS data feeds from transit agencies in the state, which were combined into a single GTFS feed using a Python utility published by the Puget Sound Regional Council (https://github.com/psrc/combine_gtfs_feeds), then processed by the ArcGIS Pro GTFS Stops to Features utility.</procdesc>
+                <procdate>20221012</procdate>
+            </procstep>
+        </lineage>
+    </dataqual>
+    <spdoinfo>
+        <direct>Vector</direct>
+        <ptvctinf>
+            <sdtsterm>
+                <sdtstype>Entity point</sdtstype>
+                <ptvctcnt>22268</ptvctcnt>
+            </sdtsterm>
+        </ptvctinf>
+    </spdoinfo>
+    <eainfo>
+        <detailed>
+            <enttyp>
+                <enttypl>TransitStops</enttypl>
+                <enttypd>Each entry describes a transit service stop based on the GTFS specification. Additional information added regarding service frequency.</enttypd>
+                <enttypds>https://gtfs.org/schedule/reference/#stopstxt</enttypds>
+            </enttyp>
+            <attr>
+                <attrlabl>OBJECTID</attrlabl>
+                <attrdef>Internal feature number.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                                                  
+                    
+                    <udom>Sequential unique whole numbers that are automatically generated.</udom>
+                                                
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>stop_id</attrlabl>
+                <attrdef>Identifies a location: stop/platform, station, entrance/exit, generic node or boarding area (see location_type).
+
+Multiple routes may use the same stop_id.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_code</attrlabl>
+                <attrdef>Short text or a number that identifies the location for riders. These codes are often used in phone-based transit information systems or printed on signage to make it easier for riders to get information for a particular location. The stop_code may be the same as stop_id if it is public facing. This field should be left empty for locations without a code presented to riders.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>platform_code</attrlabl>
+                <attrdef>Platform identifier for a platform stop (a stop belonging to a station). This should be just the platform identifier (eg. "G" or "3"). Words like “platform” or "track" (or the feed’s language-specific equivalent) should not be included. This allows feed consumers to more easily internationalize and localize the platform identifier into other languages.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_name</attrlabl>
+                <attrdef>Name of the location. The stop_name should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage. For translations into other languages, use translations.txt.
+
+When the location is a boarding area (location_type=4), the stop_name should contains the name of the boarding area as displayed by the agency. It could be just one letter (like on some European intercity railway stations), or text like “Wheelchair boarding area” (NYC’s Subway) or “Head of short trains” (Paris’ RER).
+
+Conditionally Required:
+- Required for locations which are stops (location_type=0), stations (location_type=1) or entrances/exits (location_type=2).
+- Optional for locations which are generic nodes (location_type=3) or boarding areas (location_type=4).</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_desc</attrlabl>
+                <attrdef>Description of the location that provides useful, quality information. Should not be a duplicate of stop_name.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_lat</attrlabl>
+                <attrdef>Latitude of the location.
+
+For stops/platforms (location_type=0) and boarding area (location_type=4), the coordinates must be the ones of the bus pole — if exists — and otherwise of where the travelers are boarding the vehicle (on the sidewalk or the platform, and not on the roadway or the track where the vehicle stops).
+
+Conditionally Required:
+- Required for locations which are stops (location_type=0), stations (location_type=1) or entrances/exits (location_type=2).
+- Optional for locations which are generic nodes (location_type=3) or boarding areas (location_type=4).</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_lon</attrlabl>
+                <attrdef>Longitude of the location.
+
+For stops/platforms (location_type=0) and boarding area (location_type=4), the coordinates must be the ones of the bus pole — if exists — and otherwise of where the travelers are boarding the vehicle (on the sidewalk or the platform, and not on the roadway or the track where the vehicle stops).
+
+Conditionally Required:
+- Required for locations which are stops (location_type=0), stations (location_type=1) or entrances/exits (location_type=2).
+- Optional for locations which are generic nodes (location_type=3) or boarding areas (location_type=4).</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>zone_id</attrlabl>
+                <attrdef>Identifies the fare zone for a stop. If this record represents a station or station entrance, the zone_id is ignored.
+
+Conditionally Required:
+- Required if providing fare information using fare_rules.txt
+- Optional otherwise.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_url</attrlabl>
+                <attrdef>URL of a web page about the location. This should be different from the agency.agency_url and the routes.route_url field values.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>location_type</attrlabl>
+                <attrdef>Location type. Valid options are:
+
+0 (or blank) - Stop (or Platform). A location where passengers board or disembark from a transit vehicle. Is called a platform when defined within a parent_station.
+1 - Station. A physical structure or area that contains one or more platform.
+2 - Entrance/Exit. A location where passengers can enter or exit a station from the street. If an entrance/exit belongs to multiple stations, it may be linked by pathways to both, but the data provider must pick one of them as parent.
+3 - Generic Node. A location within a station, not matching any other location_type, that may be used to link together pathways define in pathways.txt.
+4 - Boarding Area. A specific location on a platform, where passengers can board and/or alight vehicles.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>parent_station</attrlabl>
+                <attrdef>Defines hierarchy between the different locations defined in stops.txt. It contains the ID of the parent location, as followed:
+
+- Stop/platform (location_type=0): the parent_station field contains the ID of a station.
+- Station (location_type=1): this field must be empty.
+- Entrance/exit (location_type=2) or generic node (location_type=3): the parent_station field contains the ID of a station (location_type=1)
+- Boarding Area (location_type=4): the parent_station field contains ID of a platform.
+
+Conditionally Required:
+- Required for locations which are entrances (location_type=2), generic nodes (location_type=3) or boarding areas (location_type=4).
+- Optional for stops/platforms (location_type=0).
+- Forbidden for stations (location_type=1).</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>stop_timezone</attrlabl>
+                <attrdef> Timezone of the location. If the location has a parent station, it inherits the parent station’s timezone instead of applying its own. Stations and parentless stops with empty stop_timezone inherit the timezone specified by agency.agency_timezone. If stop_timezone values are provided, the times in stop_times.txt should be entered as the time since midnight in the timezone specified by agency.agency_timezone. This ensures that the time values in a trip always increase over the course of a trip, regardless of which timezones the trip crosses.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>wheelchair_boarding</attrlabl>
+                <attrdef>Indicates whether wheelchair boardings are possible from the location. Valid options are:
+
+For parentless stops:
+0 or empty - No accessibility information for the stop.
+1 - Some vehicles at this stop can be boarded by a rider in a wheelchair.
+2 - Wheelchair boarding is not possible at this stop.
+
+For child stops:
+0 or empty - Stop will inherit its wheelchair_boarding behavior from the parent station, if specified in the parent.
+1 - There exists some accessible path from outside the station to the specific stop/platform.
+2 - There exists no accessible path from outside the station to the specific stop/platform.
+
+For station entrances/exits:
+0 or empty - Station entrance will inherit its wheelchair_boarding behavior from the parent station, if specified for the parent.
+1 - Station entrance is wheelchair accessible.
+2 - No accessible path from station entrance to stops/platforms.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>tts_stop_name</attrlabl>
+                <attrdef>Readable version of the stop_name. See "Text-to-speech field" in the Term Definitions for more.</attrdef>
+                <attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>level6</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "Level 6" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>level5</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "Level 5" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>level4</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "Level 4" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>level3</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "Level 3" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>level2</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "Level 2" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>level1</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "Level 1" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>levelNights</attrlabl>
+                <attrdef>A value of 1 indicates that the service meets the definition of "24-hour" frequency transit described in the WSDOT Frequent Transit Service Study. Note that a service meeting the most restrictive/most frequent service requirements ("Level 1" and "24-hour") will have a 1 in every service level column.</attrdef>
+                <attrdefs>https://engage.wsdot.wa.gov/frequent-transit-service-study/</attrdefs>
+            </attr>
+            <attr>
+                <attrlabl>Shape</attrlabl>
+                <attrdef>Feature geometry.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                                                  
+                    
+                    <udom>Coordinates defining the features.</udom>
+                                                
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>GlobalID</attrlabl>
+            </attr>
+        </detailed>
+    </eainfo>
+    <distinfo>
+        <distrib>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>Washington State Department of Transportation, Office of Information Technology</cntorg>
+                    <cntper>Jordyn Mitchell</cntper>
+                </cntorgp>
+                <cntpos>GIS Database Administrator</cntpos>
+                <cntemail>jordyn.mitchell@wsdot.wa.gov</cntemail>
+            </cntinfo>
+        </distrib>
+        <distliab>The Washington State Department of Transportation shall not be liable for any activity involving this data with regard to lost profits or savings or any other consequential damages; or the fitness for use of the data for a particular purpose; or the installation of the data, its use, or the results obtained.</distliab>
+        <custom>Download individual data sets from https://gisdata-wsdot.opendata.arcgis.com</custom>
+    </distinfo>
+    <metainfo>
+        <metd>20240105</metd>
+        <metc>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>Public Transportation Division, WSDOT</cntorg>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>mailing</addrtype>
+                    <city>Olympia</city>
+                    <state>WA</state>
+                    <postal>98504</postal>
+                </cntaddr>
+                <cntvoice>360-709-7976</cntvoice>
+                <cntemail>gtfs@wsdot.wa.gov</cntemail>
+            </cntinfo>
+        </metc>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
