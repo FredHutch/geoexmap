@@ -171,6 +171,7 @@ server <- function(input, output, session) {
     if(col == "avg_rad") return("Average Nighttime Radiance")
   }
   
+  # TODO: pivot first (to longer), filter for selections (year, variables), then pivot wider for reactive values
   map_cols <- reactive({
     cbind(natural_env, built_env) %>% 
       dplyr::select(!!!input$naturalenv, !!!input$builtenv)
