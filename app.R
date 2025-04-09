@@ -195,7 +195,8 @@ server <- function(input, output, session) {
     
     map <- leaflet(map_cols()) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
-      addProviderTiles(providers$CartoDB.Positron)  
+      addProviderTiles(providers$CartoDB.Positron) %>% 
+      addSearchOSM()
   })
   
   observe({
@@ -216,7 +217,7 @@ server <- function(input, output, session) {
               addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c))
           }
         }
-      }
+      } 
   })
 }
 
