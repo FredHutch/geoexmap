@@ -3,7 +3,7 @@ FROM fredhutch/r-shiny-server-base:4.4.1
 RUN apt-get update -y && apt-get install -y libudunits2-dev libgdal-dev
 
 # Install R packages
-RUN R -e 'install.packages(c("shiny", "tidyverse", "sf", "leaflet", "leaflet.extras2", "mapview", "crosstalk", "RColorBrewer", "bslib", "bsicons", "dplyr", "rsconnect", "rlang"), repos="https://cloud.r-project.org/")'
+RUN R -e 'install.packages(c("shiny", "tidyverse", "sf", "leaflet", "leaflet.extras",  "leaflet.extras2", "mapview", "crosstalk", "RColorBrewer", "bslib", "bsicons", "dplyr", "rsconnect", "rlang"), repos="https://cloud.r-project.org/")'
 
 # Copy app to /srv/shiny-server/
 COPY app.R /srv/shiny-server/
