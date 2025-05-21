@@ -16,6 +16,7 @@ library(leaflet)
 library(leaflet.extras)
 library(leaflet.extras2)
 library(mapview)
+library(plotly)
 #library(crosstalk)
 library(RColorBrewer)
 library(bslib)
@@ -108,9 +109,11 @@ ui <- page_sidebar(
   window_title = "geoexmap",
   
   sidebar = categories,
-  card(full_screen = TRUE,
+  card(#full_screen = TRUE,
        card_header = ("Map"),
-       leafletOutput("geoexmap"))
+       leafletOutput("geoexmap")),
+  card(card_header = ("Chart"),
+       plotlyOutput("chart"))
 )
 
 # -------- SERVER --------
@@ -189,7 +192,12 @@ server <- function(input, output, session) {
   #     paste(lab)
   #   }
   # }
-  
+  output$chart <- renderPlotly({
+    plotly.dat <- map_cols() %>% 
+      as.data.frame()
+    # probably an issue with naming
+    plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], type = "scatter") 
+  })
   
   output$geoexmap <- renderLeaflet({
     #print(input$naturalenv, input$builtenv)
@@ -201,7 +209,7 @@ server <- function(input, output, session) {
   })
   
   observe({
-    
+    plotlyProxy("chart")
     
     leafletProxy("geoexmap", data = map_cols()) %>% 
       clearControls()  %>% 
