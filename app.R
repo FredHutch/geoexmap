@@ -124,7 +124,6 @@ server <- function(input, output, session) {
   b <- c("pm2.5_t")
   n <- c("avg_rad")
   
-  # use colorQuantile
   # palette helper function
   geoex.palette <- function(var) {
     tryCatch({
@@ -212,7 +211,8 @@ server <- function(input, output, session) {
   })
   
   observe({
-    plotlyProxy("chart")
+    withProgress(message = "Plotting...", 
+    {plotlyProxy("chart")
     
     leafletProxy("geoexmap", data = map_cols()) %>% 
       clearControls()  %>% 
@@ -229,7 +229,7 @@ server <- function(input, output, session) {
               addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c))
           }
         }
-      } 
+      }}) 
   })
 }
 
