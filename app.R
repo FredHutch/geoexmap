@@ -196,7 +196,7 @@ server <- function(input, output, session) {
     plotly.dat <- map_cols() %>% 
       as.data.frame()
     # probably an issue with naming
-    plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3]) %>% 
+    plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2]) %>% 
       layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]),
                           yaxis = list(title = colnames(plotly.dat)[2]),
                           zaxis = list(title = colnames(plotly.dat)[3]))) 
