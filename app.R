@@ -195,8 +195,6 @@ server <- function(input, output, session) {
     plotly.dat <- map_cols() %>% 
       as.data.frame()
     
-    head(plotly.dat)
-    
     if (ncol(plotly.dat) == 2) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
         layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]))) 
