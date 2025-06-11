@@ -16,6 +16,7 @@ library(leaflet)
 library(leaflet.extras)
 library(leaflet.extras2)
 library(mapview)
+library(plotly)
 #library(crosstalk)
 library(RColorBrewer)
 library(bslib)
@@ -108,9 +109,11 @@ ui <- page_sidebar(
   window_title = "geoexmap",
   
   sidebar = categories,
-  card(full_screen = TRUE,
+  card(#full_screen = TRUE,
        card_header = ("Map"),
-       leafletOutput("geoexmap"))
+       leafletOutput("geoexmap")),
+  card(card_header = ("Chart"),
+       plotlyOutput("chart"))
 )
 
 # -------- SERVER --------
@@ -121,7 +124,6 @@ server <- function(input, output, session) {
   b <- c("pm2.5_t")
   n <- c("avg_rad")
   
-  # use colorQuantile
   # palette helper function
   geoex.palette <- function(var) {
     tryCatch({
@@ -189,7 +191,25 @@ server <- function(input, output, session) {
   #     paste(lab)
   #   }
   # }
-  
+  output$chart <- renderPlotly({
+    plotly.dat <- map_cols() %>% 
+      as.data.frame()
+    
+    if (ncol(plotly.dat) == 2) {
+      plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
+        layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]))) 
+    } else if (ncol(plotly.dat) == 3) {
+      plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2]) %>% 
+        layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]),
+                            yaxis = list(title = colnames(plotly.dat)[2])))
+    } else if (ncol(plotly.dat) == 4) {
+      plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3]) %>% 
+        layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]),
+                            yaxis = list(title = colnames(plotly.dat)[2]),
+                            zaxis = list(title = colnames(plotly.dat)[3])))
+    }
+     
+  })
   
   output$geoexmap <- renderLeaflet({
     #print(input$naturalenv, input$builtenv)
@@ -201,7 +221,8 @@ server <- function(input, output, session) {
   })
   
   observe({
-    
+    withProgress(message = "Plotting...", 
+    {plotlyProxy("chart")
     
     leafletProxy("geoexmap", data = map_cols()) %>% 
       clearControls()  %>% 
@@ -218,8 +239,9 @@ server <- function(input, output, session) {
               addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c))
           }
         }
-      } 
-  })
+      }}) 
+  }) %>% 
+    bindEvent(list(input$naturalenv, input$builtenv))
 }
 
 # -------- CREATE SHINY APP --------
