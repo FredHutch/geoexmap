@@ -111,7 +111,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
-    varSelectizeInput("outcomes", label = "Select Measures", data = health_outcomes_inp, multiple = TRUE)
+    varSelectizeInput('outcomes', label = "Select Measures", data = health_outcomes_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking")
@@ -137,7 +137,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
-    checkboxInput("showbounds", "Show Tract Boundaries", value = TRUE),
+    checkboxInput("showbounds", "Show Tract Boundaries", value = FALSE),
     fileInput("upload", "Upload a Shapefile"),
     actionButton("print", "Print map", onclick = "$('#geoexmap').print();")
   )
@@ -145,10 +145,11 @@ categories <- accordion(
 )
 
 # -------- UI LAYOUT --------
-ui <- page_sidebar(
+ui <- page_navbar(
   title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   window_title = "geoexmap",
-  
+  #nav_panel(title = "geoexmap"),
+ # nav_panel(title = "documentation")
   sidebar = categories,
   card(#full_screen = TRUE,
        card_header = ("Map"),
@@ -175,7 +176,7 @@ server <- function(input, output, session) {
       }
       
       domain = df_vars[[var]]
-      bins = quantile(df_vars[[var]])
+      bins = stats::quantile(df_vars[[var]], na.rm = TRUE)
       
       if (var %in% g) {
         return(colorQuantile(
@@ -272,6 +273,7 @@ server <- function(input, output, session) {
       {
         # for each chosen column, define the palette, and add polygons
         for (c in colnames(map_cols())) {
+          print(c)
           pal <- geoex.palette(c)
           
           # skip null to avoid geometry
@@ -283,10 +285,12 @@ server <- function(input, output, session) {
         }
       }}) 
   }) %>% 
-    bindEvent(list(input$outcomes,input$naturalenv, input$builtenv))
+    bindEvent(list(input$outcomes,input$naturalenv, input$builtenv, input$showbounds, input$upload, input$print))
 }
 
 # -------- CREATE SHINY APP --------
+
+options <- list()
 
 if (!interactive()) {
   options$shiny.port = 3838
