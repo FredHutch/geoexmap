@@ -301,17 +301,27 @@ server <- function(input, output, session) {
       st_drop_geometry()
     
     if (ncol(plotly.dat) == 1) {
-      plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
-        layout(xaxis = list(title = names(plotly.dat)[1])) 
+      plot_ly(data = plotly.dat, x = plotly.dat[,1],
+              text = ~paste0("<b>", names(plotly.dat)[1], ": ", plotly.dat[,1])) %>% 
+        layout(
+          plot_bgcolor = '#e5ecf6',
+          xaxis = list(title = names(plotly.dat)[1])) 
     } else if (ncol(plotly.dat) == 2) {
-      plot_ly(data = plotly.dat, type = "scatter", x = plotly.dat[,1], y = plotly.dat[,2]) %>% 
-        layout(xaxis = list(title = as.character(names(plotly.dat)[1])),
-               yaxis = list(title = as.character(names(plotly.dat)[2])))
+      plot_ly(data = plotly.dat, type = "scatter", x = plotly.dat[,1], y = plotly.dat[,2],
+              text = ~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
+                             "<br>", gsub("\\.", " ", names(plotly.dat)[2]), ": ", round(plotly.dat[,2], digits = 2))) %>% 
+        layout(
+          plot_bgcolor = '#e5ecf6',
+          xaxis = list(title = gsub("\\.", " ", names(plotly.dat)[1])),
+          yaxis = list(title = gsub("\\.", " ", names(plotly.dat)[2])))
     } else if (ncol(plotly.dat) == 3) {
-      plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3]) %>% 
-        layout(scene = list(xaxis = list(title = names(plotly.dat)[1]),
-                            yaxis = list(title = names(plotly.dat)[2]),
-                            zaxis = list(title = names(plotly.dat)[3])))
+      plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3],
+              text = ~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
+                             "<br>", gsub("\\.", " ", names(plotly.dat)[2]), ": ", round(plotly.dat[,2], digits = 2),
+                             "<br>", gsub("\\.", " ", names(plotly.dat)[3]), ": ", round(plotly.dat[,3], digits = 2))) %>% 
+        layout(scene = list(xaxis = list(title = gsub("\\.", " ", names(plotly.dat)[1])),
+                            yaxis = list(title = gsub("\\.", " ", names(plotly.dat)[2])),
+                            zaxis = list(title = gsub("\\.", " ", names(plotly.dat)[3]))))
     } else {
       
     }
