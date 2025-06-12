@@ -73,6 +73,12 @@ health_outcomes <- df_vars %>%
   dplyr::select(c(21:32))
 #names(health_outcomes) <- gsub("\\.", " ", names(health_outcomes))
 
+health_behaviors <- df_vars %>% 
+  dplyr::select(c(17:20))
+
+health_prevention <- df_vars %>% 
+  dplyr::select(c(10:16))
+
 natural_env <- df_vars %>%
   dplyr::select(c(1))
 #names(natural_env) <- gsub("\\.", " ", names(natural_env))
@@ -82,6 +88,12 @@ built_env <- df_vars %>%
 #names(built_env) <- gsub("\\.", " ", names(built_env))
 
 health_outcomes_inp <- health_outcomes %>% 
+  st_drop_geometry()
+
+health_behaviors_inp <- health_behaviors %>% 
+  st_drop_geometry()
+
+health_prevention_inp <- health_prevention %>% 
   st_drop_geometry()
 
 natural_env_inp <- natural_env %>%
@@ -114,10 +126,12 @@ categories <- accordion(
     varSelectizeInput('outcomes', label = "Select Measures", data = health_outcomes_inp, multiple = TRUE)
   ),
   accordion_panel(
-    "Health Behaviors", icon = bs_icon("person-walking")
+    "Health Behaviors", icon = bs_icon("person-walking"),
+    varSelectizeInput('behaviors', label = "Select Measures", data = health_behaviors_inp, multiple = TRUE)
   ),
   accordion_panel(
-    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px")
+    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
+    varSelectizeInput('prevention', label = "Select Measures", data = health_prevention_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add")
@@ -138,6 +152,7 @@ categories <- accordion(
   accordion_panel(
     "Options", icon = bs_icon("gear"),
     checkboxInput("showbounds", "Show Tract Boundaries", value = FALSE),
+    checkboxInput("showchart", "Show Chart", value = TRUE),
     fileInput("upload", "Upload a Shapefile"),
     actionButton("print", "Print map", onclick = "$('#geoexmap').print();")
   )
@@ -150,21 +165,37 @@ ui <- page_navbar(
   window_title = "geoexmap",
   #nav_panel(title = "geoexmap"),
  # nav_panel(title = "documentation")
-  sidebar = categories,
-  card(#full_screen = TRUE,
-       card_header = ("Map"),
-       leafletOutput("geoexmap")),
-  card(card_header = ("Chart"),
-       plotlyOutput("chart"))
+  card(card_header = ("Map"),
+       layout_sidebar(
+         sidebar = categories,
+         layout_columns(
+           col_widths = c(12,8),
+           row_heights = c(2, 1),
+           leafletOutput("geoexmap"),
+           card(card_header = ("Chart"),
+                plotlyOutput("chart"))
+         )
+         ),
+       ),
 )
 
 # -------- SERVER --------
 server <- function(input, output, session) {
   # define categories for palettes
   # "good", "bad", "neutral"
-  g <- c("Green.Space")
-  b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults")
-  n <- c("Nighttime.Radiance")
+  g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Denstist.in.Past.Year", "Cholesterol.Screening",
+         "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
+         "Colorectal.Cancer.Screening.among.Adults.45.to.75")
+  b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults", 
+         "Food.Stamps", "Food.Insecurity",
+         "Housing.Insecurity", "Utility.Services.Threat", "Lacking.Reliable.Transportation", 
+         "Lack.Of.Health.Insurance", "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults",
+         "No.Leisure.Time.Physical.Activity.among.Adults", "Short.Sleep.Duration",
+         "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
+         "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
+         "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
+         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "")
+  n <- c("Nighttime.Radiance", "Stroke.among.Adults")
   
   # palette helper function
   geoex.palette <- function(var) {
@@ -214,17 +245,44 @@ server <- function(input, output, session) {
     if(col == "Particulate.Matter.2.5") return("Particulate Matter (PM) 2.5")
     if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI)")
     if(col == "Nighttime.Radiance") return("Average Nighttime Radiance")
-    if(col == "Arthritis.among.Adults") return("Arthritis Among Adults")
+    if(col == "Food.Stamps") return("Comparative Population on SNAP")
+    if(col == "Food.Insecurity") return("Comparative Prevalence of Food Insecurity")
+    if(col == "Housing.Insecurity") return("Comparative Prevalence of Housing Insecurity")
+    if(col == "Utility.Services.Threat") return("Comparative Prevalence of Utility Services Threats")
+    if(col == "Lacking.Reliable.Transportation") return("Comparative Population Lacking Reliable Transportation")
+    if(col == "Lack.Of.Health.Insurance") return("Comparative Population Lacking Health Insurance")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Comparative Prevalence of Routine Checkups (Past Year)")
+    if(col == "Visited.Denstist.in.Past.Year") return("Comparative Prevalence of Dental Visits (Past Year)")
+    if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Comparative Prevalence of Pop. Taking BP Medicine")
+    if(col == "Cholesterol.Screening") return("Comparative Prevalence of Pop. with Cholesterol Screening")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Comparative Mammography Use (Women 50-74)")
+    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Comparative Prevalence of Colorectal Cancer Screening (Adults 45-75)")
+    if(col == "Binge.Drinking.among.Adults") return("Comparative Prevalence of Binge Drinking Among Adults")
+    if(col == "Cigarette.Smoking.among.Adults") return("Comparative Prevalence of Cigarette Smoking Among Adults")
+    if(col == "No.Leisure.Time.Physical.Activity.among.Adults") return("Comparative Lack of Leisurely Physical Activity Among Adults")
+    if(col == "Short.Sleep.Duration") return("Comparative Prevalence of Short Sleep Duration Among Adults")
+    if(col == "Arthritis.among.Adults") return("Comparative Prevalence of Arthritis Among Adults")
+    if(col == "Asthma.among.Adults") return("Comparative Prevalence of Asthma among Adults")
+    if(col == "High.Blood.Pressure.among.Adults") return("Comparative Prevalence High BP Among Adults")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Comparative Prevalence of Cancer or Melanoma Among Adults")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("Comparative Prevalence of High Cholesterol Among Screened Adults")
+    if(col == "COPD.among.Adults") return("Comparative Prevalence of COPD Among Adults")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Comparative Prevalence of Coronary Heart Disease Among Adults")
+    if(col == "Depression.among.Adults") return("Comparative Prevalence of Depression Among Adults")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Comparative Prevalence of Diabetes Among Adults")
+    if(col == "Obesity.among.Adults") return("Comparative Prevalence of Obesity Among Adults")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("Comparative Prevalence All Teeth Lost Among Adults 65+")
+    if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
   
   # TODO: pivot first (to longer), filter for selections (year, variables), then pivot wider for reactive values
   map_cols <- reactive({
-    cbind(health_outcomes, natural_env, built_env) %>% 
-      dplyr::select(!!!input$outcomes, !!!input$naturalenv, !!!input$builtenv)
+    cbind(health_outcomes, health_prevention, health_behaviors, natural_env, built_env) %>% 
+      dplyr::select(!!!input$outcomes, !!!input$prevention, !!!input$behaviors, !!!input$naturalenv, !!!input$builtenv)
     
   }) %>% 
-    bindCache(input$outcomes, input$naturalenv, input$builtenv) %>% # reduce work by server
-    bindEvent(list(input$outcomes, input$naturalenv, input$builtenv))
+    bindCache(input$outcomes, input$prevention, input$behaviors, input$naturalenv, input$builtenv) %>% # reduce work by server
+    bindEvent(list(input$outcomes, input$prevention, input$behaviors, input$naturalenv, input$builtenv))
   
   # label.titles <- function(cols) {
   #   cols <- map_cols()
@@ -285,7 +343,7 @@ server <- function(input, output, session) {
         }
       }}) 
   }) %>% 
-    bindEvent(list(input$outcomes,input$naturalenv, input$builtenv, input$showbounds, input$upload, input$print))
+    bindEvent(list(input$outcomes,input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$showbounds, input$upload, input$print))
 }
 
 # -------- CREATE SHINY APP --------
