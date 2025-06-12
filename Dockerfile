@@ -11,7 +11,7 @@ COPY app.R /srv/shiny-server/
 # Copy www to /srv/shiny-server/
 COPY www/* /srv/shiny-server/www/
 
-COPY Data_Processed/* /srv/shiny-server/Data_Processed/
+COPY Data_Processed/ /srv/shiny-server/Data_Processed/
 
 RUN mkdir -p /srv/shiny-server/app_cache/sass
 
