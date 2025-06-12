@@ -80,12 +80,18 @@ health_prevention <- df_vars %>%
   dplyr::select(c(10:16))
 
 natural_env <- df_vars %>%
-  dplyr::select(c(1))
+  dplyr::select(c(1, 75))
 #names(natural_env) <- gsub("\\.", " ", names(natural_env))
 
 built_env <- df_vars %>%
   dplyr::select(c(2:3))
 #names(built_env) <- gsub("\\.", " ", names(built_env))
+
+sociodemo <- df_vars %>% 
+  dplyr::select(c(33:72))
+
+social_env <- df_vars %>% 
+  dplyr::select(c(4:9, 73:74))
 
 health_outcomes_inp <- health_outcomes %>% 
   st_drop_geometry()
@@ -97,8 +103,13 @@ health_prevention_inp <- health_prevention %>%
   st_drop_geometry()
 
 natural_env_inp <- natural_env %>%
-  st_drop_geometry() #%>% 
-  #rename("Particulate Matter 2.5" = pm2.5_t)
+  st_drop_geometry() 
+
+sociodemo_inp <- sociodemo %>% 
+  st_drop_geometry()
+
+social_env_inp <- social_env %>% 
+  st_drop_geometry()
 
 built_env_inp <- built_env %>%
   st_drop_geometry()
@@ -119,7 +130,8 @@ cards <- list(
 
 categories <- accordion(
   accordion_panel(
-    "Sociodemographics", icon = bs_icon("person-vcard")
+    "Sociodemographics", icon = bs_icon("person-vcard"),
+    varSelectizeInput('sociodemo', label = "Select Measures", data = sociodemo_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
@@ -147,14 +159,14 @@ categories <- accordion(
     varSelectizeInput('builtenv', label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE)
   ),
   accordion_panel(
-    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px")#icon = bs_icon("house")
+    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    varSelectizeInput('socialenv', label = "Select Measures", data = social_env_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
     checkboxInput("showbounds", "Show Tract Boundaries", value = FALSE),
     checkboxInput("showchart", "Show Chart", value = TRUE),
-    fileInput("upload", "Upload a Shapefile"),
-    actionButton("print", "Print map", onclick = "$('#geoexmap').print();")
+    fileInput("upload", "Upload a Shapefile")
   )
   
 )
@@ -194,8 +206,8 @@ server <- function(input, output, session) {
          "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
-         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "")
-  n <- c("Nighttime.Radiance", "Stroke.among.Adults")
+         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults")
+  n <- c("Nighttime.Radiance", names(sociodemo_inp))
   
   # palette helper function
   geoex.palette <- function(var) {
@@ -275,39 +287,33 @@ server <- function(input, output, session) {
     if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
   
-  # TODO: pivot first (to longer), filter for selections (year, variables), then pivot wider for reactive values
   map_cols <- reactive({
-    cbind(health_outcomes, health_prevention, health_behaviors, natural_env, built_env) %>% 
-      dplyr::select(!!!input$outcomes, !!!input$prevention, !!!input$behaviors, !!!input$naturalenv, !!!input$builtenv)
+    cbind(health_outcomes, sociodemo, social_env, health_prevention, health_behaviors, natural_env, built_env) %>% 
+      dplyr::select(!!!input$outcomes, !!!input$sociodemo, !!!input$socialenv, !!!input$prevention, 
+                    !!!input$behaviors, !!!input$naturalenv, !!!input$builtenv)
     
   }) %>% 
-    bindCache(input$outcomes, input$prevention, input$behaviors, input$naturalenv, input$builtenv) %>% # reduce work by server
-    bindEvent(list(input$outcomes, input$prevention, input$behaviors, input$naturalenv, input$builtenv))
+    bindCache(input$outcomes, input$sociodemo, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$builtenv) %>% # reduce work by server
+    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$builtenv))
   
-  # label.titles <- function(cols) {
-  #   cols <- map_cols()
-  #   for (col in colnames(cols)) {
-  #     # get value
-  #     lab <- col
-  #     paste(lab)
-  #   }
-  # }
   output$chart <- renderPlotly({
     plotly.dat <- map_cols() %>% 
-      as.data.frame()
+      st_drop_geometry()
     
-    if (ncol(plotly.dat) == 2) {
+    if (ncol(plotly.dat) == 1) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
-        layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]))) 
+        layout(xaxis = list(title = names(plotly.dat)[1])) 
+    } else if (ncol(plotly.dat) == 2) {
+      plot_ly(data = plotly.dat, type = "scatter", x = plotly.dat[,1], y = plotly.dat[,2]) %>% 
+        layout(xaxis = list(title = as.character(names(plotly.dat)[1])),
+               yaxis = list(title = as.character(names(plotly.dat)[2])))
     } else if (ncol(plotly.dat) == 3) {
-      plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2]) %>% 
-        layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]),
-                            yaxis = list(title = colnames(plotly.dat)[2])))
-    } else if (ncol(plotly.dat) == 4) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3]) %>% 
-        layout(scene = list(xaxis = list(title = colnames(plotly.dat)[1]),
-                            yaxis = list(title = colnames(plotly.dat)[2]),
-                            zaxis = list(title = colnames(plotly.dat)[3])))
+        layout(scene = list(xaxis = list(title = names(plotly.dat)[1]),
+                            yaxis = list(title = names(plotly.dat)[2]),
+                            zaxis = list(title = names(plotly.dat)[3])))
+    } else {
+      
     }
      
   })
@@ -338,12 +344,14 @@ server <- function(input, output, session) {
           if (!is.null(pal)){
               addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                           fillOpacity = 0.3, highlightOptions = highlightOptions(color = "white", weight = 2, bringToFront = TRUE)) %>% 
-              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c))
+              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
+              addEasyprint(options = easyprintOptions())
           }
         }
-      }}) 
+      } }) 
   }) %>% 
-    bindEvent(list(input$outcomes,input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$showbounds, input$upload, input$print))
+    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, 
+                   input$showbounds, input$upload))
 }
 
 # -------- CREATE SHINY APP --------
