@@ -156,8 +156,8 @@ categories <- accordion(
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
-    checkboxInput("showbounds", "Show Tract Boundaries", value = FALSE),
-    checkboxInput("showchart", "Show Chart", value = TRUE),
+    input_switch("showbounds", "Show Tract Boundaries", value = FALSE),
+    input_switch("showchart", "Show Chart", value = TRUE),
     fileInput("upload", "Upload a Shapefile")
   )
   
