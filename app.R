@@ -1,14 +1,8 @@
 # MC :)
 
-# TODO:
-# PM 2.5 (Done)
-# Wildfires from MTBS
-# Greenspace/NDVI (Done)
-# LAN (Done)
-# ADI
-# EJI
-
 library(shiny)
+library(shinyjs)
+#library(reactable)
 library(tidyverse)
 library(sf)
 library(data.table)
@@ -27,14 +21,12 @@ library(dplyr)
 library(rsconnect)
 library(rlang)
 
-# load pm2.5 layer
-#pm2.5 <- st_read("Demo Data/wa_tracts_pm2.5.gpkg")
-
-# NDVI
-#ndvi <- st_read("Demo Data/wa_tracts_ndvi.gpkg")
-
-data <- readRDS("Data_Processed/wa_tracts_pm25_ndvi_lan.rds")
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg") 
+
+data$Binge.Drinking.among.Adults <- as.numeric(data$Binge.Drinking.among.Adults)
+data$Cigarette.Smoking.among.Adults <- as.numeric(data$Cigarette.Smoking.among.Adults)
+data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisure.time.Physical.Activity.among.Adults)
+data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
 #names(data) <- gsub("\\.", " ", names(data))
 
@@ -122,10 +114,10 @@ built_env_inp <- built_env %>%
 
 # -------- UI ELEMENTS --------
 cards <- list(
-  card(
-    full_screen = TRUE,
-    card_header("geoexmap")
-  )
+  # card(
+  #   full_screen = TRUE,
+  #   card_header("geoexmap")
+  # )
 )
 
 categories <- accordion(
@@ -184,15 +176,17 @@ ui <- page_navbar(
            col_widths = c(12,8),
            row_heights = c(2, 1),
            leafletOutput("geoexmap"),
-           card(card_header = ("Chart"),
-                plotlyOutput("chart"))
-         )
+           conditionalPanel(
+             condition = "input.showchart == true",
+             card(card_header = ("Chart"),
+                                 plotlyOutput("chart"))))
          ),
        ),
 )
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  
   # define categories for palettes
   # "good", "bad", "neutral"
   g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Denstist.in.Past.Year", "Cholesterol.Screening",
@@ -206,7 +200,7 @@ server <- function(input, output, session) {
          "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
-         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults")
+         "Obesity.among.Adults", "All.Teeth.Lost.amond.Adults.65.and.older", "Stroke.among.Adults") # CHANGE TO AMONG
   n <- c("Nighttime.Radiance", names(sociodemo_inp))
   
   # palette helper function
@@ -219,7 +213,7 @@ server <- function(input, output, session) {
       }
       
       domain = df_vars[[var]]
-      bins = stats::quantile(df_vars[[var]], na.rm = TRUE)
+      bins = unique(stats::quantile(df_vars[[var]], na.rm = TRUE))
       
       if (var %in% g) {
         return(colorQuantile(
@@ -302,7 +296,7 @@ server <- function(input, output, session) {
     
     if (ncol(plotly.dat) == 1) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1],
-              text = ~paste0("<b>", names(plotly.dat)[1], ": ", plotly.dat[,1])) %>% 
+              text = ~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2))) %>% 
         layout(
           plot_bgcolor = '#e5ecf6',
           xaxis = list(title = names(plotly.dat)[1])) 
@@ -338,6 +332,11 @@ server <- function(input, output, session) {
   })
   
   observe({
+    if (ncol(map_cols()) == 4) {
+      print("Disabling select inputs...")
+      shinyjs::disable(c("outcomes", "sociodemo", "socialenv", "behaviors", "prevention", "naturalenv", "builtenv"))
+    }
+    
     withProgress(message = "Plotting...", 
     {plotlyProxy("chart")
     
@@ -353,7 +352,8 @@ server <- function(input, output, session) {
           # skip null to avoid geometry
           if (!is.null(pal)){
               addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
-                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "white", weight = 2, bringToFront = TRUE)) %>% 
+                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "white", weight = 2, bringToFront = TRUE),
+                          label = "Hey") %>% 
               addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
               addEasyprint(options = easyprintOptions())
           }
