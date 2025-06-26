@@ -1,5 +1,11 @@
 # MC :)
 
+#TODO ELEMENTS:
+## modal for intro/welcome message
+## popover for actionable links
+## add food environment category (built environment)
+## add land use category (built environment)
+
 library(shiny)
 library(shinyjs)
 #library(reactable)
@@ -148,7 +154,12 @@ categories <- accordion(
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
     #!!!builtenv_filters
-    varSelectizeInput('builtenv', label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE)
+    varSelectizeInput('builtenv', label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
+    accordion_panel(
+      "Food Environment", icon = bs_icon("basket"),
+      varSelectizeInput('foodenv', label = "Select Measures", data = built_env_inp, multiple = TRUE)
+    )
+    
   ),
   accordion_panel(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
