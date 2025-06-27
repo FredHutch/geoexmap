@@ -180,7 +180,7 @@ ui <- page_navbar(
   window_title = "geoexmap",
   #nav_panel(title = "geoexmap"),
  # nav_panel(title = "documentation")
-  card(card_header = ("Map"),
+  bslib::card(card_header = ("Map"),
        layout_sidebar(
          sidebar = categories,
          layout_columns(
@@ -189,7 +189,7 @@ ui <- page_navbar(
            leafletOutput("geoexmap"),
            conditionalPanel(
              condition = "input.showchart == true",
-             card(card_header = ("Chart"),
+             bslib::card(card_header = ("Chart"),
                                  plotlyOutput("chart"))))
          ),
        ),
@@ -225,11 +225,12 @@ server <- function(input, output, session) {
       
       domain = df_vars[[var]]
       bins = unique(stats::quantile(df_vars[[var]], na.rm = TRUE))
+      numbins = length(bins)
       
       if (var %in% g) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
-          na.color = "transparent", n = 5
+          na.color = "transparent", n = numbins + 1
         ))
       } else if (var %in% n) {
         # TODO: have multiple colors for this, one for each neutral variable
@@ -237,17 +238,17 @@ server <- function(input, output, session) {
         if (var == "Nighttime.Radiance") {
           return(colorQuantile(
             palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
-            na.color="transparent", n = 5
+            na.color="transparent", n = numbins + 1
           ))
         } else return(colorQuantile(
               palette = "Blues", domain = domain,
-              na.color = "transparent", n = 5
+              na.color = "transparent", n = numbins + 1
         ))
         # otherwise, var is in "bad"
       } else {
         return(colorQuantile(
           palette = "YlOrRd", domain = domain,
-          na.color = "transparent", n = 5
+          na.color = "transparent", n = numbins + 1
         ))
       }
     },
