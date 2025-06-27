@@ -3,8 +3,9 @@
 #TODO ELEMENTS:
 ## modal for intro/welcome message
 ## popover for actionable links
-## add food environment category (built environment)
 ## add land use category (built environment)
+## add absolutePanel() for plots on top of map
+## add table features
 
 library(shiny)
 library(shinyjs)
@@ -129,19 +130,19 @@ cards <- list(
 categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    varSelectizeInput('sociodemo', label = "Select Measures", data = sociodemo_inp, multiple = TRUE)
+    varSelectInput('sociodemo', selectize = TRUE, label = "Select Measures", data = sociodemo_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
-    varSelectizeInput('outcomes', label = "Select Measures", data = health_outcomes_inp, multiple = TRUE)
+    varSelectInput('outcomes', selectize = TRUE, label = "Select Measures", data = health_outcomes_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
-    varSelectizeInput('behaviors', label = "Select Measures", data = health_behaviors_inp, multiple = TRUE)
+    varSelectInput('behaviors', selectize = TRUE, label = "Select Measures", data = health_behaviors_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
-    varSelectizeInput('prevention', label = "Select Measures", data = health_prevention_inp, multiple = TRUE)
+    varSelectInput('prevention', selectize = TRUE, label = "Select Measures", data = health_prevention_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add")
@@ -149,12 +150,12 @@ categories <- accordion(
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
     #!!!naturalenv_filters
-    varSelectizeInput('naturalenv', label = "Select Measures", data = natural_env_inp, selected = 'Particulate.Matter.2.5', multiple = TRUE)
+    varSelectInput('naturalenv', selectize = TRUE, label = "Select Measures", data = natural_env_inp, selected = 'Particulate.Matter.2.5', multiple = TRUE)
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
     #!!!builtenv_filters
-    varSelectizeInput('builtenv', label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
+    varSelectInput('builtenv', selectize = TRUE, label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
       varSelectizeInput('foodenv', label = "Select Measures", data = built_env_inp, multiple = TRUE)
@@ -163,7 +164,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
-    varSelectizeInput('socialenv', label = "Select Measures", data = social_env_inp, multiple = TRUE)
+    varSelectInput('socialenv', selectize = TRUE, label = "Select Measures", data = social_env_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
@@ -176,23 +177,28 @@ categories <- accordion(
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
+  shinyjs::useShinyjs(),
   title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
-  window_title = "geoexmap",
+  nav_panel("Map",
+            bslib::card(card_header = ("Map"),
+                        layout_sidebar(
+                          sidebar = categories,
+                          layout_columns(
+                            col_widths = c(12,8),
+                            row_heights = c(2, 1),
+                            leafletOutput("geoexmap"),
+                            conditionalPanel(
+                              condition = "input.showchart == true",
+                              bslib::card(card_header = ("Chart"),
+                                          plotlyOutput("chart"))))
+                        )
+            )),
+  nav_panel("Documentation"),
+  nav_panel("Contact us"),
+  window_title = "geoexmap"
   #nav_panel(title = "geoexmap"),
  # nav_panel(title = "documentation")
-  bslib::card(card_header = ("Map"),
-       layout_sidebar(
-         sidebar = categories,
-         layout_columns(
-           col_widths = c(12,8),
-           row_heights = c(2, 1),
-           leafletOutput("geoexmap"),
-           conditionalPanel(
-             condition = "input.showchart == true",
-             bslib::card(card_header = ("Chart"),
-                                 plotlyOutput("chart"))))
-         ),
-       ),
+  
 )
 
 # -------- SERVER --------
@@ -346,7 +352,13 @@ server <- function(input, output, session) {
   observe({
     if (ncol(map_cols()) == 4) {
       print("Disabling select inputs...")
-      shinyjs::disable(c("outcomes", "sociodemo", "socialenv", "behaviors", "prevention", "naturalenv", "builtenv"))
+      shinyjs::disable("outcomes")
+      shinyjs::disable("sociodemo")
+      shinyjs::disable("socialenv")
+      shinyjs::disable("behaviors")
+      shinyjs::disable("prevention")
+      shinyjs::disable("naturalenv")
+      shinyjs::disable("builtenv")
     }
     
     withProgress(message = "Plotting...", 
