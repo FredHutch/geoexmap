@@ -30,6 +30,10 @@ library(rlang)
 
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg") 
 
+# read point data
+transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
+                   layer = "transit")
+
 data$Binge.Drinking.among.Adults <- as.numeric(data$Binge.Drinking.among.Adults)
 data$Cigarette.Smoking.among.Adults <- as.numeric(data$Cigarette.Smoking.among.Adults)
 data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisure.time.Physical.Activity.among.Adults)
@@ -120,12 +124,12 @@ built_env_inp <- built_env %>%
 #TODO: add filter for year 
 
 # -------- UI ELEMENTS --------
-cards <- list(
+#cards <- list(
   # card(
   #   full_screen = TRUE,
   #   card_header("geoexmap")
   # )
-)
+#)
 
 categories <- accordion(
   accordion_panel(
@@ -149,13 +153,12 @@ categories <- accordion(
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
-    #!!!naturalenv_filters
     varSelectInput('naturalenv', selectize = TRUE, label = "Select Measures", data = natural_env_inp, selected = 'Particulate.Matter.2.5', multiple = TRUE)
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
-    #!!!builtenv_filters
     varSelectInput('builtenv', selectize = TRUE, label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
+    input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
       varSelectizeInput('foodenv', label = "Select Measures", data = built_env_inp, multiple = TRUE)
@@ -180,18 +183,26 @@ ui <- page_navbar(
   shinyjs::useShinyjs(),
   title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   nav_panel("Map",
-            bslib::card(card_header = ("Map"),
+            #bslib::card(card_header = ("Map"),
                         layout_sidebar(
                           sidebar = categories,
-                          layout_columns(
-                            col_widths = c(12,8),
-                            row_heights = c(2, 1),
+                          #layout_columns(
+                           # col_widths = c(12,8),
+                            #row_heights = c(2, 1),
                             leafletOutput("geoexmap"),
                             conditionalPanel(
                               condition = "input.showchart == true",
-                              bslib::card(card_header = ("Chart"),
-                                          plotlyOutput("chart"))))
-                        )
+                              absolutePanel(
+                                class = "panel panel-default",
+                                draggable = TRUE,
+                                fixed = TRUE,
+                                left = "300px",
+                                right = "1000px",
+                                bottom = "20px",
+                                plotlyOutput("chart", height = "200px", width = "300px")
+                            ))
+                              #)
+                        #)
             )),
   nav_panel("Documentation"),
   nav_panel("Contact us"),
@@ -341,25 +352,24 @@ server <- function(input, output, session) {
   })
   
   output$geoexmap <- renderLeaflet({
-    #print(input$naturalenv, input$builtenv)
-    
     map <- leaflet(map_cols()) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
-      addProviderTiles(providers$CartoDB.Positron) %>% 
-      addSearchOSM()
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addSearchOSM() %>% 
+      addEasyprint(options = easyprintOptions())
   })
   
   observe({
-    if (ncol(map_cols()) == 4) {
-      print("Disabling select inputs...")
-      shinyjs::disable("outcomes")
-      shinyjs::disable("sociodemo")
-      shinyjs::disable("socialenv")
-      shinyjs::disable("behaviors")
-      shinyjs::disable("prevention")
-      shinyjs::disable("naturalenv")
-      shinyjs::disable("builtenv")
-    }
+    # if (ncol(map_cols()) == 4) {
+    #   print("Disabling select inputs...")
+    #   shinyjs::disable("outcomes")
+    #   shinyjs::disable("sociodemo")
+    #   shinyjs::disable("socialenv")
+    #   shinyjs::disable("behaviors")
+    #   shinyjs::disable("prevention")
+    #   shinyjs::disable("naturalenv")
+    #   shinyjs::disable("builtenv")
+    # }
     
     withProgress(message = "Plotting...", 
     {plotlyProxy("chart")
@@ -367,6 +377,13 @@ server <- function(input, output, session) {
     leafletProxy("geoexmap", data = map_cols()) %>% 
       clearControls()  %>% 
       clearShapes() %>% 
+      # {
+      #   if (input$transit) {
+      #     message("plotting transit")
+      #     addMarkers(data = transit, lon = ~stop_lon, lat = ~stop_lat,
+      #                icon = bs_icon("bus-front"))
+      #   }
+      # } %>%
       {
         # for each chosen column, define the palette, and add polygons
         for (c in colnames(map_cols())) {
@@ -378,13 +395,13 @@ server <- function(input, output, session) {
               addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                           fillOpacity = 0.3, highlightOptions = highlightOptions(color = "white", weight = 2, bringToFront = TRUE),
                           label = "Hey") %>% 
-              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
-              addEasyprint(options = easyprintOptions())
+              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) 
           }
         }
-      } }) 
+      } 
+    })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, 
+    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, 
                    input$showbounds, input$upload))
 }
 
