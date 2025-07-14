@@ -181,34 +181,30 @@ categories <- accordion(
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
-  title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
+  #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
+  title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_panel("Map",
-            #bslib::card(card_header = ("Map"),
-                        layout_sidebar(
-                          sidebar = categories,
-                          #layout_columns(
-                           # col_widths = c(12,8),
-                            #row_heights = c(2, 1),
-                            leafletOutput("geoexmap"),
-                            conditionalPanel(
-                              condition = "input.showchart == true",
-                              absolutePanel(
-                                class = "panel panel-default",
-                                draggable = TRUE,
-                                fixed = TRUE,
-                                left = "300px",
-                                right = "1000px",
-                                bottom = "20px",
-                                plotlyOutput("chart", height = "200px", width = "300px")
-                            ))
-                              #)
-                        #)
+            layout_sidebar(
+              sidebar = categories,
+              leafletOutput("geoexmap"),
+              conditionalPanel(
+                condition = "input.showchart == true",
+                absolutePanel(
+                  class = "panel panel-default",
+                  draggable = TRUE,
+                  fixed = TRUE,
+                  left = "300px",
+                  right = "1000px",
+                  bottom = "20px",
+                  height = "250px",
+                  width = "400px",
+                  plotlyOutput("chart")
+                ))
             )),
   nav_panel("Documentation"),
-  nav_panel("Contact us"),
+  nav_panel("Contact us",
+            ),
   window_title = "geoexmap"
-  #nav_panel(title = "geoexmap"),
- # nav_panel(title = "documentation")
   
 )
 
@@ -241,13 +237,13 @@ server <- function(input, output, session) {
       }
       
       domain = df_vars[[var]]
-      bins = unique(stats::quantile(df_vars[[var]], na.rm = TRUE))
-      numbins = length(bins)
+     # bins = unique(stats::quantile(df_vars[[var]], na.rm = TRUE))
+      #numbins = length(bins)
       
       if (var %in% g) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
-          na.color = "transparent", n = numbins + 1
+          na.color = "transparent", n = 5
         ))
       } else if (var %in% n) {
         # TODO: have multiple colors for this, one for each neutral variable
@@ -255,17 +251,17 @@ server <- function(input, output, session) {
         if (var == "Nighttime.Radiance") {
           return(colorQuantile(
             palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
-            na.color="transparent", n = numbins + 1
+            na.color="transparent", n = 5
           ))
         } else return(colorQuantile(
               palette = "Blues", domain = domain,
-              na.color = "transparent", n = numbins + 1
+              na.color = "transparent", n = 5
         ))
         # otherwise, var is in "bad"
       } else {
         return(colorQuantile(
           palette = "YlOrRd", domain = domain,
-          na.color = "transparent", n = numbins + 1
+          na.color = "transparent", n = 5
         ))
       }
     },
