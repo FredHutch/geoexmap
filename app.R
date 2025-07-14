@@ -4,7 +4,6 @@
 ## modal for intro/welcome message
 ## popover for actionable links
 ## add land use category (built environment)
-## add absolutePanel() for plots on top of map
 ## add table features
 
 library(shiny)
@@ -29,6 +28,8 @@ library(rsconnect)
 library(rlang)
 
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg") 
+
+food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
 
 # read point data
 transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
@@ -96,6 +97,9 @@ sociodemo <- df_vars %>%
 social_env <- df_vars %>% 
   dplyr::select(c(4:9, 73:74))
 
+food_env <- food %>% 
+  dplyr::select(c(11:50))
+
 health_outcomes_inp <- health_outcomes %>% 
   st_drop_geometry()
 
@@ -115,6 +119,9 @@ social_env_inp <- social_env %>%
   st_drop_geometry()
 
 built_env_inp <- built_env %>%
+  st_drop_geometry()
+
+food_env_inp <- food_env %>% 
   st_drop_geometry()
 
 # ADI
@@ -161,7 +168,7 @@ categories <- accordion(
     input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      varSelectizeInput('foodenv', label = "Select Measures", data = built_env_inp, multiple = TRUE)
+      varSelectizeInput('foodenv', label = "Select Measures", data = food_env_inp, multiple = TRUE)
     )
     
   ),
