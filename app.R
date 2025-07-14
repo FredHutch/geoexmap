@@ -196,8 +196,8 @@ ui <- page_navbar(
                   fixed = TRUE,
                   left = "300px",
                   right = "1000px",
-                  bottom = "300px",
-                  height = "300px",
+                  bottom = "200px",
+                  height = "250px",
                   width = "500px",
                   wellPanel(plotlyOutput("chart"))
                 ))
