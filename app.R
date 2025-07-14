@@ -173,7 +173,8 @@ categories <- accordion(
     "Options", icon = bs_icon("gear"),
     input_switch("showbounds", "Show Tract Boundaries", value = FALSE),
     input_switch("showchart", "Show Chart", value = TRUE),
-    fileInput("upload", "Upload a Shapefile")
+    fileInput("upload", "Upload a Shapefile"),
+    downloadButton("download", "Download data")
   )
   
 )
@@ -195,10 +196,10 @@ ui <- page_navbar(
                   fixed = TRUE,
                   left = "300px",
                   right = "1000px",
-                  bottom = "20px",
-                  height = "250px",
-                  width = "400px",
-                  plotlyOutput("chart")
+                  bottom = "300px",
+                  height = "300px",
+                  width = "500px",
+                  wellPanel(plotlyOutput("chart"))
                 ))
             )),
   nav_panel("Documentation"),
@@ -210,7 +211,6 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
-  
   # define categories for palettes
   # "good", "bad", "neutral"
   g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Denstist.in.Past.Year", "Cholesterol.Screening",
@@ -224,7 +224,7 @@ server <- function(input, output, session) {
          "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
-         "Obesity.among.Adults", "All.Teeth.Lost.amond.Adults.65.and.older", "Stroke.among.Adults") # CHANGE TO AMONG
+         "Obesity.among.Adults", "All.Teeth.Lost.amond.Adults.65.and.older", "Stroke.amond.Adults") # CHANGE TO AMONG IN PROCESSING
   n <- c("Nighttime.Radiance", names(sociodemo_inp))
   
   # palette helper function
@@ -303,7 +303,7 @@ server <- function(input, output, session) {
     if(col == "Diagnosed.Diabetes.among.Adults") return("Comparative Prevalence of Diabetes Among Adults")
     if(col == "Obesity.among.Adults") return("Comparative Prevalence of Obesity Among Adults")
     if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("Comparative Prevalence All Teeth Lost Among Adults 65+")
-    if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
+    if(col == "Stroke.amond.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
   
   map_cols <- reactive({
@@ -314,6 +314,13 @@ server <- function(input, output, session) {
   }) %>% 
     bindCache(input$outcomes, input$sociodemo, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$builtenv) %>% # reduce work by server
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$builtenv))
+  
+  output$download <- downloadHandler(
+    filename = "geoexmap_download.gpkg",
+    content = function(file) {
+      st_write(map_cols(), file)
+    }
+  )
   
   output$chart <- renderPlotly({
     plotly.dat <- map_cols() %>% 
@@ -351,8 +358,7 @@ server <- function(input, output, session) {
     map <- leaflet(map_cols()) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
-      addSearchOSM() %>% 
-      addEasyprint(options = easyprintOptions())
+      addSearchOSM()
   })
   
   observe({
@@ -391,7 +397,8 @@ server <- function(input, output, session) {
               addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                           fillOpacity = 0.3, highlightOptions = highlightOptions(color = "white", weight = 2, bringToFront = TRUE),
                           label = "Hey") %>% 
-              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) 
+              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
+              addEasyprint(options = easyprintOptions()) 
           }
         }
       } 
