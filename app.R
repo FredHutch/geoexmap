@@ -432,7 +432,7 @@ server <- function(input, output, session) {
           # skip null to avoid geometry
           if (!is.null(pal)){
               addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
-                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 2, bringToFront = TRUE),
+                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           label = "Hey") %>% 
               addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
               addEasyprint(options = easyprintOptions()) 
