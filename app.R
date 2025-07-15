@@ -5,6 +5,7 @@
 ## popover for actionable links
 ## add land use category (built environment)
 ## add table features
+#library(waiter)
 
 library(shiny)
 library(shinyjs)
@@ -22,6 +23,7 @@ library(plotly)
 library(RColorBrewer)
 library(bslib)
 library(bsicons)
+#library(shinyBS)
 library(dplyr)
 
 library(rsconnect)
@@ -141,7 +143,8 @@ food_env_inp <- food_env %>%
 categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    varSelectInput('sociodemo', selectize = TRUE, label = "Select Measures", data = sociodemo_inp, multiple = TRUE)
+    varSelectInput('sociodemo', selectize = TRUE, label = tags$span("Select Measures"), 
+                   data = sociodemo_inp, multiple = TRUE),
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
@@ -178,7 +181,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
-    input_switch("showbounds", "Show Tract Boundaries", value = FALSE),
+    input_switch("showbounds", "Show Tract Boundaries", value = TRUE),
     input_switch("showchart", "Show Chart", value = TRUE),
     fileInput("upload", "Upload a Shapefile"),
     downloadButton("download", "Download data")
@@ -188,6 +191,7 @@ categories <- accordion(
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
+  #waiter::use_waiter(), 
   shinyjs::useShinyjs(),
   #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
@@ -204,15 +208,16 @@ ui <- page_navbar(
                   left = "300px",
                   right = "1000px",
                   bottom = "200px",
-                  height = "250px",
-                  width = "500px",
+                  height = "200px",
+                  width = "400px",
                   wellPanel(plotlyOutput("chart"))
                 ))
             )),
   nav_panel("Documentation"),
   nav_panel("Contact us",
-            ),
-  window_title = "geoexmap"
+            h3("Questions or comments?"),
+            a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org")),
+  window_title = "geoexmap | Geospatial Exposome Map at Fred Hutch Cancer Center"
   
 )
 
