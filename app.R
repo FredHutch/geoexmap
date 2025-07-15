@@ -127,6 +127,11 @@ built_env_inp <- built_env %>%
 food_env_inp <- food_env %>% 
   st_drop_geometry()
 
+# define markdown text for tips
+food_env_md <- markdown("
+Need help finding food? See: [Feeding Washington](https://feedingwashington.org/find-food/)
+                        ")
+
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
@@ -186,7 +191,7 @@ categories <- accordion(
       "Food Environment", icon = bs_icon("basket"),
       varSelectizeInput('foodenv', label = span("Select Measures", 
                                                 popover(bs_icon("lightbulb"),
-                                                        "See actionable tips for this category",
+                                                        food_env_md,
                                                         title = "Actionable Tips",
                                                         placement = "right")), data = food_env_inp, multiple = TRUE)
     )
@@ -215,6 +220,7 @@ ui <- page_navbar(
   #shinyjs::useShinyjs(),
   #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
+  nav_spacer(),
   nav_panel("Map",
             layout_sidebar(
               sidebar = categories,
@@ -359,8 +365,7 @@ server <- function(input, output, session) {
       st_drop_geometry()
     
     if (ncol(plotly.dat) == 1) {
-      plot_ly(data = plotly.dat, x = plotly.dat[,1],
-              text = ~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2))) %>% 
+      plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% #~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2))) %>% 
         layout(
           plot_bgcolor = '#e5ecf6',
           xaxis = list(title = names(plotly.dat)[1])) 
@@ -427,7 +432,7 @@ server <- function(input, output, session) {
           # skip null to avoid geometry
           if (!is.null(pal)){
               addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
-                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "white", weight = 2, bringToFront = TRUE),
+                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 2, bringToFront = TRUE),
                           label = "Hey") %>% 
               addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
               addEasyprint(options = easyprintOptions()) 
