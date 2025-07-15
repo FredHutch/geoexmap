@@ -9,6 +9,7 @@
 
 library(shiny)
 library(shinyjs)
+library(htmltools)
 #library(reactable)
 library(tidyverse)
 library(sf)
@@ -126,58 +127,77 @@ built_env_inp <- built_env %>%
 food_env_inp <- food_env %>% 
   st_drop_geometry()
 
-# ADI
-
-# EJI
-
-#TODO: add filter for year 
 
 # -------- UI ELEMENTS --------
-#cards <- list(
-  # card(
-  #   full_screen = TRUE,
-  #   card_header("geoexmap")
-  # )
-#)
-
 categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    varSelectInput('sociodemo', selectize = TRUE, label = tags$span("Select Measures"), 
-                   data = sociodemo_inp, multiple = TRUE),
+    varSelectInput('sociodemo', selectize = TRUE, label = span("Select Measures", 
+                                                                    popover(bs_icon("lightbulb"),
+                                                                            "See actionable tips for this category",
+                                                                            title = "Actionable Tips",
+                                                                            placement = "right")),
+                   data = sociodemo_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
-    varSelectInput('outcomes', selectize = TRUE, label = "Select Measures", data = health_outcomes_inp, multiple = TRUE)
+    varSelectInput('outcomes', selectize = TRUE, label = span("Select Measures", 
+                                                              popover(bs_icon("lightbulb"),
+                                                                      "See actionable tips for this category",
+                                                                      title = "Actionable Tips",
+                                                                      placement = "right")), data = health_outcomes_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
-    varSelectInput('behaviors', selectize = TRUE, label = "Select Measures", data = health_behaviors_inp, multiple = TRUE)
+    varSelectInput('behaviors', selectize = TRUE, label = span("Select Measures", 
+                                                               popover(bs_icon("lightbulb"),
+                                                                       "See actionable tips for this category",
+                                                                       title = "Actionable Tips",
+                                                                       placement = "right")), data = health_behaviors_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
-    varSelectInput('prevention', selectize = TRUE, label = "Select Measures", data = health_prevention_inp, multiple = TRUE)
+    varSelectInput('prevention', selectize = TRUE, label = span("Select Measures", 
+                                                                popover(bs_icon("lightbulb"),
+                                                                        "See actionable tips for this category",
+                                                                        title = "Actionable Tips",
+                                                                        placement = "right")), data = health_prevention_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add")
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
-    varSelectInput('naturalenv', selectize = TRUE, label = "Select Measures", data = natural_env_inp, selected = 'Particulate.Matter.2.5', multiple = TRUE)
+    varSelectInput('naturalenv', selectize = TRUE, label = span("Select Measures", 
+                                                                popover(bs_icon("lightbulb"),
+                                                                        "See actionable tips for this category",
+                                                                        title = "Actionable Tips",
+                                                                        placement = "right")), data = natural_env_inp, selected = 'Particulate.Matter.2.5', multiple = TRUE)
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
-    varSelectInput('builtenv', selectize = TRUE, label = "Select Measures", data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
+    varSelectInput('builtenv', selectize = TRUE, label = span("Select Measures", 
+                                                              popover(bs_icon("lightbulb"),
+                                                                      "See actionable tips for this category",
+                                                                      title = "Actionable Tips",
+                                                                      placement = "right")), data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
     input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      varSelectizeInput('foodenv', label = "Select Measures", data = food_env_inp, multiple = TRUE)
+      varSelectizeInput('foodenv', label = span("Select Measures", 
+                                                popover(bs_icon("lightbulb"),
+                                                        "See actionable tips for this category",
+                                                        title = "Actionable Tips",
+                                                        placement = "right")), data = food_env_inp, multiple = TRUE)
     )
-    
   ),
   accordion_panel(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
-    varSelectInput('socialenv', selectize = TRUE, label = "Select Measures", data = social_env_inp, multiple = TRUE)
+    varSelectInput('socialenv', selectize = TRUE, label = span("Select Measures", 
+                                                               popover(bs_icon("lightbulb"),
+                                                                       "See actionable tips for this category",
+                                                                       title = "Actionable Tips",
+                                                                       placement = "right")), data = social_env_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
@@ -192,7 +212,7 @@ categories <- accordion(
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   #waiter::use_waiter(), 
-  shinyjs::useShinyjs(),
+  #shinyjs::useShinyjs(),
   #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_panel("Map",
