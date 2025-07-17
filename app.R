@@ -239,6 +239,10 @@ ui <- page_navbar(
                   wellPanel(plotlyOutput("chart"))
                 ))
             )),
+  nav_panel("Table",
+            layout_sidebar(
+              sidebar = categories
+            )),
   nav_panel("Documentation"),
   nav_panel("Contact us",
             h3("Questions or comments?"),
@@ -353,6 +357,11 @@ server <- function(input, output, session) {
     bindCache(input$outcomes, input$sociodemo, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$builtenv) %>% # reduce work by server
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$builtenv))
   
+  food_env_cols <- reactive({
+    cbind(food_env) %>% 
+      dplyr::select(!!!input$foodenv)
+  })
+  
   output$download <- downloadHandler(
     filename = "geoexmap_download.gpkg",
     content = function(file) {
@@ -425,9 +434,11 @@ server <- function(input, output, session) {
       # } %>%
       {
         # for each chosen column, define the palette, and add polygons
+        label = ""
         for (c in colnames(map_cols())) {
           print(c)
           pal <- geoex.palette(c)
+          
           
           # skip null to avoid geometry
           if (!is.null(pal)){
