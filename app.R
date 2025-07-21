@@ -441,8 +441,9 @@ server <- function(input, output, session) {
         # for each chosen column, define the palette, and add polygons
         label = ""
         if (input$transit) {
-          addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
-                                           icon = bs_icon("bus-front"))
+          print("transit")
+          #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
+                                           #icon = bs_icon("bus-front"))
         }
         for (c in colnames(map_cols())) {
           print(c)
