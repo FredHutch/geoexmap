@@ -57,9 +57,6 @@ categories <- accordion(
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
-  #waiter::use_waiter(), 
-  #shinyjs::useShinyjs(),
-  #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
   nav_panel("Map",
