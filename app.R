@@ -407,6 +407,18 @@ server <- function(input, output, session) {
       addSearchOSM()
   })
   
+  # observeEvent(input$transit, {
+  #   {
+  #     leafletProxy("geoexmap", data = transit) %>% 
+  #       {
+  #         if (input$transit) {
+  #           addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
+  #                      icon = bs_icon("bus-front"))
+  #         }
+  #       }
+  #   }
+  # })
+  
   observe({
     # if (ncol(map_cols()) == 4) {
     #   print("Disabling select inputs...")
@@ -425,16 +437,14 @@ server <- function(input, output, session) {
     leafletProxy("geoexmap", data = map_cols()) %>% 
       clearControls()  %>% 
       clearShapes() %>% 
-      # {
-      #   if (input$transit) {
-      #     message("plotting transit")
-      #     addMarkers(data = transit, lon = ~stop_lon, lat = ~stop_lat,
-      #                icon = bs_icon("bus-front"))
-      #   }
-      # } %>%
       {
         # for each chosen column, define the palette, and add polygons
         label = ""
+        if (input$transit) {
+          print("transit")
+          #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
+                                           #icon = bs_icon("bus-front"))
+        }
         for (c in colnames(map_cols())) {
           print(c)
           pal <- geoex.palette(c)
