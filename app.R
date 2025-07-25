@@ -248,7 +248,8 @@ ui <- page_navbar(
             )),
   nav_panel("Table",
             layout_sidebar(
-              sidebar = categories
+              sidebar = sidebar(categories, 
+                                width = "400px")
             )),
   nav_panel("Documentation"),
   nav_panel("Contact us",
