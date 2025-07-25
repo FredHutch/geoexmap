@@ -2,7 +2,6 @@
 
 #TODO ELEMENTS:
 ## modal for intro/welcome message
-## popover for actionable links
 ## add land use category (built environment)
 ## add table features
 #library(waiter)
@@ -97,6 +96,9 @@ built_env <- df_vars %>%
 sociodemo <- df_vars %>% 
   dplyr::select(c(33:72))
 
+#race <- df_vars %>% 
+#  dplyr::select()
+
 social_env <- df_vars %>% 
   dplyr::select(c(4:9, 73:74))
 
@@ -137,12 +139,16 @@ Need help finding food? See: [Feeding Washington](https://feedingwashington.org/
 categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    varSelectInput('sociodemo', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('sociodemo', selectize = TRUE, label = span("Select Measures", #change to total population 
                                                                     popover(bs_icon("lightbulb"),
                                                                             "See actionable tips for this category",
                                                                             title = "Actionable Tips",
                                                                             placement = "right")),
-                   data = sociodemo_inp, multiple = TRUE)
+                   data = sociodemo_inp, multiple = TRUE),
+    accordion_panel("Race and Ethnicity", varSelectInput('race', label = NULL, data = sociodemo, multiple = TRUE)),
+    accordion_panel("Sex", varSelectInput('sex', label = NULL, data = sociodemo, multiple = TRUE)),
+    accordion_panel("Age", varSelectInput('age', label = NULL, data = sociodemo, multiple = TRUE))
+    
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
@@ -223,7 +229,8 @@ ui <- page_navbar(
   nav_spacer(),
   nav_panel("Map",
             layout_sidebar(
-              sidebar = categories,
+              sidebar = sidebar(categories,
+                                width = "400px"),
               leafletOutput("geoexmap"),
               conditionalPanel(
                 condition = "input.showchart == true",
@@ -231,7 +238,7 @@ ui <- page_navbar(
                   class = "panel panel-default",
                   draggable = TRUE,
                   fixed = TRUE,
-                  left = "300px",
+                  left = "425px",
                   right = "1000px",
                   bottom = "200px",
                   height = "200px",
