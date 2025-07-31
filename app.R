@@ -139,7 +139,7 @@ Need help finding food? See: [Feeding Washington](https://feedingwashington.org/
 categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    varSelectInput('sociodemo', selectize = TRUE, label = span("Select Measures", #change to total population 
+    varSelectInput('sociodemo', selectize = TRUE, label = span("Select variables", #change to total population 
                                                                     popover(bs_icon("lightbulb"),
                                                                             "See actionable tips for this category",
                                                                             title = "Actionable Tips",
@@ -152,7 +152,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
-    varSelectInput('outcomes', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('outcomes', selectize = TRUE, label = span("Select variables", 
                                                               popover(bs_icon("lightbulb"),
                                                                       "See actionable tips for this category",
                                                                       title = "Actionable Tips",
@@ -160,7 +160,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
-    varSelectInput('behaviors', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('behaviors', selectize = TRUE, label = span("Select variables", 
                                                                popover(bs_icon("lightbulb"),
                                                                        "See actionable tips for this category",
                                                                        title = "Actionable Tips",
@@ -168,7 +168,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
-    varSelectInput('prevention', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('prevention', selectize = TRUE, label = span("Select variables", 
                                                                 popover(bs_icon("lightbulb"),
                                                                         "See actionable tips for this category",
                                                                         title = "Actionable Tips",
@@ -179,7 +179,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
-    varSelectInput('naturalenv', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('naturalenv', selectize = TRUE, label = span("Select variables", 
                                                                 popover(bs_icon("lightbulb"),
                                                                         "See actionable tips for this category",
                                                                         title = "Actionable Tips",
@@ -187,7 +187,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
-    varSelectInput('builtenv', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('builtenv', selectize = TRUE, label = span("Select variables", 
                                                               popover(bs_icon("lightbulb"),
                                                                       "See actionable tips for this category",
                                                                       title = "Actionable Tips",
@@ -195,7 +195,7 @@ categories <- accordion(
     input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      varSelectizeInput('foodenv', label = span("Select Measures", 
+      varSelectizeInput('foodenv', label = span("Select variables", 
                                                 popover(bs_icon("lightbulb"),
                                                         food_env_md,
                                                         title = "Actionable Tips",
@@ -204,7 +204,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
-    varSelectInput('socialenv', selectize = TRUE, label = span("Select Measures", 
+    varSelectInput('socialenv', selectize = TRUE, label = span("Select variables", 
                                                                popover(bs_icon("lightbulb"),
                                                                        "See actionable tips for this category",
                                                                        title = "Actionable Tips",
