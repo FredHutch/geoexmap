@@ -183,7 +183,7 @@ categories <- accordion(
                                                                 popover(bs_icon("lightbulb"),
                                                                         "See actionable tips for this category",
                                                                         title = "Actionable Tips",
-                                                                        placement = "right")), data = natural_env_inp, selected = 'Particulate.Matter.2.5', multiple = TRUE)
+                                                                        placement = "right")), data = natural_env_inp, multiple = TRUE)
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
@@ -191,7 +191,7 @@ categories <- accordion(
                                                               popover(bs_icon("lightbulb"),
                                                                       "See actionable tips for this category",
                                                                       title = "Actionable Tips",
-                                                                      placement = "right")), data = built_env_inp, selected = 'Green.Space', multiple = TRUE),
+                                                                      placement = "right")), data = built_env_inp, multiple = TRUE),
     input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
@@ -213,7 +213,7 @@ categories <- accordion(
   accordion_panel(
     "Options", icon = bs_icon("gear"),
     input_switch("showbounds", "Show Tract Boundaries", value = TRUE),
-    input_switch("showchart", "Show Chart", value = TRUE),
+    input_switch("showchart", "Show Graph", value = FALSE),
     fileInput("upload", "Upload a Shapefile"),
     downloadButton("download", "Download data")
   )
