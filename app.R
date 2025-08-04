@@ -214,6 +214,7 @@ Need help finding food? See: [Feeding Washington](https://feedingwashington.org/
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
+  open = FALSE,
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
     varSelectInput('sociodemo', selectize = TRUE, data = sociodemo_inp,
