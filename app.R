@@ -42,18 +42,11 @@ data$Cigarette.Smoking.among.Adults <- as.numeric(data$Cigarette.Smoking.among.A
 data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisure.time.Physical.Activity.among.Adults)
 data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
-#names(data) <- gsub("\\.", " ", names(data))
-
-# df_vars <- data %>% 
-#   dplyr::select(c(pm2.5_t, ndvi_r, avg_rad))
-
 df_vars <- data %>% 
   dplyr::select(c(2:99))
 
 
-#names(df_vars) <- gsub("\\.", " ", names(df_vars))
-
-# df_vars <- df_vars %>% 
+# df_vars <- df_vars %>%
 #   rename(`PM2.5` = Particulate.Matter.2.5,
 #          `Green space` = Green.Space,
 #          `Nighttime radiance` = Nighttime.Radiance,
@@ -406,7 +399,7 @@ server <- function(input, output, session) {
   
   legend.titles <- function(col) {
     #return(col)
-    if(col == "Particulate.Matter.2.5") return("PM<sub>2.5</sub>")
+    if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index")
     if(col == "Nighttime.Radiance") return("Light at Night (nW/cm<sup>2</sup>/sr)")
     if(col == "Food.Stamps") return("Comparative Population on SNAP")
