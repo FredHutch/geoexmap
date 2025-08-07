@@ -204,43 +204,11 @@ categories <- accordion(
                                                  "See actionable tips for this category",
                                                  title = "Actionable Tips",
                                                  placement = "right")),
-                c("Population (total)" = "Total.Population"),
+                sociodemographics,
                 selectize = TRUE, multiple = TRUE),
-   accordion_panel("Race and Ethnicity", selectInput('race', NULL, c("Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
-                                                                                 "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
-                                                                                 "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
-                                                                                 "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
-                                                                                 "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
-                                                                                 "Non-Hispanic Other (percentage)" = "Percent.Other.Race.NonHispanic",
-                                                                                 "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
-                                                                                 "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino Other (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
-                                                                                 "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino"), selectize = TRUE, multiple = TRUE)),
-   accordion_panel("Sex", selectInput('sex', NULL, c("Male (percentage)" = "Percent.Male",
-                                                        "Female (percentage)" = "Percent.Female"), selectize = TRUE, multiple = TRUE)),
-   accordion_panel("Age", selectInput('age', NULL, c("0-4 years (percentage)" = "Percent.0.to.4.years",
-                                                        "5-9 years (percentage)" = "Percent.5.to.9.years",
-                                                        "10-14 years (percentage)" = "Percent.10.to.14.years",
-                                                        "15-19 years (percentage)" = "Percent.15.to.19.years",
-                                                        "20-24 years (percentage)" = "Percent.20.to.24.years",
-                                                        "25-29 years (percentage)" = "Percent.25.to.29.years",
-                                                        "30-34 years (percentage)" = "Percent.30.to.34.years",
-                                                        "35-39 years (percentage)" = "Percent.35.to.39.years",
-                                                        "40-44 years (percentage)" = "Percent.40.to.44.years",
-                                                        "45-49 years (percentage)" = "Percent.45.to.49.years",
-                                                        "50-54 years (percentage)" = "Percent.50.to.54.years",
-                                                        "55-59 years (percentage)" = "Percent.55.to.59.years",
-                                                        "60-64 years (percentage)" = "Percent.60.to.64.years",
-                                                        "65-69 years (percentage)" = "Percent.65.to.69.years",
-                                                        "70-74 years (percentage)" = "Percent.70.to.74.years",
-                                                        "75-79 years (percentage)" = "Percent.75.to.79.years",
-                                                        "80-84 years (percentage)" = "Percent.80.to.84.years",
-                                                        "85 years+ (percentage)" = "Percent.85.and.older"), selectize = TRUE, multiple = TRUE))
+    accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
+   accordion_panel("Sex", selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+   accordion_panel("Age", selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
@@ -250,18 +218,7 @@ categories <- accordion(
                      popover(bs_icon("lightbulb"),
                              "See actionable tips for this category",
                              title = "Actionable Tips",
-                             placement = "right")), c("Arthritis" = "Arthritis.among.Adults",
-                                                      "Asthma" = "Asthma.among.Adults",
-                                                      "High blood pressure" = "High.Blood.Pressure.among.Adults",
-                                                      "Cancer" = "Cancer.or.Melanoma.among.Adults",
-                                                      "High cholesterol" = "High.Cholesterol.among.Screened.Adults",
-                                                      "Chronic obstructive pulmonary disease" = "COPD.among.Adults",
-                                                      "Coronary heart disease" = "Coronary.Heart.Disease.among.Adults",
-                                                      "Depression" = "Depression.among.Adults",
-                                                      "Diabetes" = "Diagnosed.Diabetes.among.Adults",
-                                                      "Obesity" = "Obesity.among.Adults",
-                                                      "All teeth lost" = "All.Teeth.Lost.among.Adults.65.and.Older",
-                                                      "Stroke" = "Stroke.among.Adults"), selectize = TRUE, multiple = TRUE)
+                             placement = "right")), outcomes, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
@@ -269,10 +226,7 @@ categories <- accordion(
                                   popover(bs_icon("lightbulb"),
                                           "See actionable tips for this category",
                                           title = "Actionable Tips",
-                                          placement = "right")), c("Binge drinking" =  "Binge.Drinking.among.Adults",
-                                                                   "Cigarette smoking" = "Cigarette.Smoking.among.Adults",
-                                                                   "No physical activity" = "No.Leisure.time.Physical.Activity.among.Adults",
-                                                                   "Short sleep duration" =  "Short.Sleep.Duration"),
+                                          placement = "right")), behaviors,
                  multiple = TRUE, selectize = TRUE,)
   ),
   accordion_panel(
@@ -281,14 +235,7 @@ categories <- accordion(
                                       popover(bs_icon("lightbulb"),
                                               "See actionable tips for this category",
                                               title = "Actionable Tips",
-                                              placement = "right")), c("Cholesterol screening" = "Cholesterol.Screening",
-                                                                       "Lack of health insurance" = "Lack.of.Health.Insurance",
-                                                                       "Routine checkup in past year" = "Routine.Checkup.in.the.Past.Year",
-                                                                       "Visited dentist in past year" = "Visited.Denstist.in.Past.Year",
-                                                                       "Taking blood pressure medication" = "Taking.Medicine.to.Control.High.Blood.Pressure",
-                                                                       "Cholesterol screening" = "Cholesterol.Screening",
-                                                                       "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
-                                                                       "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75"), selectize = TRUE, multiple = TRUE)
+                                              placement = "right")), prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add")
@@ -299,19 +246,9 @@ categories <- accordion(
                                               popover(bs_icon("lightbulb"),
                                                       "See actionable tips for this category",
                                                       title = "Actionable Tips",
-                                                      placement = "right")), c("UV index" = "UV.Index",
-                                                                               "Dew point" = "Dew.point",
-                                                                               "Maximum temperature" = "Maximum.temperature",
-                                                                               "Minimum temperature" = "Minimum.temperature",
-                                                                               "Average temperature" = "Average.temperature",
-                                                                               "Radon" = "Radon"), selectize = TRUE, multiple = TRUE),
+                                                      placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
-                   selectInput('airpol', NULL, c("PM2.5" = "Particulate.Matter.2.5",
-                                                 "Wildfire smoke" = "Wildfire.smoke",
-                                                 "Nitrogen dioxide (No2)" = "Nitrogen.dioxide",
-                                                 "Sulfur dioxide (So2)" = "Sulfur.dioxide",
-                                                 "Carbon monoxide (CO)" = "Carbon.monoxide",
-                                                 "Ozone (O3)" = "Ozone"), selectize = TRUE, multiple = TRUE))
+                   selectInput('airpol', NULL, airpol, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
@@ -319,11 +256,7 @@ categories <- accordion(
                                  popover(bs_icon("lightbulb"),
                                          "See actionable tips for this category",
                                          title = "Actionable Tips",
-                                         placement = "right")), c("Walkability" = "Walkability",
-                                                                  "Pesticide exposure" = "Pesticide.Exposure",
-                                                                  "Green space" = "Green.Space",
-                                                                  "Light at night" = "Nighttime.Radiance",
-                                                                  "Noise pollution" = "Noise.Pollution"), selectize = TRUE, multiple = TRUE),
+                                         placement = "right")), builtenv, selectize = TRUE, multiple = TRUE),
     input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
@@ -340,22 +273,7 @@ categories <- accordion(
                                           popover(bs_icon("lightbulb"),
                                                   "See actionable tips for this category",
                                                   title = "Actionable Tips",
-                                                  placement = "right")), c("Food insecurity" = "Food.Insecurity",
-                                                                           "Housing insecurity" = "Housing.Insecurity",
-                                                                           "Utility services threat" = "Utility.Services.Threat",
-                                                                           "Lack of reliable transportation" = "Lacking.Reliable.Transportation",
-                                                                           "Lack of social and emotional support" =  "Lack.of.Social.and.Emotional.Support",
-                                                                           "No internet" = "No.broadband.internet",
-                                                                           "No high school education" = "No.high.school.diploma",
-                                                                           "Single parent households" = "Single.parent.households",
-                                                                           "Housing cost burden" = "Housing.cost.burden",
-                                                                           "Crowding" = "Crowding",
-                                                                           "Poverty" = "Poverty",
-                                                                           "Unemployment" = "Unemployment",
-                                                                           "Social Vulnerability Index" = "Social.Vulnerability.Index",
-                                                                           "Environmental Justice Index" = "Environmental.Justice.Index",
-                                                                           "Segregation" = "Racial.Residential.Segregation",
-                                                                           "Population density" = "Population.density"), selectize = TRUE,  multiple = TRUE)
+                                                  placement = "right")), socialenv, selectize = TRUE,  multiple = TRUE)
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
@@ -391,8 +309,8 @@ ui <- page_navbar(
                   bottom = "200px",
                   height = "200px",
                   width = "400px",
-                  wellPanel(plotlyOutput("chart"),
-                            actionButton("clear", label = "X"))
+                  wellPanel(actionButton("clear", label = "X"),
+                            plotlyOutput("chart"))
                 ))
             )),
   nav_panel("Table",
@@ -471,8 +389,10 @@ server <- function(input, output, session) {
     })
   }
   
+  showchart <- reactiveVal(FALSE)
+  
   observeEvent(input$clear, {
-    input$showchart == FALSE
+    showchart(FALSE)
   })
   
   legend.titles <- function(col) {
@@ -554,7 +474,7 @@ server <- function(input, output, session) {
                             yaxis = list(title = gsub("\\.", " ", names(plotly.dat)[2])),
                             zaxis = list(title = gsub("\\.", " ", names(plotly.dat)[3]))))
     } else {
-
+      
     }
 
   })
