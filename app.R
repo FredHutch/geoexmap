@@ -43,99 +43,200 @@ data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisur
 data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
 df_vars <- data %>% 
-  dplyr::select(c(2:99))
+  dplyr::select(c(2:100))
 
+# column_mapping <- c("PM2.5" = "Particulate.Matter.2.5",
+#          "Green space" = "Green.Space",
+#          "Nighttime radiance" = "Nighttime.Radiance",
+#          "Received SNAP Benefits" = "Food.Stamps",
+#          "Food insecurity" = "Food.Insecurity",
+#          "Housing insecurity" = "Housing.Insecurity",
+#          "Utility services threat" = "Utility.Services.Threat",
+#          "Lack of reliable transportation" = "Lacking.Reliable.Transportation",
+#          "Lack of social and emotional support" =  "Lack.of.Social.and.Emotional.Support",
+#          "Lack of health insurance" = "Lack.of.Health.Insurance",
+#          "Routine checkup in past year" = "Routine.Checkup.in.the.Past.Year",
+#          "Visited dentist in past year" = "Visited.Denstist.in.Past.Year",
+#          "Taking blood pressure medication" = "Taking.Medicine.to.Control.High.Blood.Pressure",
+#          "Cholesterol screening" = "Cholesterol.Screening",
+#          "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
+#          "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75",
+#          "Binge drinking" =  "Binge.Drinking.among.Adults",
+#          "Cigarette smoking" = "Cigarette.Smoking.among.Adults",
+#          "No physical activity" = "No.Leisure.time.Physical.Activity.among.Adults",
+#          "Short sleep duration" =  "Short.Sleep.Duration",
+#          "Arthritis" = "Arthritis.among.Adults",
+#          "Asthma" = "Asthma.among.Adults",
+#          "High blood pressure" = "High.Blood.Pressure.among.Adults",
+#          "Cancer" = "Cancer.or.Melanoma.among.Adults",
+#          "High cholesterol" = "High.Cholesterol.among.Screened.Adults",
+#          "Chronic obstructive pulmonary disease" = "COPD.among.Adults",
+#          "Coronary heart disease" = "Coronary.Heart.Disease.among.Adults",
+#          "Depression" = "Depression.among.Adults",
+#          "Diabetes" = "Diagnosed.Diabetes.among.Adults",
+#          "Obesity" = "Obesity.among.Adults",
+#          "All teeth lost" = "All.Teeth.Lost.among.Adults.65.and.Older",
+#          "Stroke" = "Stroke.among.Adults",
+#          "Cholesterol screening" = "Cholesterol.Screening",
+#          "Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
+#          "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
+#          "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
+#          "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
+#          "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
+#          "Non-Hispanic Other (percentage)" = "Percent.Other.Race.NonHispanic",
+#          "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
+#          "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
+#          "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
+#          "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
+#          "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
+#          "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
+#          "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
+#          "Hispanic or Latino Other (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
+#          "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino",
+#          "Total population" = "Total.Population",
+#          "Male (percentage)" = "Percent.Male",
+#          "Female (percentage)" = "Percent.Female",
+#          "0-4 years (percentage)" = "Percent.0.to.4.years",
+#          "5-9 years (percentage)" = "Percent.5.to.9.years",
+#          "10-14 years (percentage)" = "Percent.10.to.14.years",
+#          "15-19 years (percentage)" = "Percent.15.to.19.years",
+#          "20-24 years (percentage)" = "Percent.20.to.24.years",
+#          "25-29 years (percentage)" = "Percent.25.to.29.years",
+#          "30-34 years (percentage)" = "Percent.30.to.34.years",
+#          "35-39 years (percentage)" = "Percent.35.to.39.years",
+#          "40-44 years (percentage)" = "Percent.40.to.44.years",
+#          "45-49 years (percentage)" = "Percent.45.to.49.years",
+#          "50-54 years (percentage)" = "Percent.50.to.54.years",
+#          "55-59 years (percentage)" = "Percent.55.to.59.years",
+#          "60-64 years (percentage)" = "Percent.60.to.64.years",
+#          "65-69 years (percentage)" = "Percent.65.to.69.years",
+#          "70-74 years (percentage)" = "Percent.70.to.74.years",
+#          "75-79 years (percentage)" = "Percent.75.to.79.years",
+#          "80-84 years (percentage)" = "Percent.80.to.84.years",
+#          "85 years+ (percentage)" = "Percent.85.and.older",
+#          "Social Vulnerability Index" = "Social.Vulnerability.Index",
+#          "Environmental Justice Index" = "Environmental.Justice.Index",
+#          "UV index" = "UV.Index",
+#          "Pesticide exposure" = "Pesticide.Exposure",
+#          "Segregation" = "Racial.Residential.Segregation",
+#          "Noise pollution" = "Noise.Pollution",
+#          "No internet" = "No.broadband.internet",
+#          "No high school education" = "No.high.school.diploma",
+#          "Single parent households" = "Single.parent.households",
+#          "Housing cost burden" = "Housing.cost.burden",
+#          "Dew point" = "Dew.point",
+#          "Maximum temperature" = "Maximum.temperature",
+#          "Minimum temperature" = "Minimum.temperature",
+#          "Average temperature" = "Average.temperature",
+#          "Wildfire smoke" = "Wildfire.smoke",
+#          "Nitrogen dioxide (No2)" = "Nitrogen.dioxide",
+#          "Sulfur dioxide (So2)" = "Sulfur.dioxide",
+#          "Carbon monoxide (CO)" = "Carbon.monoxide",
+#          "Population density" = "Population.density"
+#   )
+sociodemographics <- c("Population (total)" = "Total.Population")
 
-# df_vars <- df_vars %>%
-#   rename(`PM2.5` = Particulate.Matter.2.5,
-#          `Green space` = Green.Space,
-#          `Nighttime radiance` = Nighttime.Radiance,
-#          `Received SNAP Benefits` = Food.Stamps,
-#          `Food insecurity` = Food.Insecurity,
-#          `Housing insecurity` = Housing.Insecurity,
-#          `Utility services threat` = Utility.Services.Threat,
-#          `Lack of reliable transportation` = Lacking.Reliable.Transportation,
-#          `Lack of social and emotional support` =  Lack.of.Social.and.Emotional.Support,
-#          `Lack of health insurance` = Lack.of.Health.Insurance,
-#          `Routine checkup in past year` = Routine.Checkup.in.the.Past.Year,
-#          `Visited dentist in past year` = Visited.Denstist.in.Past.Year,
-#          `Taking blood pressure medication` = Taking.Medicine.to.Control.High.Blood.Pressure,
-#          `Cholesterol screening` = Cholesterol.Screening,
-#          `Mammography screening for breast cancer` = Mammography.Use.among.Women.50.to.74,
-#          `Colorectal cancer screening` = Colorectal.Cancer.Screening.among.Adults.45.to.75,
-#          `Binge drinking` =  Binge.Drinking.among.Adults,
-#          `Cigarette smoking` = Cigarette.Smoking.among.Adults,
-#          `No physical activity` = No.Leisure.time.Physical.Activity.among.Adults,
-#          `Short sleep duration` =  Short.Sleep.Duration,
-#          `Arthritis` = Arthritis.among.Adults,
-#          `Asthma` = `Asthma.among.Adults`,
-#          `High blood pressure` = High.Blood.Pressure.among.Adults,
-#          `Cancer` = Cancer.or.Melanoma.among.Adults,
-#          `High cholesterol` = High.Cholesterol.among.Screened.Adults,
-#          `Chronic obstructive pulmonary disease` = COPD.among.Adults,
-#          `Coronary heart disease` = Coronary.Heart.Disease.among.Adults,
-#          `Depression` = Depression.among.Adults,
-#          `Diabetes` = Diagnosed.Diabetes.among.Adults,
-#          `Obesity` = Obesity.among.Adults,
-#          `All teeth lost` = All.Teeth.Lost.among.Adults.65.and.Older,
-#          `Stroke` = Stroke.among.Adults,
-#          `Cholesterol screening` = Cholesterol.Screening,
-#          `Non-Hispanic White (percentage)` = Percent.White.NonHispanic,
-#          `Non-Hispanic Black (percentage)` = Percent.Black.NonHispanic,
-#          `Non-Hispanic Asian (percentage)` = Percent.Asian.NonHispanic,
-#          `Non-Hispanic American Indian or Alaska Native (percentage)` = Percent.American.Indian.Alaska.Native.NonHispanic,
-#          `Non-Hispanic Native Hawaiian or Pacific Islander (percentage)` =  Percent.Native.Hawaiian.Pacific.Islander.NonHispanic,
-#          `Non-Hispanic Other (percentage)` = Percent.Other.Race.NonHispanic,
-#          `Non-Hispanic two or more races (percentage)` = Percent.Two.or.More.Races.NonHispanic,
-#          `Hispanic or Latino (percentage)` = Percent.Hispanic.or.Latino,
-#          `Hispanic or Latino White (percentage)` = Percent.White.Hispanic.or.Latino,
-#          `Hispanic or Latino Black (percentage)` = Percent.Black.Hispanic.or.Latino,
-#          `Hispanic or Latino Asian (percentage)` = Percent.Asian.Hispanic.or.Latino,
-#          `Hispanic or Latino American Indian or Alaska Native (percentage)` = Percent.American.Indian.Alaska.Native.Hispanic.or.Latino,
-#          `Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)` = Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino,
-#          `Hispanic or Latino Other (percentage)` = Percent.Other.Race.Hispanic.or.Latino,
-#          `Hispanic or Latino two or more races (percentage)` = Percent.Two.or.More.Races.Hispanic.or.Latino,
-#          `Total population` = Total.Population,
-#          `Male (percentage)` = Percent.Male,
-#          `Female (percentage)` = Percent.Female,
-#          `0-4 years (percentage)` = Percent.0.to.4.years,
-#          `5-9 years (percentage)` = Percent.5.to.9.years,
-#          `10-14 years (percentage)` = Percent.10.to.14.years,
-#          `15-19 years (percentage)` = Percent.15.to.19.years,
-#          `20-24 years (percentage)` = Percent.20.to.24.years,
-#          `25-29 years (percentage)` = Percent.25.to.29.years,
-#          `30-34 years (percentage)` = Percent.30.to.34.years,
-#          `35-39 years (percentage)` = Percent.35.to.39.years,
-#          `40-44 years (percentage)` = Percent.40.to.44.years,
-#          `45-49 years (percentage)` = Percent.45.to.49.years,
-#          `50-54 years (percentage)` = Percent.50.to.54.years,
-#          `55-59 years (percentage)` = Percent.55.to.59.years,
-#          `60-64 years (percentage)` = Percent.60.to.64.years,
-#          `65-69 years (percentage)` = Percent.65.to.69.years,
-#          `70-74 years (percentage)` = Percent.70.to.74.years,
-#          `75-79 years (percentage)` = Percent.75.to.79.years,
-#          `80-84 years (percentage)` = Percent.80.to.84.years,
-#          `85 years+ (percentage)` = Percent.85.and.older,
-#          `Social Vulnerability Index` = Social.Vulnerability.Index,
-#          `Environmental Justice Index` = Environmental.Justice.Index,
-#          `UV index` = UV.Index,
-#          `Pesticide exposure` = Pesticide.Exposure,
-#          `Segregation` = Racial.Residential.Segregation,
-#          `Noise pollution` = Noise.Pollution,
-#          `No internet` = No.broadband.internet,
-#          `No high school education` = No.high.school.diploma,
-#          `Single parent households` = Single.parent.households,
-#          `Housing cost burden` = Housing.cost.burden,
-#          `Dew point` = Dew.point,
-#          `Maximum temperature` = Maximum.temperature,
-#          `Minimum temperature` = Minimum.temperature,
-#          `Average temperature` = Average.temperature,
-#          `Wildfire smoke` = Wildfire.smoke,
-#          `Nitrogen dioxide (No2)` = Nitrogen.dioxide,
-#          `Sulfur dioxide (So2)` = Sulfur.dioxide,
-#          `Carbon monoxide (CO)` = Carbon.monoxide,
-#          `Population density` = Population.density
-#          )
+racev <- c("Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
+          "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
+          "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
+          "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
+          "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
+          "Non-Hispanic Other (percentage)" = "Percent.Other.Race.NonHispanic",
+          "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
+          "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
+          "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
+          "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
+          "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
+          "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
+          "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
+          "Hispanic or Latino Other (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
+          "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
+
+sexv <- c("Male (percentage)" = "Percent.Male",
+         "Female (percentage)" = "Percent.Female")
+
+agev <- c("0-4 years (percentage)" = "Percent.0.to.4.years",
+         "5-9 years (percentage)" = "Percent.5.to.9.years",
+         "10-14 years (percentage)" = "Percent.10.to.14.years",
+         "15-19 years (percentage)" = "Percent.15.to.19.years",
+         "20-24 years (percentage)" = "Percent.20.to.24.years",
+         "25-29 years (percentage)" = "Percent.25.to.29.years",
+         "30-34 years (percentage)" = "Percent.30.to.34.years",
+         "35-39 years (percentage)" = "Percent.35.to.39.years",
+         "40-44 years (percentage)" = "Percent.40.to.44.years",
+         "45-49 years (percentage)" = "Percent.45.to.49.years",
+         "50-54 years (percentage)" = "Percent.50.to.54.years",
+         "55-59 years (percentage)" = "Percent.55.to.59.years",
+         "60-64 years (percentage)" = "Percent.60.to.64.years",
+         "65-69 years (percentage)" = "Percent.65.to.69.years",
+         "70-74 years (percentage)" = "Percent.70.to.74.years",
+         "75-79 years (percentage)" = "Percent.75.to.79.years",
+         "80-84 years (percentage)" = "Percent.80.to.84.years",
+         "85 years+ (percentage)" = "Percent.85.and.older")
+
+behaviors <- c("Binge drinking" =  "Binge.Drinking.among.Adults",
+               "Cigarette smoking" = "Cigarette.Smoking.among.Adults",
+               "No physical activity" = "No.Leisure.time.Physical.Activity.among.Adults",
+               "Short sleep duration" =  "Short.Sleep.Duration")
+
+outcomes <- c("Arthritis" = "Arthritis.among.Adults",
+              "Asthma" = "Asthma.among.Adults",
+              "High blood pressure" = "High.Blood.Pressure.among.Adults",
+              "Cancer" = "Cancer.or.Melanoma.among.Adults",
+              "High cholesterol" = "High.Cholesterol.among.Screened.Adults",
+              "Chronic obstructive pulmonary disease" = "COPD.among.Adults",
+              "Coronary heart disease" = "Coronary.Heart.Disease.among.Adults",
+              "Depression" = "Depression.among.Adults",
+              "Diabetes" = "Diagnosed.Diabetes.among.Adults",
+              "Obesity" = "Obesity.among.Adults",
+              "All teeth lost" = "All.Teeth.Lost.among.Adults.65.and.Older",
+              "Stroke" = "Stroke.among.Adults")
+
+prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
+                "Lack of health insurance" = "Lack.of.Health.Insurance",
+                "Routine checkup in past year" = "Routine.Checkup.in.the.Past.Year",
+                "Visited dentist in past year" = "Visited.Denstist.in.Past.Year",
+                "Taking blood pressure medication" = "Taking.Medicine.to.Control.High.Blood.Pressure",
+                "Cholesterol screening" = "Cholesterol.Screening",
+                "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
+                "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75")
+
+airpol <- c("PM2.5" = "Particulate.Matter.2.5",
+            "Wildfire smoke" = "Wildfire.smoke",
+            "Nitrogen dioxide (No2)" = "Nitrogen.dioxide",
+            "Sulfur dioxide (So2)" = "Sulfur.dioxide",
+            "Carbon monoxide (CO)" = "Carbon.monoxide",
+            "Ozone (O3)" = "Ozone")
+
+naturalenv <- c("UV index" = "UV.Index",
+                "Dew point" = "Dew.point",
+                "Maximum temperature" = "Maximum.temperature",
+                "Minimum temperature" = "Minimum.temperature",
+                "Average temperature" = "Average.temperature",
+                "Radon" = "Radon")
+
+builtenv <- c("Walkability" = "Walkability",
+              "Pesticide exposure" = "Pesticide.Exposure",
+              "Green space" = "Green.Space",
+              "Light at night" = "Nighttime.Radiance",
+              "Noise pollution" = "Noise.Pollution")
+
+socialenv <- c("Food insecurity" = "Food.Insecurity",
+               "Housing insecurity" = "Housing.Insecurity",
+               "Utility services threat" = "Utility.Services.Threat",
+               "Lack of reliable transportation" = "Lacking.Reliable.Transportation",
+               "Lack of social and emotional support" =  "Lack.of.Social.and.Emotional.Support",
+               "No internet" = "No.broadband.internet",
+               "No high school education" = "No.high.school.diploma",
+               "Single parent households" = "Single.parent.households",
+               "Housing cost burden" = "Housing.cost.burden",
+               "Crowding" = "Crowding",
+               "Poverty" = "Poverty",
+               "Unemployment" = "Unemployment",
+               "Social Vulnerability Index" = "Social.Vulnerability.Index",
+               "Environmental Justice Index" = "Environmental.Justice.Index",
+               "Segregation" = "Racial.Residential.Segregation",
+               "Population density" = "Population.density")
 
 # define filters
 health_outcomes <- df_vars %>% 
@@ -155,12 +256,12 @@ health_prevention_inp <- health_prevention %>%
   st_drop_geometry()
 
 natural_env <- df_vars %>%
-  dplyr::select(c(1, 75, 76, 88:92)) 
+  dplyr::select(c(75, 76, 88:92)) 
 natural_env_inp <- natural_env %>% 
   st_drop_geometry()
 
 air_pol <- df_vars %>% 
-  dplyr::select(c(93:96)) 
+  dplyr::select(c(1, 93:96)) 
 air_pol_inp <- air_pol %>% 
   st_drop_geometry()
 
@@ -174,19 +275,19 @@ sociodemo <- df_vars %>%
 sociodemo_inp <- sociodemo %>% 
   st_drop_geometry()
 
-sex <- df_vars %>% 
-  dplyr::select(c(53, 54)) 
-sex_inp <- sex %>% 
+sex <- df_vars %>%
+  dplyr::select(c(53, 54))
+sex_inp <- sex %>%
   st_drop_geometry()
 
-race <- df_vars %>% 
-  dplyr::select(c(33:47)) 
-race_inp <- race %>% 
+race <- df_vars %>%
+  dplyr::select(c(33:47))
+race_inp <- race %>%
   st_drop_geometry()
 
-age <- df_vars %>% 
-  dplyr::select(c(55:72)) 
-age_inp <- df_vars %>% 
+age <- df_vars %>%
+  dplyr::select(c(55:72))
+age_inp <- df_vars %>%
   st_drop_geometry()
 
 social_env <- df_vars %>% 
@@ -210,79 +311,163 @@ categories <- accordion(
   open = FALSE,
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    varSelectInput('sociodemo', selectize = TRUE, data = sociodemo_inp,
-                   label = span("Select variables", #change to total population 
-                                                                    popover(bs_icon("lightbulb"),
-                                                                            "See actionable tips for this category",
-                                                                            title = "Actionable Tips",
-                                                                            placement = "right")),
-                    multiple = TRUE),
-   # accordion_panel("Race and Ethnicity", varSelectInput('race', selectize = TRUE, label = NULL, data = race_inp, multiple = TRUE)),
-    #accordion_panel("Sex", varSelectInput('sex', selectize = TRUE, label = NULL, data = sex_inp, multiple = TRUE)),
-   # accordion_panel("Age", varSelectInput('age', selectize = TRUE, label = NULL, data = age_inp, multiple = TRUE))
+    selectInput('sociodemo', 
+                span("Select variables", popover(bs_icon("lightbulb"),
+                                                 "See actionable tips for this category",
+                                                 title = "Actionable Tips",
+                                                 placement = "right")),
+                c("Population (total)" = "Total.Population"),
+                selectize = TRUE, multiple = TRUE),
+   accordion_panel("Race and Ethnicity", selectInput('race', NULL, c("Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
+                                                                                 "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
+                                                                                 "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
+                                                                                 "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
+                                                                                 "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
+                                                                                 "Non-Hispanic Other (percentage)" = "Percent.Other.Race.NonHispanic",
+                                                                                 "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
+                                                                                 "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino Other (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
+                                                                                 "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino"), selectize = TRUE, multiple = TRUE)),
+   accordion_panel("Sex", selectInput('sex', NULL, c("Male (percentage)" = "Percent.Male",
+                                                        "Female (percentage)" = "Percent.Female"), selectize = TRUE, multiple = TRUE)),
+   accordion_panel("Age", selectInput('age', NULL, c("0-4 years (percentage)" = "Percent.0.to.4.years",
+                                                        "5-9 years (percentage)" = "Percent.5.to.9.years",
+                                                        "10-14 years (percentage)" = "Percent.10.to.14.years",
+                                                        "15-19 years (percentage)" = "Percent.15.to.19.years",
+                                                        "20-24 years (percentage)" = "Percent.20.to.24.years",
+                                                        "25-29 years (percentage)" = "Percent.25.to.29.years",
+                                                        "30-34 years (percentage)" = "Percent.30.to.34.years",
+                                                        "35-39 years (percentage)" = "Percent.35.to.39.years",
+                                                        "40-44 years (percentage)" = "Percent.40.to.44.years",
+                                                        "45-49 years (percentage)" = "Percent.45.to.49.years",
+                                                        "50-54 years (percentage)" = "Percent.50.to.54.years",
+                                                        "55-59 years (percentage)" = "Percent.55.to.59.years",
+                                                        "60-64 years (percentage)" = "Percent.60.to.64.years",
+                                                        "65-69 years (percentage)" = "Percent.65.to.69.years",
+                                                        "70-74 years (percentage)" = "Percent.70.to.74.years",
+                                                        "75-79 years (percentage)" = "Percent.75.to.79.years",
+                                                        "80-84 years (percentage)" = "Percent.80.to.84.years",
+                                                        "85 years+ (percentage)" = "Percent.85.and.older"), selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
-    varSelectInput('outcomes', selectize = TRUE, label = span("Select variables", 
-                                                              popover(bs_icon("lightbulb"),
-                                                                      "See actionable tips for this category",
-                                                                      title = "Actionable Tips",
-                                                                      placement = "right")), data = health_outcomes_inp, multiple = TRUE)
+    selectInput('outcomes', 
+                span("Select variables", 
+                     popover(bs_icon("lightbulb"),
+                             "See actionable tips for this category",
+                             title = "Actionable Tips",
+                             placement = "right")), c("Arthritis" = "Arthritis.among.Adults",
+                                                      "Asthma" = "Asthma.among.Adults",
+                                                      "High blood pressure" = "High.Blood.Pressure.among.Adults",
+                                                      "Cancer" = "Cancer.or.Melanoma.among.Adults",
+                                                      "High cholesterol" = "High.Cholesterol.among.Screened.Adults",
+                                                      "Chronic obstructive pulmonary disease" = "COPD.among.Adults",
+                                                      "Coronary heart disease" = "Coronary.Heart.Disease.among.Adults",
+                                                      "Depression" = "Depression.among.Adults",
+                                                      "Diabetes" = "Diagnosed.Diabetes.among.Adults",
+                                                      "Obesity" = "Obesity.among.Adults",
+                                                      "All teeth lost" = "All.Teeth.Lost.among.Adults.65.and.Older",
+                                                      "Stroke" = "Stroke.among.Adults"), selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
-    varSelectInput('behaviors', selectize = TRUE, label = span("Select variables", 
-                                                               popover(bs_icon("lightbulb"),
-                                                                       "See actionable tips for this category",
-                                                                       title = "Actionable Tips",
-                                                                       placement = "right")), data = health_behaviors_inp, multiple = TRUE)
+    selectInput('behaviors', span("Select variables", 
+                                  popover(bs_icon("lightbulb"),
+                                          "See actionable tips for this category",
+                                          title = "Actionable Tips",
+                                          placement = "right")), c("Binge drinking" =  "Binge.Drinking.among.Adults",
+                                                                   "Cigarette smoking" = "Cigarette.Smoking.among.Adults",
+                                                                   "No physical activity" = "No.Leisure.time.Physical.Activity.among.Adults",
+                                                                   "Short sleep duration" =  "Short.Sleep.Duration"),
+                 multiple = TRUE, selectize = TRUE,)
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
-    varSelectInput('prevention', selectize = TRUE, label = span("Select variables", 
-                                                                popover(bs_icon("lightbulb"),
-                                                                        "See actionable tips for this category",
-                                                                        title = "Actionable Tips",
-                                                                        placement = "right")), data = health_prevention_inp, multiple = TRUE)
+    selectInput('prevention', span("Select variables", 
+                                      popover(bs_icon("lightbulb"),
+                                              "See actionable tips for this category",
+                                              title = "Actionable Tips",
+                                              placement = "right")), c("Cholesterol screening" = "Cholesterol.Screening",
+                                                                       "Lack of health insurance" = "Lack.of.Health.Insurance",
+                                                                       "Routine checkup in past year" = "Routine.Checkup.in.the.Past.Year",
+                                                                       "Visited dentist in past year" = "Visited.Denstist.in.Past.Year",
+                                                                       "Taking blood pressure medication" = "Taking.Medicine.to.Control.High.Blood.Pressure",
+                                                                       "Cholesterol screening" = "Cholesterol.Screening",
+                                                                       "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
+                                                                       "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75"), selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add")
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
-    varSelectInput('naturalenv', selectize = TRUE, label = span("Select variables", 
-                                                                popover(bs_icon("lightbulb"),
-                                                                        "See actionable tips for this category",
-                                                                        title = "Actionable Tips",
-                                                                        placement = "right")), data = natural_env_inp, multiple = TRUE),
-    #accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
-    #                varSelectInput('airpol', selectize = TRUE, label = NULL, multiple = TRUE, data = air_pol_inp))
+    selectInput('naturalenv', span("Select variables", 
+                                              popover(bs_icon("lightbulb"),
+                                                      "See actionable tips for this category",
+                                                      title = "Actionable Tips",
+                                                      placement = "right")), c("UV index" = "UV.Index",
+                                                                               "Dew point" = "Dew.point",
+                                                                               "Maximum temperature" = "Maximum.temperature",
+                                                                               "Minimum temperature" = "Minimum.temperature",
+                                                                               "Average temperature" = "Average.temperature",
+                                                                               "Radon" = "Radon"), selectize = TRUE, multiple = TRUE),
+    accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
+                   selectInput('airpol', NULL, c("PM2.5" = "Particulate.Matter.2.5",
+                                                 "Wildfire smoke" = "Wildfire.smoke",
+                                                 "Nitrogen dioxide (No2)" = "Nitrogen.dioxide",
+                                                 "Sulfur dioxide (So2)" = "Sulfur.dioxide",
+                                                 "Carbon monoxide (CO)" = "Carbon.monoxide",
+                                                 "Ozone (O3)" = "Ozone"), selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
-    varSelectInput('builtenv', selectize = TRUE, label = span("Select variables", 
-                                                              popover(bs_icon("lightbulb"),
-                                                                      "See actionable tips for this category",
-                                                                      title = "Actionable Tips",
-                                                                      placement = "right")), data = built_env_inp, multiple = TRUE),
+    selectInput('builtenv', span("Select variables", 
+                                 popover(bs_icon("lightbulb"),
+                                         "See actionable tips for this category",
+                                         title = "Actionable Tips",
+                                         placement = "right")), c("Walkability" = "Walkability",
+                                                                  "Pesticide exposure" = "Pesticide.Exposure",
+                                                                  "Green space" = "Green.Space",
+                                                                  "Light at night" = "Nighttime.Radiance",
+                                                                  "Noise pollution" = "Noise.Pollution"), selectize = TRUE, multiple = TRUE),
     input_switch('transit', "Transit Stops", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      varSelectizeInput('foodenv', label = span("Select variables", 
-                                                popover(bs_icon("lightbulb"),
-                                                        food_env_md,
-                                                        title = "Actionable Tips",
-                                                        placement = "right")), data = food_env_inp, multiple = TRUE)
+      varSelectInput('foodenv', label = span("Select variables", 
+                                 popover(bs_icon("lightbulb"),
+                                         food_env_md,
+                                         title = "Actionable Tips",
+                                         placement = "right")), data = food_env_inp, multiple = TRUE)
     )
   ),
   accordion_panel(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
-    varSelectInput('socialenv', selectize = TRUE, label = span("Select variables", 
-                                                               popover(bs_icon("lightbulb"),
-                                                                       "See actionable tips for this category",
-                                                                       title = "Actionable Tips",
-                                                                       placement = "right")), data = social_env_inp, multiple = TRUE)
+    selectInput('socialenv', span("Select variables", 
+                                          popover(bs_icon("lightbulb"),
+                                                  "See actionable tips for this category",
+                                                  title = "Actionable Tips",
+                                                  placement = "right")), c("Food insecurity" = "Food.Insecurity",
+                                                                           "Housing insecurity" = "Housing.Insecurity",
+                                                                           "Utility services threat" = "Utility.Services.Threat",
+                                                                           "Lack of reliable transportation" = "Lacking.Reliable.Transportation",
+                                                                           "Lack of social and emotional support" =  "Lack.of.Social.and.Emotional.Support",
+                                                                           "No internet" = "No.broadband.internet",
+                                                                           "No high school education" = "No.high.school.diploma",
+                                                                           "Single parent households" = "Single.parent.households",
+                                                                           "Housing cost burden" = "Housing.cost.burden",
+                                                                           "Crowding" = "Crowding",
+                                                                           "Poverty" = "Poverty",
+                                                                           "Unemployment" = "Unemployment",
+                                                                           "Social Vulnerability Index" = "Social.Vulnerability.Index",
+                                                                           "Environmental Justice Index" = "Environmental.Justice.Index",
+                                                                           "Segregation" = "Racial.Residential.Segregation",
+                                                                           "Population density" = "Population.density"), selectize = TRUE,  multiple = TRUE)
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
@@ -352,6 +537,7 @@ server <- function(input, output, session) {
          "Obesity.among.Adults", "All.Teeth.Lost.amond.Adults.65.and.older", "Stroke.amond.Adults",
          names(air_pol_inp)) # CHANGE TO AMONG IN PROCESSING
   n <- c("Nighttime.Radiance", names(sociodemo_inp))
+  
   # palette helper function
   geoex.palette <- function(var) {
     tryCatch({
@@ -432,44 +618,41 @@ server <- function(input, output, session) {
     if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
   
-#   map_cols <- reactive({
-#   # Helper function to safely convert list inputs to character vectors
-#   safe_chars <- function(x) {
-#     if(is.null(x) || length(x) == 0) {
-#       character(0)
-#     } else {
-#       as.character(unlist(x))  # Convert list to character vector
-#     }
-#   }
-#   
-#   cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, health_behaviors, natural_env, air_pol, built_env) %>%
-#     dplyr::select(!!!syms(safe_chars(input$outcomes)), 
-#                   !!!syms(safe_chars(input$sociodemo)), 
-#                   !!!syms(safe_chars(input$race)), 
-#                   !!!syms(safe_chars(input$sex)), 
-#                   !!!syms(safe_chars(input$age)), 
-#                   !!!syms(safe_chars(input$socialenv)), 
-#                   !!!syms(safe_chars(input$prevention)), 
-#                   !!!syms(safe_chars(input$behaviors)), 
-#                   !!!syms(safe_chars(input$naturalenv)), 
-#                   !!!syms(safe_chars(input$airpol)), 
-#                   !!!syms(safe_chars(input$builtenv)))
-# }) %>% 
-#   bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) %>%
-#   bindEvent(list(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv))
+  # map_cols <- reactive({
+  #   df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, health_behaviors, natural_env, air_pol, built_env)
+  #   
+  #   df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
+  # })
   
   map_cols <- reactive({
-    # to_syms <- function(x) {
-    #   if(is.null(x) || length(x) == 0) return(list())
-    #   syms(x)
-    # }
-    cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, health_behaviors, natural_env, air_pol, built_env) %>%
-      dplyr::select(!!!input$outcomes, !!!input$sociodemo, !!!input$race, !!!input$sex, !!!input$age,
-                    !!!input$socialenv, !!!input$prevention, !!!input$behaviors, !!!input$airpol, !!!input$naturalenv, , !!!input$builtenv)
-
-  }) %>%
-    bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) %>% # reduce work by server
-    bindEvent(list(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv))
+    #sociodemo <- sociodemo[, c(input$sociodemo, input$age, input$sex, input$race), drop = FALSE]
+    #natural_env <- natural_env[, c(input$naturalenv, input$airpol)]
+    
+    df <- cbind(health_outcomes, sociodemo, social_env, health_prevention, health_behaviors, natural_env, built_env)
+    
+    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
+  }) %>% 
+    bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server) 
+  
+  # map_cols <- reactive({
+  #   print(syms(input$outcomes))
+  #   cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, health_behaviors, natural_env, air_pol, built_env) %>%
+  #     st_as_sf() %>% 
+  #     dplyr::select(!!!input$outcomes, 
+  #                   !!!input$sociodemo, 
+  #                   !!!input$race, 
+  #                   !!!input$sex, 
+  #                   !!!input$age,
+  #                   !!!input$socialenv, 
+  #                   !!!input$prevention, 
+  #                   !!!input$behaviors, 
+  #                   !!!input$airpol, 
+  #                   !!!input$naturalenv, 
+  #                   !!!input$builtenv)
+  # 
+  # }) %>%
+  #   bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) %>% # reduce work by server
+  #   bindEvent(list(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv))
 
   food_env_cols <- reactive({
     cbind(food_env) %>% 
@@ -488,7 +671,7 @@ server <- function(input, output, session) {
       st_drop_geometry()
 
     if (ncol(plotly.dat) == 1) {
-      plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% #~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2))) %>%
+      plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
         layout(
           plot_bgcolor = '#e5ecf6',
           xaxis = list(title = names(plotly.dat)[1]))
