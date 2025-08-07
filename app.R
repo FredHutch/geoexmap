@@ -299,7 +299,7 @@ ui <- page_navbar(
                                 width = "400px"),
               leafletOutput("geoexmap"),
               conditionalPanel(
-                condition = "input.showchart == true || input.clear == 0",
+                condition = "(input.showchart == true ) || (input.clear == null || input.clear == 0)",
                 absolutePanel(
                   class = "panel panel-default",
                   draggable = TRUE,
