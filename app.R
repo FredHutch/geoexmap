@@ -391,7 +391,8 @@ ui <- page_navbar(
                   bottom = "200px",
                   height = "200px",
                   width = "400px",
-                  wellPanel(plotlyOutput("chart"))
+                  wellPanel(plotlyOutput("chart"),
+                            actionButton("clear", label = "X"))
                 ))
             )),
   nav_panel("Table",
@@ -423,7 +424,7 @@ server <- function(input, output, session) {
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
          "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults") 
-  n <- c("Nighttime.Radiance", names(sociodemo_inp))
+  n <- c("Nighttime.Radiance")
   
   # palette helper function
   geoex.palette <- function(var) {
@@ -470,6 +471,10 @@ server <- function(input, output, session) {
     })
   }
   
+  observeEvent(input$clear, {
+    input$showchart == FALSE
+  })
+  
   legend.titles <- function(col) {
     #return(col)
     if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
@@ -504,43 +509,13 @@ server <- function(input, output, session) {
     if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("Comparative Prevalence All Teeth Lost Among Adults 65+")
     if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
-  
-  # map_cols <- reactive({
-  #   df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, health_behaviors, natural_env, air_pol, built_env)
-  #   
-  #   df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
-  # })
-  
   map_cols <- reactive({
-    #sociodemo <- sociodemo[, c(input$sociodemo, input$age, input$sex, input$race), drop = FALSE]
-    #natural_env <- natural_env[, c(input$naturalenv, input$airpol)]
-    
     df <- cbind(health_outcomes, sociodemo, social_env, health_prevention, health_behaviors, natural_env, built_env)
     
     df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
   }) %>% 
     bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server) 
   
-  # map_cols <- reactive({
-  #   print(syms(input$outcomes))
-  #   cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, health_behaviors, natural_env, air_pol, built_env) %>%
-  #     st_as_sf() %>% 
-  #     dplyr::select(!!!input$outcomes, 
-  #                   !!!input$sociodemo, 
-  #                   !!!input$race, 
-  #                   !!!input$sex, 
-  #                   !!!input$age,
-  #                   !!!input$socialenv, 
-  #                   !!!input$prevention, 
-  #                   !!!input$behaviors, 
-  #                   !!!input$airpol, 
-  #                   !!!input$naturalenv, 
-  #                   !!!input$builtenv)
-  # 
-  # }) %>%
-  #   bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) %>% # reduce work by server
-  #   bindEvent(list(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv))
-
   food_env_cols <- reactive({
     cbind(food_env) %>% 
       dplyr::select(!!!input$foodenv)
