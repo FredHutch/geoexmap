@@ -104,7 +104,7 @@ outcomes <- c("Arthritis" = "Arthritis.among.Adults",
               "Stroke" = "Stroke.among.Adults")
 
 prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
-                "Lack of health insurance" = "Lack.of.Health.Insurance",
+                "No health insurance" = "Lack.of.Health.Insurance",
                 "Routine checkup in past year" = "Routine.Checkup.in.the.Past.Year",
                 "Visited dentist in past year" = "Visited.Denstist.in.Past.Year",
                 "Taking blood pressure medication" = "Taking.Medicine.to.Control.High.Blood.Pressure",
@@ -299,7 +299,7 @@ ui <- page_navbar(
                                 width = "400px"),
               leafletOutput("geoexmap"),
               conditionalPanel(
-                condition = "input.showchart == true",
+                condition = "input.showchart == true || input.clear == 0",
                 absolutePanel(
                   class = "panel panel-default",
                   draggable = TRUE,
@@ -328,6 +328,12 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  #showchart <- reactive(reactiveVal(input$showchart))
+  
+  observeEvent(input$clear, {
+    update_switch("showchart", value = FALSE)
+  })
+  
   # define categories for palettes
   # "good", "bad", "neutral"
   g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Denstist.in.Past.Year", "Cholesterol.Screening",
@@ -388,12 +394,6 @@ server <- function(input, output, session) {
       return(NULL)
     })
   }
-  
-  showchart <- reactiveVal(FALSE)
-  
-  observeEvent(input$clear, {
-    showchart(FALSE)
-  })
   
   legend.titles <- function(col) {
     #return(col)
