@@ -327,6 +327,12 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  # track active variables
+  values <- reactiveValues(
+    active_variables = character(0)
+  )
+  
+  # turn switch off if clear button is clicked
   observeEvent(input$clear, {
     update_switch("showchart", value = FALSE)
   })
@@ -427,13 +433,9 @@ server <- function(input, output, session) {
     if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
   
-  values <- reactiveValues(
-    selection_history = character(0)
-  )
-  
-  # Clear All Variables button handler
+  # observe event for clear button click
   observeEvent(input$clear_all_vars, {
-    # Reset all selectInputs and switches
+    # reset all selectInputs and switches
     updateSelectInput(session, "outcomes", selected = character(0))
     updateSelectInput(session, "sociodemo", selected = character(0))
     updateSelectInput(session, "age", selected = character(0))
@@ -447,13 +449,10 @@ server <- function(input, output, session) {
     updateSelectInput(session, "builtenv", selected = character(0))
     updateVarSelectInput(session, "foodenv", selected = character(0))
     
-    # Reset switches if needed
+    # reset switches if needed
     update_switch("transit", value = FALSE)
     
-    # Clear selection history
-    values$selection_history <- character(0)
-    
-    # Clear the map
+    # clear the map
     leafletProxy("geoexmap") %>%
       clearControls() %>%
       clearShapes()
@@ -512,6 +511,79 @@ server <- function(input, output, session) {
 
   })
   
+  # create the variable panel HTML
+  create_variable_panel <- function(variables) {
+    if (length(variables) == 0) {
+      return("")
+    }
+    
+    # clickable variable items
+    variable_items <- sapply(variables, function(var) {
+      # shortened display name if needed
+      display_name <- if(nchar(var) > 25) paste0(substr(var, 1, 22), "...") else var
+      
+      paste0(
+        '<div class="variable-item" onclick="Shiny.setInputValue(\'remove_variable\', \'', var, '\', {priority: \'event\'});" ',
+        'title="Click to remove: ', var, '">',
+        '<span class="variable-name">', display_name, '</span>',
+        '<span class="remove-icon">×</span>',
+        '</div>'
+      )
+    })
+    
+    # combine full panel HTML
+    panel_html <- paste0(
+      '<div id="variable-panel" style="
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        max-width: 250px;
+        max-height: 300px;
+        overflow-y: auto;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      ">',
+      '<div style="font-weight: bold; margin-bottom: 8px; color: #333;">Active Variables</div>',
+      paste(variable_items, collapse = ""),
+      '</div>',
+      '<style>
+        .variable-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 5px 8px;
+          margin: 2px 0;
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 3px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .variable-item:hover {
+          background: #e9ecef;
+          border-color: #adb5bd;
+        }
+        .variable-name {
+          flex: 1;
+          font-size: 12px;
+          color: #495057;
+        }
+        .remove-icon {
+          color: #dc3545;
+          font-weight: bold;
+          font-size: 16px;
+          margin-left: 5px;
+        }
+        .variable-item:hover .remove-icon {
+          color: #c82333;
+        }
+      </style>'
+    )
+    
+    return(panel_html)
+  }
+  
   output$geoexmap <- renderLeaflet({
     map <- leaflet(map_cols()) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
@@ -525,6 +597,39 @@ server <- function(input, output, session) {
         }")
       ))
       return(map)
+  })
+  
+  # handle individual variable removal
+  observeEvent(input$remove_variable, {
+    var_to_remove <- input$remove_variable
+    
+    if (!is.null(var_to_remove) && var_to_remove != "") {
+      # lookup table for variable categories
+      variable_lookup <- list(
+        list(data = health_outcomes, input_id = "outcomes", update_fn = updateSelectInput),
+        list(data = sociodemo, input_id = "sociodemo", update_fn = updateSelectInput),
+        list(data = age, input_id = "age", update_fn = updateSelectInput),
+        list(data = sex, input_id = "sex", update_fn = updateSelectInput),
+        list(data = race, input_id = "race", update_fn = updateSelectInput),
+        list(data = social_env, input_id = "socialenv", update_fn = updateSelectInput),
+        list(data = health_prevention, input_id = "prevention", update_fn = updateSelectInput),
+        list(data = health_behaviors, input_id = "behaviors", update_fn = updateSelectInput),
+        list(data = natural_env, input_id = "naturalenv", update_fn = updateSelectInput),
+        list(data = air_pol, input_id = "airpol", update_fn = updateSelectInput),
+        list(data = built_env, input_id = "builtenv", update_fn = updateSelectInput),
+        list(data = food_env_inp, input_id = "foodenv", update_fn = updateVarSelectInput)
+      )
+      
+      # Find the matching category and update
+      for (category in variable_lookup) {
+        if (var_to_remove %in% colnames(category$data)) {
+          current_selection <- input[[category$input_id]]
+          new_selection <- setdiff(current_selection, var_to_remove)
+          category$update_fn(session, category$input_id, selected = new_selection)
+          break
+        }
+      }
+    }
   })
   
   # observeEvent(input$transit, {
@@ -553,33 +658,51 @@ server <- function(input, output, session) {
     
     withProgress(message = "Plotting...", 
     {plotlyProxy("chart")
-    
-    leafletProxy("geoexmap", data = map_cols()) %>% 
-      clearControls()  %>% 
-      clearShapes() %>% 
-      {
-        # for each chosen column, define the palette, and add polygons
-        label = ""
-        if (input$transit) {
-          print("transit")
-          #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
-                                           #icon = bs_icon("bus-front"))
-        }
-        for (c in colnames(map_cols())) {
-          print(c)
-          pal <- geoex.palette(c)
-          
-          
-          # skip null to avoid geometry
-          if (!is.null(pal)){
-              addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
-                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                          label = "Hey") %>% 
-              addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
-              addEasyprint(options = easyprintOptions()) 
+      
+      current_vars <- colnames(map_cols())
+      current_vars <- current_vars[!current_vars %in% c("geom")]
+      values$active_variables <- current_vars
+      
+      # update the variable panel
+      if (length(current_vars) > 0) {
+        panel_html <- create_variable_panel(current_vars)
+        leafletProxy("geoexmap", data = map_cols()) %>% 
+          clearControls()  %>% 
+          clearShapes() %>% 
+          addControl(
+            html = panel_html,
+            position = "topright",
+            layerId = "variable_panel"
+          ) %>% 
+          {
+            # for each chosen column, define the palette, and add polygons
+            label = ""
+            if (input$transit) {
+              print("transit")
+              #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
+              #icon = bs_icon("bus-front"))
+            }
+            for (c in colnames(map_cols())) {
+              print(c)
+              pal <- geoex.palette(c)
+              
+              
+              # skip null to avoid geometry
+              if (!is.null(pal)){
+                addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
+                            fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                            label = "Hey") %>% 
+                  addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
+                  addEasyprint(options = easyprintOptions()) 
+              }
+            }
           }
-        }
-      } 
+      } else {
+        # remove panel if no variables
+        leafletProxy("geoexmap") %>%
+          removeControl(layerId = "variable_panel")
+      }
+     
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, 
