@@ -193,7 +193,6 @@ food_env_md <- markdown("
 Need help finding food? See: [Feeding Washington](https://feedingwashington.org/find-food/)
                         ")
 
-
 # -------- UI ELEMENTS --------
 categories <- accordion(
   open = FALSE,
@@ -207,8 +206,8 @@ categories <- accordion(
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
     accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
-   accordion_panel("Sex", selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
-   accordion_panel("Age", selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
+    accordion_panel("Sex", selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Age", selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
@@ -305,8 +304,8 @@ ui <- page_navbar(
                   draggable = TRUE,
                   fixed = TRUE,
                   left = "425px",
-                  right = "1000px",
-                  bottom = "200px",
+                  right = "1100px",
+                  bottom = "300px",
                   height = "200px",
                   width = "400px",
                   wellPanel(actionButton("clear", label = "X"),
@@ -328,8 +327,6 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
-  #showchart <- reactive(reactiveVal(input$showchart))
-  
   observeEvent(input$clear, {
     update_switch("showchart", value = FALSE)
   })
@@ -429,7 +426,43 @@ server <- function(input, output, session) {
     if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("Comparative Prevalence All Teeth Lost Among Adults 65+")
     if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
   }
+  
+  values <- reactiveValues(
+    selection_history = character(0)
+  )
+  
+  # Clear All Variables button handler
+  observeEvent(input$clear_all_vars, {
+    # Reset all selectInputs and switches
+    updateSelectInput(session, "outcomes", selected = character(0))
+    updateSelectInput(session, "sociodemo", selected = character(0))
+    updateSelectInput(session, "age", selected = character(0))
+    updateSelectInput(session, "sex", selected = character(0))
+    updateSelectInput(session, "race", selected = character(0))
+    updateSelectInput(session, "socialenv", selected = character(0))
+    updateSelectInput(session, "prevention", selected = character(0))
+    updateSelectInput(session, "behaviors", selected = character(0))
+    updateSelectInput(session, "naturalenv", selected = character(0))
+    updateSelectInput(session, "airpol", selected = character(0))
+    updateSelectInput(session, "builtenv", selected = character(0))
+    updateVarSelectInput(session, "foodenv", selected = character(0))
+    
+    # Reset switches if needed
+    update_switch("transit", value = FALSE)
+    
+    # Clear selection history
+    values$selection_history <- character(0)
+    
+    # Clear the map
+    leafletProxy("geoexmap") %>%
+      clearControls() %>%
+      clearShapes()
+  })
+  
   map_cols <- reactive({
+    naturalenv <- cbind(natural_env, air_pol)
+    sociodemo <- cbind(sociodemo, age, sex, race)
+    
     df <- cbind(health_outcomes, sociodemo, social_env, health_prevention, health_behaviors, natural_env, built_env)
     
     df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
@@ -483,7 +516,15 @@ server <- function(input, output, session) {
     map <- leaflet(map_cols()) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
-      addSearchOSM()
+      addSearchOSM() %>% 
+      addEasyButton(easyButton(
+        icon = 'fa-remove',
+        title = "Remove all variables",
+        onClick = JS("function(btn, map){
+                     Shiny.setInputValue('clear_all_vars', Math.random());
+        }")
+      ))
+      return(map)
   })
   
   # observeEvent(input$transit, {
