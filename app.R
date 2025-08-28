@@ -629,18 +629,6 @@ server <- function(input, output, session) {
     }
   })
   
-  # observeEvent(input$transit, {
-  #   {
-  #     leafletProxy("geoexmap", data = transit) %>% 
-  #       {
-  #         if (input$transit) {
-  #           addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
-  #                      icon = bs_icon("bus-front"))
-  #         }
-  #       }
-  #   }
-  # })
-  
   observe({
     # if (ncol(map_cols()) == 4) {
     #   print("Disabling select inputs...")
@@ -660,46 +648,64 @@ server <- function(input, output, session) {
       current_vars <- current_vars[!current_vars %in% c("geom")]
       values$active_variables <- current_vars
       
+      proxy <- leafletProxy("geoexmap", data = map_cols()) %>% 
+        clearControls() %>% 
+        clearShapes() %>% 
+        clearMarkers()
+      
       # update the variable panel
       if (length(current_vars) > 0) {
         panel_html <- create_variable_panel(current_vars)
-        leafletProxy("geoexmap", data = map_cols()) %>% 
-          clearControls()  %>% 
-          clearShapes() %>% 
-          addControl(
+        proxy <- proxy %>% addControl(
             html = panel_html,
             position = "topright",
             layerId = "variable_panel"
-          ) %>% 
-          {
-            # for each chosen column, define the palette, and add polygons
-            label = ""
-            if (input$transit) {
-              print("transit")
-              #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
-              #icon = bs_icon("bus-front"))
-            }
-            for (c in colnames(map_cols())) {
-              print(c)
-              pal <- geoex.palette(c)
-              
-              
-              # skip null to avoid geometry
-              if (!is.null(pal)){
-                addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
-                            fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                            label = "Hey") %>% 
-                  addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) %>% 
-                  addEasyprint(options = easyprintOptions()) 
-              }
-            }
-          }
-      } else {
+          ) 
+      }
+      # for each chosen column, define the palette, and add polygons
+      label = ""
+      
+      if (input$transit) {
+        print("Adding points")
+        
+        clusterOptions <- markerClusterOptions()
+        
+        proxy <- proxy %>% 
+          addMarkers(
+            data = transit,
+            lng = ~stop_lon,
+            lat = ~stop_lat,
+            group = "transit_markers",
+            popup = ~paste("Stop:", stop_name),
+            clusterOptions = clusterOptions
+            
+          )
+        print("transit")
+        #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
+        #icon = bs_icon("bus-front"))
+      }
+      
+      for (c in colnames(map_cols())) {
+        print(c)
+        pal <- geoex.palette(c)
+        
+        
+        # skip null to avoid geometry
+        if (!is.null(pal)){
+          proxy <- proxy %>% 
+            addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
+                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                        label = "Hey") %>% 
+            addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) 
+        }
+      }
+      
+      if (length(current_vars) == 0) {
         # remove panel if no variables
-        leafletProxy("geoexmap") %>%
+        proxy %>% 
           removeControl(layerId = "variable_panel")
       }
-     
+      
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, 
