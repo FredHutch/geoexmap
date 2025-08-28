@@ -2,7 +2,6 @@
 
 #TODO ELEMENTS:
 ## modal for intro/welcome message
-## add land use category (built environment)
 ## add table features
 #library(waiter)
 
@@ -23,7 +22,6 @@ library(plotly)
 library(RColorBrewer)
 library(bslib)
 library(bsicons)
-#library(shinyBS)
 library(dplyr)
 
 library(rsconnect)
@@ -286,7 +284,6 @@ categories <- accordion(
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
-  #waiter::use_waiter(), 
   #shinyjs::useShinyjs(),
   #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   tags$head(tags$link(rel = "shortcut icon", href = "/favicon.ico/geoexmap_favicon.png")),
