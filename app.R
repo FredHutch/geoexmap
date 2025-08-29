@@ -683,6 +683,9 @@ server <- function(input, output, session) {
         print("transit")
         #addMarkers(data = transit, lng = ~stop_lon, lat = ~stop_lat,
         #icon = bs_icon("bus-front"))
+      } else {
+        proxy <- proxy %>% 
+          clearMarkerClusters()
       }
       
       for (c in colnames(map_cols())) {
