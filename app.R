@@ -12,6 +12,7 @@ library(htmltools)
 library(tidyverse)
 library(sf)
 library(data.table)
+library(reactable)
 
 library(leaflet)
 library(leaflet.extras)
@@ -323,7 +324,8 @@ ui <- page_navbar(
   nav_panel("Table",
             layout_sidebar(
               sidebar = sidebar(categories, 
-                                width = "400px")
+                                width = "400px"),
+              reactableOutput("table")
             )),
   nav_panel("Documentation"),
   nav_panel("Contact us",
@@ -607,6 +609,11 @@ server <- function(input, output, session) {
       return(map)
   })
   
+  table_cols <- reactive({map_cols() %>% 
+                           st_drop_geometry()})
+  
+  output$table <- renderReactable({reactable(table_cols())})
+  
   # handle individual variable removal
   observeEvent(input$remove_variable, {
     var_to_remove <- input$remove_variable
@@ -652,6 +659,7 @@ server <- function(input, output, session) {
     #   shinyjs::disable("builtenv")
     # }
     
+    #### MAIN LOGIC AND PROXIES ####
     withProgress(message = "Plotting...", 
     {plotlyProxy("chart")
       
