@@ -27,6 +27,11 @@ library(dplyr)
 library(rsconnect)
 library(rlang)
 
+# empty shapefiles
+city.bounds <- st_read("Geo/city/cities.gpkg")
+county.bounds <- st_read("Geo/county/counties.gpkg")
+
+# polygon data
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data") 
 
 food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
@@ -279,6 +284,8 @@ categories <- accordion(
   accordion_panel(
     "Options", icon = bs_icon("gear"),
     input_switch("showbounds", "Show Tract Boundaries", value = TRUE),
+    input_switch("showcounties", "Show County Boundaries", value = FALSE),
+    input_switch("showcities", "Show City Boundaries", value = FALSE),
     input_switch("showchart", "Show Graph", value = FALSE),
     fileInput("upload", "Upload a Shapefile"),
     downloadButton("download", "Download data")
@@ -711,6 +718,16 @@ server <- function(input, output, session) {
           clearGroup(group = "cancer_programs")
       }
       
+      if (input$showcities) {
+        proxy <- proxy %>% 
+          addPolygons(data = city.bounds, stroke = TRUE, weight = 1, color = "#57737A")
+      }
+      
+      if (input$showcounties) {
+        proxy <- proxy %>% 
+          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#85BDBF")
+      }
+      
       for (c in colnames(map_cols())) {
         print(c)
         pal <- geoex.palette(c)
@@ -735,7 +752,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, 
-                   input$cancer, input$showbounds, input$upload))
+                   input$cancer, input$showcities, input$showcounties, input$showbounds, input$upload))
 }
 
 # -------- CREATE SHINY APP --------
