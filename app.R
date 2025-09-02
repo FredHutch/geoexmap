@@ -474,7 +474,7 @@ server <- function(input, output, session) {
     
     df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
   }) %>% 
-    bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server) 
+    bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
   
   food_env_cols <- reactive({
     cbind(food_env) %>% 
@@ -728,11 +728,22 @@ server <- function(input, output, session) {
           addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#85BDBF")
       }
       
+      for (c in colnames(food_env_cols())) {
+        pal <- geoex.palette(c)
+        
+        if (!is.null(pal)) {
+          proxy <- proxy %>% 
+            addPolygons(data = food_env_cols(), fillColor = ~pal(food_env_cols()[[c]]), stroke = TRUE, weight = 0.9, color = "blue",
+                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegend(pal = pal, values = ~food_env_cols()[[c]], title = legend.titles(c))
+        }
+      }
+      
+      
       for (c in colnames(map_cols())) {
         print(c)
         pal <- geoex.palette(c)
-        
-        
+
         # skip null to avoid geometry
         if (!is.null(pal)){
           proxy <- proxy %>% 
@@ -752,7 +763,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, 
-                   input$cancer, input$showcities, input$showcounties, input$showbounds, input$upload))
+                   input$cancer, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
 }
 
 # -------- CREATE SHINY APP --------
