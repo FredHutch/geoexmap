@@ -28,6 +28,7 @@ library(dplyr)
 library(rsconnect)
 library(rlang)
 
+#### LOAD DATA ####
 # empty shapefiles
 city.bounds <- st_read("Geo/city/cities.gpkg")
 county.bounds <- st_read("Geo/county/counties.gpkg")
@@ -44,6 +45,10 @@ transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
 cancer.progs <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                         layer = "cancer_progs")
 
+alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
+               layer = "alc_retailers")
+
+#### DEFINE DATA CATEGORIES ####
 data$Binge.Drinking.among.Adults <- as.numeric(data$Binge.Drinking.among.Adults)
 data$Cigarette.Smoking.among.Adults <- as.numeric(data$Cigarette.Smoking.among.Adults)
 data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisure.time.Physical.Activity.among.Adults)
@@ -195,6 +200,7 @@ food_env <- food %>%
 food_env_inp <- food_env %>% 
   st_drop_geometry()
 
+#### DEFINE MARKDOWN FOR TIPS ####
 # define markdown text for tips
 food_env_md <- markdown("
 Need help finding food? See: [Feeding Washington](https://feedingwashington.org/find-food/)
@@ -264,7 +270,8 @@ categories <- accordion(
                                          "See actionable tips for this category",
                                          title = "Actionable Tips",
                                          placement = "right")), builtenv, selectize = TRUE, multiple = TRUE),
-    input_switch('transit', "Transit Stops", value = FALSE),
+    input_switch('transit', "Transit stops", value = FALSE),
+    input_switch('alc', "Alcohol retailers", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
       varSelectInput('foodenv', label = span("Select variables", 
@@ -749,6 +756,24 @@ server <- function(input, output, session) {
           clearGroup(group = "cancer_programs")
       }
       
+      if (input$alc) {
+        print("adding alc")
+        # svg for icon
+        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shop" viewBox="0 0 16 16">
+  <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zm3 0h-2v3h2z"/>
+</svg> Alcohol Retailers <br/>'
+        
+        proxy <- proxy %>% 
+          addMarkers(data = alc,
+                     popup = ~Licensee,
+                     group = "alc_retailers",
+                     icon = makeIcon("/shop.svg")) %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "alc_retailers")
+      }
+      
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -796,7 +821,7 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, 
+    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc,
                    input$cancer, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
 }
 
