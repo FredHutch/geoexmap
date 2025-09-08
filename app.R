@@ -8,7 +8,7 @@
 library(shiny)
 library(shinyjs)
 library(htmltools)
-library(reactable)
+#library(reactable)
 library(tidyverse)
 library(sf)
 library(data.table)
