@@ -230,7 +230,11 @@ categories <- accordion(
                      popover(bs_icon("lightbulb"),
                              "See actionable tips for this category",
                              title = "Actionable Tips",
-                             placement = "right")), outcomes, selectize = TRUE, multiple = TRUE)
+                             placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
+    accordion_panel("Cancer Incidence",
+                    selectInput('cancer-inc', selectize = TRUE)),
+    accordion_panel("Cancer Mortality",
+                    selectInput('cancer-mort', selectize = TRUE))
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
