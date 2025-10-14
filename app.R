@@ -39,6 +39,9 @@ data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_
 
 food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
 
+wscr.inc <- fread("Data_Processed/wscr_inc.csv")
+wscr.mort <- fread("Data_Processed/wscr_mort.csv")
+
 # read point data
 transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                    layer = "transit")
@@ -232,10 +235,15 @@ categories <- accordion(
                              "See actionable tips for this category",
                              title = "Actionable Tips",
                              placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
+    # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence",
-                    selectInput('cancer-inc', selectize = TRUE)),
+                    selectInput('inc-site', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE),
+                    selectInput('inc-stage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE),
+                    selectInput('inc-sex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE)),
     accordion_panel("Cancer Mortality",
-                    selectInput('cancer-mort', selectize = TRUE))
+                    selectInput('mort-site', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE),
+                    selectInput('mort-stage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE),
+                    selectInput('mort-sex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE))
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
