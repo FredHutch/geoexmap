@@ -3,11 +3,12 @@
 #TODO ELEMENTS:
 ## modal for intro/welcome message
 ## add table features
-#library(waiter)
 
 library(shiny)
 library(shinyjs)
 library(htmltools)
+#library(htmlwidgets)
+#library(crosstalk)
 #library(reactable)
 library(tidyverse)
 library(sf)
