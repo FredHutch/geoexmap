@@ -685,9 +685,13 @@ server <- function(input, output, session) {
   output$table <- renderReactable({
     validate(need(base::ncol(table_cols()) > 0, "Please select a variable."))
     
-    reactable(table_cols())
+    reactable(table_cols(),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) round(value, 3),
+                align = "left"
+              ))
     })
-  
   
   #### MAIN OBSERVER LOGIC AND PROXIES ####
   observe({
