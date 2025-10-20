@@ -207,9 +207,44 @@ food_env_inp <- food_env %>%
 
 #### DEFINE MARKDOWN FOR TIPS ####
 # define markdown text for tips
+health_out_md <- markdown("
+                          - Diabetes: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)
+                          - Obesity: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)
+                          - Cancer incidence: learn about [risk factors for cancer in general and ways to prevent cancer](https://www.cancer.gov/about-cancer/causes-prevention/patient-prevention-overview-pdq)
+                          ")
+health_bh_md <- markdown("
+                         - Cigarette smoking: learn about ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)
+                         - No leisure-time physical activity: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)
+                         - Short sleep duration: learn about ways to [get better sleep](https://www.cdc.gov/sleep/about/index.html)
+                         ")
+prev_md <- markdown("
+                    - Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington
+                    - Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)
+                    - Mammography use: learn about the [benefits of mammography](https://www.cdc.gov/breast-cancer/screening/index.html)
+                    - Colorectal cancer screening: learn about the [benefits of colorectal cancer screening](https://www.cdc.gov/colorectal-cancer/screening/index.html)
+                    ")
+nat_md <- markdown("
+                   - Air pollutants: learn about ways to [protect yourself from air pollution](http://www.breatheasy.tips)
+                   - Ultraviolet radiation (UV): learn about [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)
+                   - Radon: learn about ways to [test for radon in your home](https://doh.wa.gov/community-and-environment/contaminants/radon)
+                   - PFAS in drinking water: learn about ways to [reduce exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)
+                   ")
+
+built_md <- markdown("
+                     - Walkability: learn about the [health benefits of walking](https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise)
+                     - Pesticide use: learn about ways to [reduce pesticide exposure from foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and [while using pesticides](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)
+                     - Green space: learn more about the [health benefits of green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)
+                     ")
+
 food_env_md <- markdown("
-Need help finding food? See: [Feeding Washington](https://feedingwashington.org/find-food/)
+                        - Food environment/healthy food: search for [nearby local foods](https://www.usdalocalfoodportal.com/) such as farmers markets
                         ")
+
+soc_md <- markdown("
+                   - Food insecurity: call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [WA statewide helpline](https://wa211.org/). Call 1-866-HUNGRY for assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest [food bank or meal program from Feeding Washington](https://feedingwashington.org/find-food/).
+                   - Housing insecurity: learn about [housing resources](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) including emergency housing. Call 2-1-1 or text '211WAOD' to 898211 for other housing resources from the [WA statewide helpline](https://wa211.org/)
+                   - Lack of reliable transportation: call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [WA statewide helpline](https://wa211.org/)
+                   ")
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
@@ -217,10 +252,7 @@ categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
     selectInput('sociodemo', 
-                span("Select variables", popover(bs_icon("lightbulb"),
-                                                 "See actionable tips for this category",
-                                                 title = "Actionable Tips",
-                                                 placement = "right")),
+                span("Select variables"),
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
     accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
@@ -233,7 +265,7 @@ categories <- accordion(
     selectInput('outcomes', 
                 span("Select variables", 
                      popover(bs_icon("lightbulb"),
-                             "See actionable tips for this category",
+                             health_out_md,
                              title = "Actionable Tips",
                              placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
@@ -250,7 +282,7 @@ categories <- accordion(
     "Health Behaviors", icon = bs_icon("person-walking"),
     selectInput('behaviors', span("Select variables", 
                                   popover(bs_icon("lightbulb"),
-                                          "See actionable tips for this category",
+                                          health_bh_md,
                                           title = "Actionable Tips",
                                           placement = "right")), behaviors,
                  multiple = TRUE, selectize = TRUE,)
@@ -259,7 +291,7 @@ categories <- accordion(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
     selectInput('prevention', span("Select variables", 
                                       popover(bs_icon("lightbulb"),
-                                              "See actionable tips for this category",
+                                              prev_md,
                                               title = "Actionable Tips",
                                               placement = "right")), prevention, selectize = TRUE, multiple = TRUE)
   ),
@@ -271,7 +303,7 @@ categories <- accordion(
     "Natural Environment", icon = bs_icon("sun"),
     selectInput('naturalenv', span("Select variables", 
                                               popover(bs_icon("lightbulb"),
-                                                      "See actionable tips for this category",
+                                                      nat_md,
                                                       title = "Actionable Tips",
                                                       placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
@@ -281,7 +313,7 @@ categories <- accordion(
     "Built Environment", icon = bs_icon("buildings"),
     selectInput('builtenv', span("Select variables", 
                                  popover(bs_icon("lightbulb"),
-                                         "See actionable tips for this category",
+                                         built_md,
                                          title = "Actionable Tips",
                                          placement = "right")), builtenv, selectize = TRUE, multiple = TRUE),
     input_switch('transit', "Transit stops", value = FALSE),
@@ -299,7 +331,7 @@ categories <- accordion(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
     selectInput('socialenv', span("Select variables", 
                                           popover(bs_icon("lightbulb"),
-                                                  "See actionable tips for this category",
+                                                  soc_md,
                                                   title = "Actionable Tips",
                                                   placement = "right")), socialenv, selectize = TRUE,  multiple = TRUE)
   ),
