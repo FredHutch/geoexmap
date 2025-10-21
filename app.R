@@ -59,48 +59,49 @@ data$Cigarette.Smoking.among.Adults <- as.numeric(data$Cigarette.Smoking.among.A
 data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisure.time.Physical.Activity.among.Adults)
 data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
-df_vars <- data %>% 
-  dplyr::select(c(2:100))
+df_vars <- data
 
 sociodemographics <- c("Population (total)" = "Total.Population")
 
-racev <- c("Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
-          "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
-          "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
-          "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
-          "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
-          "Non-Hispanic Other (percentage)" = "Percent.Other.Race.NonHispanic",
-          "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
-          "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
-          "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
-          "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
-          "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
-          "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
-          "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
-          "Hispanic or Latino Other (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
-          "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
+racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
+          "Non-Hispanic Black (total)" = "Black.NonHispanic", "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
+          "Non-Hispanic Asian (total)" = "Asian.NonHispanic", "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
+          "Non-Hispanic American Indian or Alaska Native (total)" = "American.Indian.Alaska.Native.NonHispanic", "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
+          "Non-Hispanic Native Hawaiian or Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.NonHispanic",  "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
+          "Non-Hispanic other race (total)" = "Other.Race.NonHispanic", "Non-Hispanic other race (percentage)" = "Percent.Other.Race.NonHispanic",
+          "Non-Hispanic two or more races (total)" = "Two.or.More.Races.NonHispanic", "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
+          "Hispanic or Latino (total)" = "Hispanic.or.Latino", "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
+          "Hispanic or Latino White (total)" = "White.Hispanic.or.Latino", "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
+          "Hispanic or Latino Black (total)" = "Black.Hispanic.or.Latino", "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
+          "Hispanic or Latino Asian (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
+          "Hispanic or Latino American Indian or Alaska Native (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
+          "Hispanic or Latino Native Hawaiian or Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
+          "Hispanic or Latino other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino other race (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
+          "Hispanic or Latino two or more races (total)" = "", "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
 
-sexv <- c("Male (percentage)" = "Percent.Male",
+sexv <- c("Male (total)" = "Total.Male.Population",
+          "Male (percentage)" = "Percent.Male",
+          "Female (total)" = "Total.Female.Population",
          "Female (percentage)" = "Percent.Female")
 
-agev <- c("0-4 years (percentage)" = "Percent.0.to.4.years",
-         "5-9 years (percentage)" = "Percent.5.to.9.years",
-         "10-14 years (percentage)" = "Percent.10.to.14.years",
-         "15-19 years (percentage)" = "Percent.15.to.19.years",
-         "20-24 years (percentage)" = "Percent.20.to.24.years",
-         "25-29 years (percentage)" = "Percent.25.to.29.years",
-         "30-34 years (percentage)" = "Percent.30.to.34.years",
-         "35-39 years (percentage)" = "Percent.35.to.39.years",
-         "40-44 years (percentage)" = "Percent.40.to.44.years",
-         "45-49 years (percentage)" = "Percent.45.to.49.years",
-         "50-54 years (percentage)" = "Percent.50.to.54.years",
-         "55-59 years (percentage)" = "Percent.55.to.59.years",
-         "60-64 years (percentage)" = "Percent.60.to.64.years",
-         "65-69 years (percentage)" = "Percent.65.to.69.years",
-         "70-74 years (percentage)" = "Percent.70.to.74.years",
-         "75-79 years (percentage)" = "Percent.75.to.79.years",
-         "80-84 years (percentage)" = "Percent.80.to.84.years",
-         "85 years+ (percentage)" = "Percent.85.and.older")
+agev <- c("0-4 years (total)" = "Total.0.to.4.years", "0-4 years (percentage)" = "Percent.0.to.4.years",
+         "5-9 years (total)" = "Total.5.to.9.years", "5-9 years (percentage)" = "Percent.5.to.9.years",
+         "10-14 years (total)" = "Total.10.to.14.years", "10-14 years (percentage)" = "Percent.10.to.14.years",
+         "15-19 years (total)" = "Total.15.to.19.years", "15-19 years (percentage)" = "Percent.15.to.19.years",
+         "20-24 years (total)" = "Total.20.to.24.years", "20-24 years (percentage)" = "Percent.20.to.24.years",
+         "25-29 years (total)" = "Total.25.to.29.years", "25-29 years (percentage)" = "Percent.25.to.29.years",
+         "30-34 years (total)" = "Total.30.to.34.years", "30-34 years (percentage)" = "Percent.30.to.34.years",
+         "35-39 years (total)" = "Total.35.to.39.years", "35-39 years (percentage)" = "Percent.35.to.39.years",
+         "40-44 years (total)" = "Total.40.to.44.years", "40-44 years (percentage)" = "Percent.40.to.44.years",
+         "45-49 years (total)" = "Total.45.to.49.years", "45-49 years (percentage)" = "Percent.45.to.49.years",
+         "50-54 years (total)" = "Total.50.to.54.years", "50-54 years (percentage)" = "Percent.50.to.54.years",
+         "55-59 years (total)" = "Total.55.to.59.years", "55-59 years (percentage)" = "Percent.55.to.59.years",
+         "60-64 years (total)" = "Total.60.to.64.years", "60-64 years (percentage)" = "Percent.60.to.64.years",
+         "65-69 years (total)" = "Total.65.to.69.years", "65-69 years (percentage)" = "Percent.65.to.69.years",
+         "70-74 years (total)" = "Total.70.to.74.years", "70-74 years (percentage)" = "Percent.70.to.74.years",
+         "75-79 years (total)" = "Total.75.to.79.years", "75-79 years (percentage)" = "Percent.75.to.79.years",
+         "80-84 years (total)" = "Total.80.to.84.years", "80-84 years (percentage)" = "Percent.80.to.84.years",
+         "85 years+ (total)" = "Total.85.and.older", "85 years+ (percentage)" = "Percent.85.and.older")
 
 behaviors <- c("Binge drinking" =  "Binge.Drinking.among.Adults",
                "Cigarette smoking" = "Cigarette.Smoking.among.Adults",
@@ -141,13 +142,45 @@ naturalenv <- c("UV index" = "UV.Index",
                 "Maximum temperature" = "Maximum.temperature",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
-                "Radon" = "Radon")
+                "Radon" = "Radon",
+                "Avalanche risk" = "Avalanche.Risk.Score",
+                "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
+                "Cold wave risk" = "Cold.Wave.Risk.Score",
+                "Drought risk" = "Drought.Risk.Score",
+                "Earthquake risk" = "Earthquake.Risk.Score",
+                "Hail risk" = "Hail.Risk.Score",
+                "Heat wave risk" = "Heat.Wave.Risk.Score",
+                "Hurricane risk" = "Hurricane.Risk.Score",
+                "Ice storm risk" = "Ice.Storm.Risk.Score",
+                "Landslide risk" = "Landslide.Risk.Score",
+                "Lightning risk" = "Lightning.Risk.Score",
+                "Riverine flooding risk" = "riverine.Flooding.Risk.Score",
+                "Strong wind risk" = "Strong.Wind.Risk.Score",
+                "Tornado risk" = "Tornado.Risk.Score",
+                "Tsunami risk" = "Tsunami.Risk.Score",
+                "Volcanic activity risk" = "Volcanic.Activity.Risk.Score",
+                "Wildfire risk" = "Wildfire.Risk.Score",
+                "Winter weather risk" = "Winter.Weather.Risk.Score"
+                )
 
 builtenv <- c("Walkability" = "Walkability",
               "Pesticide exposure" = "Pesticide.Exposure",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
-              "Noise pollution" = "Noise.Pollution")
+              "Noise pollution" = "Noise.Pollution",
+              "Blue space" = "bluespace",
+              "Persons exposed to noise LAeq >=45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
+              "Persons exposed to noise LAeq >=45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
+              "Persons exposed to noise LAeq >=50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
+              "Persons exposed to noise LAeq >=50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
+              "Persons exposed to noise LAeq >=60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
+              "Persons exposed to noise LAeq >=60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
+              "Persons exposed to noise LAeq >=70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
+              "Persons exposed to noise LAeq >=70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
+              "Persons exposed to noise LAeq >=80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
+              "Persons exposed to noise LAeq >=80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
+              "Persons exposed to noise LAeq >=90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
+              "Persons exposed to noise LAeq >=90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
 
 socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Housing insecurity" = "Housing.Insecurity",
@@ -164,41 +197,42 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Social Vulnerability Index" = "Social.Vulnerability.Index",
                "Environmental Justice Index" = "Environmental.Justice.Index",
                "Segregation" = "Racial.Residential.Segregation",
-               "Population density" = "Population.density")
+               "Population density" = "Population.density",
+               "Social capital" = "social_capital")
 
 # define filters
 health_outcomes <- df_vars %>% 
-  dplyr::select(c(21:32)) 
+  dplyr::select(c(22:33)) 
 
 health_behaviors <- df_vars %>% 
-  dplyr::select(c(17:20)) 
+  dplyr::select(c(18:21)) 
 
 health_prevention <- df_vars %>% 
-  dplyr::select(c(10:16)) 
+  dplyr::select(c(11:17)) 
 
 natural_env <- df_vars %>%
-  dplyr::select(c(75, 76, 88:92)) 
+  dplyr::select(c(107:108, 131:135, 142:159, 162)) 
 
 air_pol <- df_vars %>% 
-  dplyr::select(c(1, 93:96)) 
+  dplyr::select(c(2, 136:140)) 
 
 built_env <- df_vars %>%
-  dplyr::select(c(2:3, 74, 77, 78, 79)) 
+  dplyr::select(c(3:4, 109:110, 112:123, 160)) 
 
 sociodemo <- df_vars %>% 
-  dplyr::select(c(52)) 
+  dplyr::select(c(34)) 
 
 sex <- df_vars %>%
-  dplyr::select(c(53, 54))
+  dplyr::select(c(65:68))
 
 race <- df_vars %>%
-  dplyr::select(c(33:47))
+  dplyr::select(c(35:64))
 
 age <- df_vars %>%
-  dplyr::select(c(55:72))
+  dplyr::select(c(69:102))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(4:9, 73:74, 81:86)) 
+  dplyr::select(c(5:10, 124:130, 105:106)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:50)) 
