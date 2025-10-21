@@ -300,7 +300,7 @@ categories <- accordion(
                 span("Select variables", 
                      popover(bs_icon("lightbulb"),
                              health_out_md,
-                             title = "Actionable Tips",
+                             title = "Tips",
                              placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence",
@@ -317,7 +317,7 @@ categories <- accordion(
     selectInput('behaviors', span("Select variables", 
                                   popover(bs_icon("lightbulb"),
                                           health_bh_md,
-                                          title = "Actionable Tips",
+                                          title = "Tips",
                                           placement = "right")), behaviors,
                  multiple = TRUE, selectize = TRUE,)
   ),
@@ -326,7 +326,7 @@ categories <- accordion(
     selectInput('prevention', span("Select variables", 
                                       popover(bs_icon("lightbulb"),
                                               prev_md,
-                                              title = "Actionable Tips",
+                                              title = "Tips",
                                               placement = "right")), prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
@@ -338,7 +338,7 @@ categories <- accordion(
     selectInput('naturalenv', span("Select variables", 
                                               popover(bs_icon("lightbulb"),
                                                       nat_md,
-                                                      title = "Actionable Tips",
+                                                      title = "Tips",
                                                       placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
                    selectInput('airpol', NULL, airpol, selectize = TRUE, multiple = TRUE))
@@ -348,7 +348,7 @@ categories <- accordion(
     selectInput('builtenv', span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          built_md,
-                                         title = "Actionable Tips",
+                                         title = "Tips",
                                          placement = "right")), builtenv, selectize = TRUE, multiple = TRUE),
     input_switch('transit', "Transit stops", value = FALSE),
     input_switch('alc', "Alcohol retailers", value = FALSE),
@@ -357,7 +357,7 @@ categories <- accordion(
       varSelectInput('foodenv', label = span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          food_env_md,
-                                         title = "Actionable Tips",
+                                         title = "Tips",
                                          placement = "right")), data = food_env_inp, multiple = TRUE)
     )
   ),
@@ -366,7 +366,7 @@ categories <- accordion(
     selectInput('socialenv', span("Select variables", 
                                           popover(bs_icon("lightbulb"),
                                                   soc_md,
-                                                  title = "Actionable Tips",
+                                                  title = "Tips",
                                                   placement = "right")), socialenv, selectize = TRUE,  multiple = TRUE)
   ),
   accordion_panel(
@@ -445,7 +445,7 @@ server <- function(input, output, session) {
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
          "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults") 
-  n <- c("Nighttime.Radiance")
+  n <- c("Nighttime.Radiance", "Total.Population")
   
   
   geoex.palette <- function(var) {
@@ -498,34 +498,35 @@ server <- function(input, output, session) {
     if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index")
     if(col == "Nighttime.Radiance") return("Light at Night (nW/cm<sup>2</sup>/sr)")
-    if(col == "Food.Stamps") return("Comparative Population on SNAP")
-    if(col == "Food.Insecurity") return("Comparative Prevalence of Food Insecurity")
-    if(col == "Housing.Insecurity") return("Comparative Prevalence of Housing Insecurity")
-    if(col == "Utility.Services.Threat") return("Comparative Prevalence of Utility Services Threats")
-    if(col == "Lacking.Reliable.Transportation") return("Comparative Population Lacking Reliable Transportation")
-    if(col == "Lack.Of.Health.Insurance") return("Comparative Population Lacking Health Insurance")
-    if(col == "Routine.Checkup.in.the.Past.Year") return("Comparative Prevalence of Routine Checkups (Past Year)")
-    if(col == "Visited.Denstist.in.Past.Year") return("Comparative Prevalence of Dental Visits (Past Year)")
-    if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Comparative Prevalence of Pop. Taking BP Medicine")
-    if(col == "Cholesterol.Screening") return("Comparative Prevalence of Pop. with Cholesterol Screening")
-    if(col == "Mammography.Use.among.Women.50.to.74") return("Comparative Mammography Use (Women 50-74)")
-    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Comparative Prevalence of Colorectal Cancer Screening (Adults 45-75)")
-    if(col == "Binge.Drinking.among.Adults") return("Comparative Prevalence of Binge Drinking Among Adults")
-    if(col == "Cigarette.Smoking.among.Adults") return("Comparative Prevalence of Cigarette Smoking Among Adults")
-    if(col == "No.Leisure.Time.Physical.Activity.among.Adults") return("Comparative Lack of Leisurely Physical Activity Among Adults")
-    if(col == "Short.Sleep.Duration") return("Comparative Prevalence of Short Sleep Duration Among Adults")
-    if(col == "Arthritis.among.Adults") return("Comparative Prevalence of Arthritis Among Adults")
-    if(col == "Asthma.among.Adults") return("Comparative Prevalence of Asthma among Adults")
-    if(col == "High.Blood.Pressure.among.Adults") return("Comparative Prevalence High BP Among Adults")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Comparative Prevalence of Cancer or Melanoma Among Adults")
-    if(col == "High.Cholesterol.among.Screened.Adults") return("Comparative Prevalence of High Cholesterol Among Screened Adults")
-    if(col == "COPD.among.Adults") return("Comparative Prevalence of COPD Among Adults")
-    if(col == "Coronary.Heart.Disease.among.Adults") return("Comparative Prevalence of Coronary Heart Disease Among Adults")
-    if(col == "Depression.among.Adults") return("Comparative Prevalence of Depression Among Adults")
-    if(col == "Diagnosed.Diabetes.among.Adults") return("Comparative Prevalence of Diabetes Among Adults")
-    if(col == "Obesity.among.Adults") return("Comparative Prevalence of Obesity Among Adults")
-    if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("Comparative Prevalence All Teeth Lost Among Adults 65+")
-    if(col == "Stroke.among.Adults") return("Comparative Prevalence Stroke Among Adults")
+    if(col == "Food.Stamps") return("Population on SNAP")
+    if(col == "Food.Insecurity") return("Prevalence of Food Insecurity")
+    if(col == "Housing.Insecurity") return("Prevalence of Housing Insecurity")
+    if(col == "Utility.Services.Threat") return("Prevalence of Utility Services Threats")
+    if(col == "Lacking.Reliable.Transportation") return("Population Lacking Reliable Transportation")
+    if(col == "Lack.Of.Health.Insurance") return("Population Lacking Health Insurance")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine Checkups (Past Year)")
+    if(col == "Visited.Denstist.in.Past.Year") return("Dental Visits (Past Year)")
+    if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Population Taking BP Medicine")
+    if(col == "Cholesterol.Screening") return("Prevalence of Cholesterol Screening")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography Use (Women 50-74)")
+    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Colorectal Cancer Screening (Adults 45-75)")
+    if(col == "Binge.Drinking.among.Adults") return("Binge Drinking Among Adults")
+    if(col == "Cigarette.Smoking.among.Adults") return("CCigarette Smoking Among Adults")
+    if(col == "No.Leisure.Time.Physical.Activity.among.Adults") return("Lack of Leisurely Physical Activity Among Adults")
+    if(col == "Short.Sleep.Duration") return("Short Sleep Duration Among Adults")
+    if(col == "Arthritis.among.Adults") return("Arthritis Among Adults")
+    if(col == "Asthma.among.Adults") return("Asthma among Adults")
+    if(col == "High.Blood.Pressure.among.Adults") return("High Blood Pressure Among Adults")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer or Melanoma Among Adults")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("High Cholesterol Among Screened Adults")
+    if(col == "COPD.among.Adults") return("COPD Among Adults")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary Heart Disease Among Adults")
+    if(col == "Depression.among.Adults") return("Depression Among Adults")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Diabetes Among Adults")
+    if(col == "Obesity.among.Adults") return("Obesity Among Adults")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("All Teeth Lost Among Adults 65+")
+    if(col == "Stroke.among.Adults") return("Stroke Among Adults")
+    if(col == "Total.Population") return("Total Population")
   }
   
   #### CLEAR BUTTON OBSERVER ####
