@@ -435,7 +435,7 @@ server <- function(input, output, session) {
   # "good", "bad", "neutral"
   g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Denstist.in.Past.Year", "Cholesterol.Screening",
          "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
-         "Colorectal.Cancer.Screening.among.Adults.45.to.75")
+         "Colorectal.Cancer.Screening.among.Adults.45.to.75", "Walkability")
   b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults", 
          "Food.Stamps", "Food.Insecurity",
          "Housing.Insecurity", "Utility.Services.Threat", "Lacking.Reliable.Transportation", 
@@ -511,7 +511,7 @@ server <- function(input, output, session) {
     if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography Use (Women 50-74)")
     if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Colorectal Cancer Screening (Adults 45-75)")
     if(col == "Binge.Drinking.among.Adults") return("Binge Drinking Among Adults")
-    if(col == "Cigarette.Smoking.among.Adults") return("CCigarette Smoking Among Adults")
+    if(col == "Cigarette.Smoking.among.Adults") return("Cigarette Smoking Among Adults")
     if(col == "No.Leisure.Time.Physical.Activity.among.Adults") return("Lack of Leisurely Physical Activity Among Adults")
     if(col == "Short.Sleep.Duration") return("Short Sleep Duration Among Adults")
     if(col == "Arthritis.among.Adults") return("Arthritis Among Adults")
@@ -527,6 +527,9 @@ server <- function(input, output, session) {
     if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("All Teeth Lost Among Adults 65+")
     if(col == "Stroke.among.Adults") return("Stroke Among Adults")
     if(col == "Total.Population") return("Total Population")
+    if(col == "Earthquake.Risk.Score") return("Earthquake Risk")
+    if(col == "Walkability") return("Walkability")
+    if(col == "No.broadband.internet") return("Lack of Internet Access")
   }
   
   #### CLEAR BUTTON OBSERVER ####
@@ -580,7 +583,7 @@ server <- function(input, output, session) {
   
   table_cols <- reactive({
     map_cols() %>% 
-      st_drop_geometry()
+      st_drop_geometry() 
     })
   
   #### DOWNLOAD HANDLER ####
