@@ -582,8 +582,10 @@ server <- function(input, output, session) {
   )
   
   table_cols <- reactive({
-    map_cols() %>% 
-      st_drop_geometry() 
+    data[, 1] %>% 
+      cbind(map_cols()) %>% 
+      select(-contains("geom")) %>% 
+      st_drop_geometry()
     })
   
   #### DOWNLOAD HANDLER ####
@@ -759,7 +761,7 @@ server <- function(input, output, session) {
     reactable(table_cols(),
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
-                cell = function(value) round(value, 3),
+                cell = function(value) if(is.numeric(value)) round(value, 3) else value,
                 align = "left"
               ))
     })
