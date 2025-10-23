@@ -52,12 +52,12 @@ cancer.progs <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
 
 superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
 
-clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics", append = FALSE)
-ems <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "ems", append = FALSE)
-hospitals <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "hospitals", append = FALSE)
-pharmacies <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "pharmacies", append = FALSE)
-wic.clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_clinics", append = FALSE)
-wic.retailers <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_retailers", append = FALSE)
+clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics")
+ems <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "ems")
+hospitals <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "hospitals")
+pharmacies <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "pharmacies")
+wic.clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_clinics")
+wic.retailers <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_retailers")
 
 
 alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
@@ -341,7 +341,12 @@ categories <- accordion(
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add"),
-    input_switch('cancer', "Cancer Programs", value = FALSE)
+    input_switch('cancer', "Cancer Programs", value = FALSE),
+    input_switch('clinics', "Clinics", value = FALSE), 
+    input_switch('ems', "Emergency Medical Stations", value = FALSE),
+    input_switch('hospitals', "Hospitals", value = FALSE),
+    input_switch('wic-clinics', "WIC Clinics", value = FALSE),
+    input_switch('wic-retailers', "WIC Retailers", value = FALSE)
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
