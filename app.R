@@ -50,6 +50,16 @@ transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
 cancer.progs <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                         layer = "cancer_progs")
 
+superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
+
+clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics", append = FALSE)
+ems <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "ems", append = FALSE)
+hospitals <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "hospitals", append = FALSE)
+pharmacies <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "pharmacies", append = FALSE)
+wic.clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_clinics", append = FALSE)
+wic.retailers <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_retailers", append = FALSE)
+
+
 alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                layer = "alc_retailers")
 
