@@ -52,7 +52,8 @@ cancer.progs <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
 
 superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
 
-clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics")
+clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics") %>% 
+  dplyr::filter(!is.na(POINT_X)) 
 ems <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "ems")
 hospitals <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "hospitals")
 pharmacies <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "pharmacies")
@@ -879,6 +880,24 @@ server <- function(input, output, session) {
           clearGroup(group = "alc_retailers")
       }
       
+      if (input$clinics) {
+        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-plus-fill" viewBox="0 0 16 16">
+          <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5z"/>
+            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5zm4.5 6V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5a.5.5 0 0 1 1 0"/>
+              </svg> Clinics <br/>'
+        print("adding clinics")
+        
+        proxy <- proxy %>% 
+          addMarkers(data = clinics,
+                     popup = ~NAME,
+                     group = "clinics",
+                     icon = makeIcon("/clipboard-plus-fill.svg")) %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "clinics")
+      }
+      
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -927,7 +946,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc,
-                   input$cancer, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
+                   input$cancer, input$clinics, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
 }
 
 # -------- CREATE SHINY APP --------
