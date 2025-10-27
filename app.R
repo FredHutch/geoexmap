@@ -60,6 +60,7 @@ pharmacies <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "pha
 wic.clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_clinics")
 wic.retailers <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_retailers")
 
+fqhc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "fqhc")
 
 alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                layer = "alc_retailers")
@@ -347,7 +348,8 @@ categories <- accordion(
     input_switch('ems', "Emergency Medical Stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('wic_clinics', "WIC Clinics", value = FALSE),
-    input_switch('wic_retailers', "WIC Retailers", value = FALSE)
+    input_switch('wic_retailers', "WIC Retailers", value = FALSE),
+    input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
@@ -950,6 +952,19 @@ server <- function(input, output, session) {
           clearGroup(group = "wic_retailers")
       }
       
+      if (input$fqhc) {
+        html_legend <- 'Federally Qualified Health Centers (FQHCs)'
+        
+        proxy <- proxy %>% 
+          addMarkers(data = fqhc,
+                     popup = ~Facility,
+                     group = "fqhc") %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "fqhc")
+      }
+      
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -998,7 +1013,8 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc,
-                   input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
+                   input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
+                   input$upload, input$foodenv))
 }
 
 # -------- CREATE SHINY APP --------
