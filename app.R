@@ -40,6 +40,8 @@ data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_
 
 food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
 
+crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
+
 wscr.inc <- fread("Data_Processed/wscr_inc.csv")
 wscr.mort <- fread("Data_Processed/wscr_mort.csv")
 
@@ -62,8 +64,7 @@ wic.retailers <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "
 
 fqhc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "fqhc")
 
-alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
-               layer = "alc_retailers")
+alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "alc_retailers")
 
 #### DEFINE DATA CATEGORIES ####
 data$Binge.Drinking.among.Adults <- as.numeric(data$Binge.Drinking.among.Adults)
@@ -211,6 +212,11 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Segregation" = "Racial.Residential.Segregation",
                "Population density" = "Population.density",
                "Social capital" = "social_capital")
+
+crimeenv <- c("Part I Offenses (Count)" = "total_p1",
+              "Part I Offenses (Rate)" = "p1_rate",
+              "Part II Offenses (Count)" = "total_p2",
+              "Part II Offenses (Rate)" = "p2_rate")
 
 # define filters
 health_outcomes <- df_vars %>% 
@@ -385,7 +391,9 @@ categories <- accordion(
                                           popover(bs_icon("lightbulb"),
                                                   soc_md,
                                                   title = "Tips",
-                                                  placement = "right")), socialenv, selectize = TRUE,  multiple = TRUE)
+                                                  placement = "right")), socialenv, selectize = TRUE,  multiple = TRUE),
+    accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
+                    selectInput('crime', NULL, crimeenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
