@@ -924,6 +924,32 @@ server <- function(input, output, session) {
           clearGroup(group = "hospitals")
       }
       
+      if (input$wic_clinics) {
+        html_legend <- 'WIC Clinics <br/>'
+        
+        proxy <- proxy %>% 
+          addMarkers(data = wic.clinics,
+                     popup = ~Clinic,
+                     group = "wic_clinics") %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "wic_clinics")
+      }
+      
+      if (input$wic_retailers) {
+        html_legend <- 'WIC Retailers <br/>'
+        
+        proxy <- proxy %>% 
+          addMarkers(data = wic.retailers,
+                     popup = ~Retailer,
+                     group = "wic_retailers") %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "wic_retailers")
+      }
+      
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -972,7 +998,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc,
-                   input$cancer, input$clinics, input$ems, input$hospitals, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
+                   input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
 }
 
 # -------- CREATE SHINY APP --------
