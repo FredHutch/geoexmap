@@ -346,8 +346,8 @@ categories <- accordion(
     input_switch('clinics', "Clinics", value = FALSE), 
     input_switch('ems', "Emergency Medical Stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
-    input_switch('wic-clinics', "WIC Clinics", value = FALSE),
-    input_switch('wic-retailers', "WIC Retailers", value = FALSE)
+    input_switch('wic_clinics', "WIC Clinics", value = FALSE),
+    input_switch('wic_retailers', "WIC Retailers", value = FALSE)
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
@@ -898,6 +898,32 @@ server <- function(input, output, session) {
           clearGroup(group = "clinics")
       }
       
+      if (input$ems) {
+        html_legend <- "EMS Stations </br>"
+        
+        proxy <- proxy %>% 
+          addMarkers(data = ems,
+                     popup = ~AGENCY,
+                     group = "ems") %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "ems")
+      }
+      
+      if (input$hospitals) {
+        html_legend <- 'Hospitals <br/>'
+        
+        proxy <- proxy %>% 
+          addMarkers(data = hospitals,
+                     popup = ~NAME,
+                     group = "hospitals") %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "hospitals")
+      }
+      
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -946,7 +972,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc,
-                   input$cancer, input$clinics, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
+                   input$cancer, input$clinics, input$ems, input$hospitals, input$showcities, input$showcounties, input$showbounds, input$upload, input$foodenv))
 }
 
 # -------- CREATE SHINY APP --------
