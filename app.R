@@ -43,7 +43,7 @@ food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env"
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
 
 wscr.inc <- fread("Data_Processed/wscr_inc.csv")
-wscr.mort <- fread("Data_Processed/wscr_mort.csv")
+wscr.mort <- fread("Data_Processed/wscr_mort.csv") 
 
 # read point data
 transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
