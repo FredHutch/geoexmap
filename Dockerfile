@@ -13,7 +13,7 @@ COPY www/* /srv/shiny-server/www/
 
 COPY Data_Processed/ /srv/shiny-server/Data_Processed/
 
-COPY Geo/* /srv/shiny-server/Geo/
+COPY Geo/ /srv/shiny-server/Geo/
 
 RUN mkdir -p /srv/shiny-server/app_cache/sass
 
