@@ -180,7 +180,6 @@ builtenv <- c("Walkability" = "Walkability",
               "Pesticide exposure" = "Pesticide.Exposure",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
-              "Noise pollution" = "Noise.Pollution",
               "Blue space" = "bluespace",
               "Persons exposed to noise LAeq >=45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
               "Persons exposed to noise LAeq >=45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
@@ -211,7 +210,8 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Environmental Justice Index" = "Environmental.Justice.Index",
                "Segregation" = "Racial.Residential.Segregation",
                "Population density" = "Population.density",
-               "Social capital" = "social_capital")
+               "Social capital" = "social_capital",
+               "Median Household income" = "Median.HH.Income")
 
 crimeenv <- c("Part I Offenses (Count)" = "total_p1",
               "Part I Offenses (Rate)" = "p1_rate",
@@ -250,7 +250,7 @@ age <- df_vars %>%
   dplyr::select(c(69:102))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(5:10, 124:130, 105:106)) 
+  dplyr::select(c(5:10, 124:130, 105:106, 163)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:50)) 
