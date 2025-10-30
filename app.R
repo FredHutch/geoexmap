@@ -322,13 +322,13 @@ categories <- accordion(
                              placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence",
-                    selectInput('inc-site', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE),
-                    selectInput('inc-stage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE),
-                    selectInput('inc-sex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE)),
+                    selectInput('incsite', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE),
+                    selectInput('incstage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE),
+                    selectInput('incsex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE)),
     accordion_panel("Cancer Mortality",
-                    selectInput('mort-site', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE),
-                    selectInput('mort-stage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE),
-                    selectInput('mort-sex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE))
+                    selectInput('mortsite', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE),
+                    selectInput('mortstage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE),
+                    selectInput('mortsex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE))
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
@@ -477,7 +477,7 @@ server <- function(input, output, session) {
   geoex.palette <- function(var) {
     tryCatch({
       # skip geometry column to avoid error
-      if (var == "geometry" || inherits(df_vars[[var]], "sfc")) {
+      if (var == "geometry" || inherits(df_vars[[var]], "sfc") || var == "GEOID") {
         message("Skipping geometry column...")
         return(NULL)
       }
@@ -601,6 +601,71 @@ server <- function(input, output, session) {
     cbind(food_env) %>% 
       dplyr::select(!!!input$foodenv)
   })
+  
+  #### OBSERVERS FOR WSCR DATA ####
+  # observe({
+  #   updateSelectizeInput(session, 'mortsite', choices = sort(unique(wscr.mort$Cancer.Site)), server = TRUE)
+  #   updateSelectizeInput(session, 'mortstage', choices = sort(unique(wscr.mort$Stage.At.Diagnosis)), server = TRUE)
+  #   updateSelectizeInput(session, 'mortsex', choices = sort(unique(wscr.mort$Gender)), server = TRUE)
+  # }) %>% 
+  #   bindEvent(list(input$mortsite, input$mortstage, input$mortsex), once = TRUE)
+  
+  # observeEvent(input$mortsite, {
+  #   new_choices <- wscr.mort %>% 
+  #     filter(Stage.At.Diagnosis == input$mortsite)
+  #   updateSelectizeInput(session, 'mortstage', choices = sort(unique(new_choices$Stage.At.Diagnosis)))
+  #   updateSelectizeInput(session, 'mortsex', choices = sort(unique(new_choices$Gender)))
+  # })
+  
+  # observe({
+  #   apply.filters <- function(data, site, age, sex) {
+  #     if (!is.null(site) && site != NULL) {
+  #       data <- data %>% filter(Cancer.Site == site)
+  #     }
+  #     if (!is.null(stage) && stage != NULL) {
+  #       data <- data %>% filter(Stage.At.Diagnosis == stage)
+  #     }
+  #     if (!is.null(sex) && sex != NULL) {
+  #       data <- data %>% filter(Gender == sex)
+  #     }
+  #     return(data)
+  #   }
+  #   
+  #   data <- apply.filters(wscr.mort, NULL, input$mortstage, input$mortsex)
+  #   valid.sites <- sort(unique(data$Cancer.Site))
+  #   new.site <- if (!is.null(input$mortsite) && input$mortsite %in% valid.sites) {
+  #     input$mortsite
+  #   } else {
+  #     ""
+  #   }
+  #   
+  #   updateSelectizeInput(session, "mortsite",
+  #                        choices = valid.sites,
+  #                        selected = new.site)
+  #   
+  #   data <- apply_filters(wscr.mort, input$mortsite, NULL, input$mortsex)
+  #   available_stages <- sort(unique(data$Stage.At.Diagnosis))
+  #   new_stage <- if (!is.null(input$mortstage) && input$mortstage %in% available_stages) {
+  #     input$mortstage
+  #   } else {
+  #     ""
+  #   }
+  #   updateSelectizeInput(session, "mortstage",
+  #                        choices = available_stages,
+  #                        selected = new_stage)
+  #   
+  #   data <- apply_filters(wscr.mort, input$mortsite, input$mortstage, NULL)
+  #   available_sex <- sort(unique(data$Gender))
+  #   new_sex <- if (!is.null(input$mortsex) && input$mortsex %in% available_sex) {
+  #     input$mortsex
+  #   } else {
+  #     ""
+  #   }
+  #   updateSelectizeInput(session, "mortsex",
+  #                        choices = available_sex,
+  #                        selected = new_sex)
+  # }) %>%
+  #   bindEvent(list(input$mortsite, input$mortstage, input$mortsex))
   
   # track active variables
   values <- reactiveValues(
