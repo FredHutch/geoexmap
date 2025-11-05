@@ -322,13 +322,15 @@ categories <- accordion(
                              placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence",
-                    selectInput('incsite', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE),
-                    selectInput('incstage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE),
-                    selectInput('incsex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE)),
+                    selectInput('incsite', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE, selected = "All"),
+                    selectInput('incstage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
+                    selectInput('incsex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE, selected = "All"),
+                    actionButton('incbutton', "Add to map")),
     accordion_panel("Cancer Mortality",
-                    selectInput('mortsite', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE),
-                    selectInput('mortstage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE),
-                    selectInput('mortsex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE))
+                    selectInput('mortsite', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE, selected = "All"),
+                    selectInput('mortstage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
+                    selectInput('mortsex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE, selected = "All"),
+                    actionButton('mortbutton', "Add to map"))
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
@@ -411,7 +413,7 @@ categories <- accordion(
 ui <- page_navbar(
   #shinyjs::useShinyjs(),
   #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
-  tags$head(tags$link(rel = "shortcut icon", href = "/favicon.ico/geoexmap_favicon.png")),
+  tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico/geoexmap_favicon.png")),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
   nav_panel("Map",
@@ -610,12 +612,79 @@ server <- function(input, output, session) {
   # }) %>% 
   #   bindEvent(list(input$mortsite, input$mortstage, input$mortsex), once = TRUE)
   
+  filtered.mort <- reactive({
+    req(input$mortsite, input$mortstage, input$mortsex)
+    wscr.mort %>% 
+      filter(Cancer.Site == input$mortsite,
+             Stage.At.Diagnosis == input$mortstage,
+             Gender == input$mortsex)
+  })
+  
+  # Helper: no filter if input is "All" or NULL, filter otherwise
+  filter_if_needed <- function(df, col, val) {
+    if (is.null(val) || val == "All") df else df[df[[col]] == val, , drop = FALSE]
+  }
+  
+  # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
+  observe({
+    df <- wscr.mort
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$mortstage)
+    # Instead of filtering by mortsex, select all sites available for either sex (or All)
+    if (!is.null(input$mortsex) && input$mortsex != "All") {
+      df <- df[df$Gender %in% c("All", input$mortsex), , drop = FALSE]
+    }
+    sites <- sort(unique(df$Cancer.Site))
+    updateSelectInput(session, "mortsite", choices = sites,
+                      selected = isolate(input$mortsite))
+  })
+  
+  # On mortsite or mortsex change, update stages (same principle)
+  observe({
+    df <- wscr.mort
+    df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
+    if (!is.null(input$mortsex) && input$mortsex != "All") {
+      df <- df[df$Gender %in% c("All", input$mortsex), , drop = FALSE]
+    }
+    stages <- sort(unique(df$Stage.At.Diagnosis))
+    updateSelectInput(session, "mortstage", choices = stages,
+                      selected = isolate(input$mortstage))
+  })
+  
+  # On mortsite or mortstage change, update sexes
+  observe({
+    df <- wscr.mort
+    df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$mortstage)
+    genders <- sort(unique(df$Gender))
+    updateSelectInput(session, "mortsex", choices = genders,
+                      selected = isolate(input$mortsex))
+  })
+  
   # observeEvent(input$mortsite, {
-  #   new_choices <- wscr.mort %>% 
-  #     filter(Stage.At.Diagnosis == input$mortsite)
-  #   updateSelectizeInput(session, 'mortstage', choices = sort(unique(new_choices$Stage.At.Diagnosis)))
-  #   updateSelectizeInput(session, 'mortsex', choices = sort(unique(new_choices$Gender)))
+  #   new_choices <- reactive({wscr.mort %>% 
+  #       filter(Cancer.Site == input$mortsite)})  
+  #   updateSelectInput(session, 'mortstage', choices = sort(unique(new_choices()$Stage.At.Diagnosis)))
+  #   updateSelectInput(session, 'mortsex', choices = sort(unique(new_choices()$Gender)))
   # })
+  # 
+  # observeEvent(input$mortstage, {
+  #   new_choices <- reactive({wscr.mort %>% 
+  #       filter(Stage.At.Diagnosis == input$mortstage)}) 
+  #   updateSelectInput(session, 'mortsite', choices = sort(unique(new_choices()$Cancer.Site)))
+  #   updateSelectInput(session, 'mortsex', choices = sort(unique(new_choices()$Gender)))
+  # })
+  # 
+  # observeEvent(input$mortsex, {
+  #   new_choices <- reactive({wscr.mort %>% 
+  #       filter(Gender == input$mortsex)}) 
+  #   updateSelectInput(session, 'mortstage', choices = sort(unique(new_choices()$Stage.At.Diagnosis)))
+  #   updateSelectInput(session, 'mortsite', choices = sort(unique(new_choices()$Cancer.Site)))
+  # })
+  
+  mort <- reactive({
+    wscr.mort %>%
+      filter(Cancer.Site == input$mortsite, Stage.At.Diagnosis == input$mortstage, Gender == input$mortsex)
+  })
   
   # observe({
   #   apply.filters <- function(data, site, age, sex) {
