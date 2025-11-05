@@ -330,7 +330,7 @@ categories <- accordion(
                     selectInput('mortsite', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE, selected = "All"),
                     selectInput('mortstage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
                     selectInput('mortsex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE, selected = "All"),
-                    actionButton('mortbutton', "Add to map"))
+                    actionButton('mortbutton', "Reset filters"))
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
@@ -605,13 +605,6 @@ server <- function(input, output, session) {
   })
   
   #### OBSERVERS FOR WSCR DATA ####
-  # observe({
-  #   updateSelectizeInput(session, 'mortsite', choices = sort(unique(wscr.mort$Cancer.Site)), server = TRUE)
-  #   updateSelectizeInput(session, 'mortstage', choices = sort(unique(wscr.mort$Stage.At.Diagnosis)), server = TRUE)
-  #   updateSelectizeInput(session, 'mortsex', choices = sort(unique(wscr.mort$Gender)), server = TRUE)
-  # }) %>% 
-  #   bindEvent(list(input$mortsite, input$mortstage, input$mortsex), once = TRUE)
-  
   filtered.mort <- reactive({
     req(input$mortsite, input$mortstage, input$mortsex)
     wscr.mort %>% 
@@ -638,7 +631,7 @@ server <- function(input, output, session) {
                       selected = isolate(input$mortsite))
   })
   
-  # On mortsite or mortsex change, update stages (same principle)
+  # On mortsite or mortsex change, update stages 
   observe({
     df <- wscr.mort
     df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
@@ -660,81 +653,11 @@ server <- function(input, output, session) {
                       selected = isolate(input$mortsex))
   })
   
-  # observeEvent(input$mortsite, {
-  #   new_choices <- reactive({wscr.mort %>% 
-  #       filter(Cancer.Site == input$mortsite)})  
-  #   updateSelectInput(session, 'mortstage', choices = sort(unique(new_choices()$Stage.At.Diagnosis)))
-  #   updateSelectInput(session, 'mortsex', choices = sort(unique(new_choices()$Gender)))
-  # })
-  # 
-  # observeEvent(input$mortstage, {
-  #   new_choices <- reactive({wscr.mort %>% 
-  #       filter(Stage.At.Diagnosis == input$mortstage)}) 
-  #   updateSelectInput(session, 'mortsite', choices = sort(unique(new_choices()$Cancer.Site)))
-  #   updateSelectInput(session, 'mortsex', choices = sort(unique(new_choices()$Gender)))
-  # })
-  # 
-  # observeEvent(input$mortsex, {
-  #   new_choices <- reactive({wscr.mort %>% 
-  #       filter(Gender == input$mortsex)}) 
-  #   updateSelectInput(session, 'mortstage', choices = sort(unique(new_choices()$Stage.At.Diagnosis)))
-  #   updateSelectInput(session, 'mortsite', choices = sort(unique(new_choices()$Cancer.Site)))
-  # })
-  
-  mort <- reactive({
-    wscr.mort %>%
-      filter(Cancer.Site == input$mortsite, Stage.At.Diagnosis == input$mortstage, Gender == input$mortsex)
+  observeEvent(input$mortbutton, {
+    updateSelectInput(session, "mortsite", selected = "All")
+    updateSelectInput(session, "mortstage", selected = "All")
+    updateSelectInput(session, "mortsex", selected = "All")
   })
-  
-  # observe({
-  #   apply.filters <- function(data, site, age, sex) {
-  #     if (!is.null(site) && site != NULL) {
-  #       data <- data %>% filter(Cancer.Site == site)
-  #     }
-  #     if (!is.null(stage) && stage != NULL) {
-  #       data <- data %>% filter(Stage.At.Diagnosis == stage)
-  #     }
-  #     if (!is.null(sex) && sex != NULL) {
-  #       data <- data %>% filter(Gender == sex)
-  #     }
-  #     return(data)
-  #   }
-  #   
-  #   data <- apply.filters(wscr.mort, NULL, input$mortstage, input$mortsex)
-  #   valid.sites <- sort(unique(data$Cancer.Site))
-  #   new.site <- if (!is.null(input$mortsite) && input$mortsite %in% valid.sites) {
-  #     input$mortsite
-  #   } else {
-  #     ""
-  #   }
-  #   
-  #   updateSelectizeInput(session, "mortsite",
-  #                        choices = valid.sites,
-  #                        selected = new.site)
-  #   
-  #   data <- apply_filters(wscr.mort, input$mortsite, NULL, input$mortsex)
-  #   available_stages <- sort(unique(data$Stage.At.Diagnosis))
-  #   new_stage <- if (!is.null(input$mortstage) && input$mortstage %in% available_stages) {
-  #     input$mortstage
-  #   } else {
-  #     ""
-  #   }
-  #   updateSelectizeInput(session, "mortstage",
-  #                        choices = available_stages,
-  #                        selected = new_stage)
-  #   
-  #   data <- apply_filters(wscr.mort, input$mortsite, input$mortstage, NULL)
-  #   available_sex <- sort(unique(data$Gender))
-  #   new_sex <- if (!is.null(input$mortsex) && input$mortsex %in% available_sex) {
-  #     input$mortsex
-  #   } else {
-  #     ""
-  #   }
-  #   updateSelectizeInput(session, "mortsex",
-  #                        choices = available_sex,
-  #                        selected = new_sex)
-  # }) %>%
-  #   bindEvent(list(input$mortsite, input$mortstage, input$mortsex))
   
   # track active variables
   values <- reactiveValues(
