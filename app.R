@@ -211,8 +211,8 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Segregation" = "Racial.Residential.Segregation",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
-               "Median Household income" = "Median.HH.Income",
-               "Housing and Transportation Affordability" = "HT_Index")
+               "Median household income" = "Median.HH.Income",
+               "Housing and transportation affordability" = "HT_Index")
 
 crimeenv <- c("Part I Offenses (Count)" = "total_p1",
               "Part I Offenses (Rate)" = "p1_rate",
