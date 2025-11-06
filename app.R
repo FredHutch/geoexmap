@@ -211,7 +211,8 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Segregation" = "Racial.Residential.Segregation",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
-               "Median Household income" = "Median.HH.Income")
+               "Median Household income" = "Median.HH.Income",
+               "Housing and Transportation Affordability" = "HT_Index")
 
 crimeenv <- c("Part I Offenses (Count)" = "total_p1",
               "Part I Offenses (Rate)" = "p1_rate",
@@ -250,7 +251,7 @@ age <- df_vars %>%
   dplyr::select(c(69:102))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(5:10, 124:130, 105:106, 163)) 
+  dplyr::select(c(5:10, 124:130, 105:106, 163, 164)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:50)) 
@@ -1099,9 +1100,14 @@ server <- function(input, output, session) {
           proxy <- proxy %>% 
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                        label = "Hey") %>% 
+                        label = "") %>% 
             addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) 
         }
+        
+        # if (map_cols()[[c]] == "PFAS_dw") {
+        #   proxy <- proxy %>% 
+        #     addPolygons(., fillColor = ~pal(map_cols()[[c]]))
+        # }
       }
       
       if (length(current_vars) == 0) {
