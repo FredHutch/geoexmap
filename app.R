@@ -325,7 +325,7 @@ categories <- accordion(
                     selectInput('incsite', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE, selected = "All"),
                     selectInput('incstage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
                     selectInput('incsex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE, selected = "All"),
-                    actionButton('incbutton', "Add to map")),
+                    actionButton('incbutton', "Reset filters")),
     accordion_panel("Cancer Mortality",
                     selectInput('mortsite', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE, selected = "All"),
                     selectInput('mortstage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
@@ -605,6 +605,60 @@ server <- function(input, output, session) {
   })
   
   #### OBSERVERS FOR WSCR DATA ####
+  filtered.inc <- reactive({
+    req(input$incsite, input$incstage, input$incsex)
+    wscr.inc %>% 
+      filter(Cancer.Site == input$incsite,
+             Stage.At.Diagnosis == input$incstage,
+             Gender == input$incsex)
+  })
+  
+  # Helper: no filter if input is "All" or NULL, filter otherwise
+  filter_if_needed <- function(df, col, val) {
+    if (is.null(val) || val == "All") df else df[df[[col]] == val, , drop = FALSE]
+  }
+  
+  # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage)
+    # Instead of filtering by mortsex, select all sites available for either sex (or All)
+    if (!is.null(input$incsex) && input$incsex != "All") {
+      df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
+    }
+    sites <- sort(unique(df$Cancer.Site))
+    updateSelectInput(session, "incsite", choices = sites,
+                      selected = isolate(input$incsite))
+  })
+  
+  # On mortsite or mortsex change, update stages 
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite)
+    if (!is.null(input$incsex) && input$incsex != "All") {
+      df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
+    }
+    stages <- sort(unique(df$Stage.At.Diagnosis))
+    updateSelectInput(session, "incstage", choices = stages,
+                      selected = isolate(input$incstage))
+  })
+  
+  # On mortsite or mortstage change, update sexes
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite)
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage)
+    genders <- sort(unique(df$Gender))
+    updateSelectInput(session, "incsex", choices = genders,
+                      selected = isolate(input$incsex))
+  })
+  
+  observeEvent(input$incbutton, {
+    updateSelectInput(session, "incsite", selected = "All")
+    updateSelectInput(session, "incstage", selected = "All")
+    updateSelectInput(session, "incsex", selected = "All")
+  })
+  
   filtered.mort <- reactive({
     req(input$mortsite, input$mortstage, input$mortsex)
     wscr.mort %>% 
@@ -612,11 +666,6 @@ server <- function(input, output, session) {
              Stage.At.Diagnosis == input$mortstage,
              Gender == input$mortsex)
   })
-  
-  # Helper: no filter if input is "All" or NULL, filter otherwise
-  filter_if_needed <- function(df, col, val) {
-    if (is.null(val) || val == "All") df else df[df[[col]] == val, , drop = FALSE]
-  }
   
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
   observe({
