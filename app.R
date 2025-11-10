@@ -323,14 +323,14 @@ categories <- accordion(
                              placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence",
-                    selectInput('incsite', "Cancer Site", choices = unique(wscr.inc$Cancer.Site), selectize = TRUE, selected = "All"),
-                    selectInput('incstage', "Stage at Diagnosis", choices = unique(wscr.inc$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
-                    selectInput('incsex', "Sex", choices = unique(wscr.inc$Gender), selectize = TRUE, selected = "All"),
+                    selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
+                    selectInput('incsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
                     actionButton('incbutton', "Reset filters")),
     accordion_panel("Cancer Mortality",
-                    selectInput('mortsite', "Cancer Site", choices = unique(wscr.mort$Cancer.Site), selectize = TRUE, selected = "All"),
-                    selectInput('mortstage', "Stage at Diagnosis", choices = unique(wscr.mort$Stage.At.Diagnosis), selectize = TRUE, selected = "All"),
-                    selectInput('mortsex', "Sex", choices = unique(wscr.mort$Gender), selectize = TRUE, selected = "All"),
+                    selectInput('mortsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('mortstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.mort$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
+                    selectInput('mortsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
                     actionButton('mortbutton', "Reset filters"))
   ),
   accordion_panel(
@@ -617,19 +617,20 @@ server <- function(input, output, session) {
   
   # Helper: no filter if input is "All" or NULL, filter otherwise
   filter_if_needed <- function(df, col, val) {
-    if (is.null(val) || val == "All") df else df[df[[col]] == val, , drop = FALSE]
+    if (is.null(val) || val == "All" || val == "") df else df[df[[col]] == val, , drop = FALSE]
   }
   
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage)
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite)
     # Instead of filtering by mortsex, select all sites available for either sex (or All)
     if (!is.null(input$incsex) && input$incsex != "All") {
       df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
     }
     sites <- sort(unique(df$Cancer.Site))
-    updateSelectInput(session, "incsite", choices = sites,
+    updateSelectInput(session, "incsite", choices = c("Please choose a site" = "", sites),
                       selected = isolate(input$incsite))
   })
   
@@ -637,11 +638,12 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Cancer.Site", input$incsite)
+    df <- filter_if_needed(df, "Gender", input$incsex)
     if (!is.null(input$incsex) && input$incsex != "All") {
       df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
     }
     stages <- sort(unique(df$Stage.At.Diagnosis))
-    updateSelectInput(session, "incstage", choices = stages,
+    updateSelectInput(session, "incstage", choices = c("Please choose a stage" = "", stages),
                       selected = isolate(input$incstage))
   })
   
@@ -651,14 +653,14 @@ server <- function(input, output, session) {
     df <- filter_if_needed(df, "Cancer.Site", input$incsite)
     df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage)
     genders <- sort(unique(df$Gender))
-    updateSelectInput(session, "incsex", choices = genders,
+    updateSelectInput(session, "incsex", choices = c("Please choose a sex" = "", genders),
                       selected = isolate(input$incsex))
   })
   
   observeEvent(input$incbutton, {
-    updateSelectInput(session, "incsite", selected = "All")
-    updateSelectInput(session, "incstage", selected = "All")
-    updateSelectInput(session, "incsex", selected = "All")
+    updateSelectInput(session, "incsite", selected = "")
+    updateSelectInput(session, "incstage", selected = "")
+    updateSelectInput(session, "incsex", selected = "")
   })
   
   filtered.mort <- reactive({
@@ -673,12 +675,13 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.mort
     df <- filter_if_needed(df, "Stage.At.Diagnosis", input$mortstage)
+    df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
     # Instead of filtering by mortsex, select all sites available for either sex (or All)
     if (!is.null(input$mortsex) && input$mortsex != "All") {
       df <- df[df$Gender %in% c("All", input$mortsex), , drop = FALSE]
     }
     sites <- sort(unique(df$Cancer.Site))
-    updateSelectInput(session, "mortsite", choices = sites,
+    updateSelectInput(session, "mortsite", choices = c("Please choose a site" = "", sites),
                       selected = isolate(input$mortsite))
   })
   
@@ -686,11 +689,12 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.mort
     df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
+    df <- filter_if_needed(df, "Gender", input$mortsex)
     if (!is.null(input$mortsex) && input$mortsex != "All") {
       df <- df[df$Gender %in% c("All", input$mortsex), , drop = FALSE]
     }
     stages <- sort(unique(df$Stage.At.Diagnosis))
-    updateSelectInput(session, "mortstage", choices = stages,
+    updateSelectInput(session, "mortstage", choices = c("Please choose a stage" = "", stages),
                       selected = isolate(input$mortstage))
   })
   
@@ -700,14 +704,14 @@ server <- function(input, output, session) {
     df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
     df <- filter_if_needed(df, "Stage.At.Diagnosis", input$mortstage)
     genders <- sort(unique(df$Gender))
-    updateSelectInput(session, "mortsex", choices = genders,
+    updateSelectInput(session, "mortsex", choices = c("Please choose a sex" = "", genders),
                       selected = isolate(input$mortsex))
   })
   
   observeEvent(input$mortbutton, {
-    updateSelectInput(session, "mortsite", selected = "All")
-    updateSelectInput(session, "mortstage", selected = "All")
-    updateSelectInput(session, "mortsex", selected = "All")
+    updateSelectInput(session, "mortsite", selected = "")
+    updateSelectInput(session, "mortstage", selected = "")
+    updateSelectInput(session, "mortsex", selected = "")
   })
   
   # track active variables
