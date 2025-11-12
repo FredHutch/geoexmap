@@ -35,7 +35,7 @@ library(rlang)
 city.bounds <- st_read("Geo/city/cities.gpkg")
 county.bounds <- st_read("Geo/county/counties.gpkg")
 
-# polygon data
+# polygon data tied to census tracts or counties
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data") 
 
 food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
@@ -45,14 +45,12 @@ crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_c
 wscr.inc <- fread("Data_Processed/wscr_inc.csv")
 wscr.mort <- fread("Data_Processed/wscr_mort.csv") 
 
-# read point data
+# point data
 transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                    layer = "transit")
 
 cancer.progs <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                         layer = "cancer_progs")
-
-superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
 
 clinics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics") %>% 
   dplyr::filter(!is.na(POINT_X)) 
@@ -65,6 +63,11 @@ wic.retailers <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "
 fqhc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "fqhc")
 
 alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "alc_retailers")
+
+# polygon data not tied to census tracts
+superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
+
+parks <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "parks")
 
 #### DEFINE DATA CATEGORIES ####
 data$Binge.Drinking.among.Adults <- as.numeric(data$Binge.Drinking.among.Adults)
@@ -379,6 +382,7 @@ categories <- accordion(
                                          placement = "right")), builtenv, selectize = TRUE, multiple = TRUE),
     input_switch('transit', "Transit stops", value = FALSE),
     input_switch('alc', "Alcohol retailers", value = FALSE),
+    input_switch('parks', "Parks", value = FALSE),
     input_switch('superfund', "Superfund sites", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
@@ -608,11 +612,11 @@ server <- function(input, output, session) {
   
   #### OBSERVERS FOR WSCR DATA ####
   filtered.inc <- reactive({
-    req(input$incsite, input$incstage, input$incsex)
+    req(input$incsite != "", input$incstage != "", input$incsex != "")
     wscr.inc %>% 
       filter(Cancer.Site == input$incsite,
              Stage.At.Diagnosis == input$incstage,
-             Gender == input$incsex)
+             Gender == input$incsex) 
   })
   
   # Helper: no filter if input is "All" or NULL, filter otherwise
@@ -1013,6 +1017,17 @@ server <- function(input, output, session) {
           clearGroup(group = "superfund")
       }
       
+      if (input$parks) {
+        proxy <- proxy %>% 
+          addPolygons(data = parks,
+                      popup = ~NAME,
+                      group = "parks",
+                      stroke = TRUE, weight = 0.9, color = "green",
+                      fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+      } else {
+        
+      }
+      
       if (input$clinics) {
         html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-plus-fill" viewBox="0 0 16 16">
           <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5z"/>
@@ -1111,7 +1126,12 @@ server <- function(input, output, session) {
         print(c)
         pal <- geoex.palette(c)
 
+        # if (map_cols()[[c]] == "PFAS_dw") {
+        #   proxy <- proxy %>% 
+        #     addPolygons(., fillColor = ~pal(map_cols()[[c]]))
+        # }
         # skip null to avoid geometry
+        # else ...
         if (!is.null(pal)){
           proxy <- proxy %>% 
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
@@ -1120,11 +1140,20 @@ server <- function(input, output, session) {
             addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) 
         }
         
-        # if (map_cols()[[c]] == "PFAS_dw") {
-        #   proxy <- proxy %>% 
-        #     addPolygons(., fillColor = ~pal(map_cols()[[c]]))
-        # }
+        
       }
+      
+      # if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
+      #   geo.inc <- merge(county.bounds, filtered.inc(), by.x = "COUNTY", by.y = "NAME")
+      #   proxy <- proxy %>% 
+      #     addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000), 
+      #                 popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+      #                                "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+      #                 group = "cancerincidence")
+      # } else {
+      #   proxy <- proxy %>% 
+      #     clearGroup("cancerincidence")
+      # }
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
@@ -1149,7 +1178,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc, input$superfund,
-                   input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
+                   input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
                    input$upload, input$foodenv))
 }
 
