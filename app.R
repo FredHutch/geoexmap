@@ -1143,17 +1143,23 @@ server <- function(input, output, session) {
         
       }
       
-      # if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
-      #   geo.inc <- merge(county.bounds, filtered.inc(), by.x = "COUNTY", by.y = "NAME")
-      #   proxy <- proxy %>% 
-      #     addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000), 
-      #                 popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-      #                                "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-      #                 group = "cancerincidence")
-      # } else {
-      #   proxy <- proxy %>% 
-      #     clearGroup("cancerincidence")
-      # }
+      if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
+        geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
+          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+        print(geo.inc)
+        if (nrow(geo.inc) > 0) {
+          pal <- colorQuantile("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000, n = 5)
+          proxy <- proxy %>%
+            addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                        popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+        }
+        
+      } else {
+        proxy <- proxy %>%
+          clearGroup("cancerincidence")
+      }
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
