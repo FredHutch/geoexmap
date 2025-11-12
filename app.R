@@ -10,7 +10,7 @@ library(shinyjs)
 library(htmltools)
 #library(htmlwidgets)
 #library(crosstalk)
-#library(reactable)
+library(reactable)
 library(tidyverse)
 library(sf)
 library(data.table)
@@ -43,7 +43,8 @@ food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env"
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
 
 wscr.inc <- fread("Data_Processed/wscr_inc.csv")
-wscr.mort <- fread("Data_Processed/wscr_mort.csv") 
+wscr.mort <- fread("Data_Processed/wscr_mort.csv") %>% 
+  mutate(Stage.At.Diagnosis = "Invasive")
 
 # point data
 transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
@@ -332,7 +333,6 @@ categories <- accordion(
                     actionButton('incbutton', "Reset filters")),
     accordion_panel("Cancer Mortality",
                     selectInput('mortsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
-                    selectInput('mortstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.mort$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
                     selectInput('mortsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
                     actionButton('mortbutton', "Reset filters"))
   ),
@@ -642,7 +642,6 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Cancer.Site", input$incsite)
-    df <- filter_if_needed(df, "Gender", input$incsex)
     if (!is.null(input$incsex) && input$incsex != "All") {
       df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
     }
@@ -668,20 +667,17 @@ server <- function(input, output, session) {
   })
   
   filtered.mort <- reactive({
-    req(input$mortsite, input$mortstage, input$mortsex)
+    req(input$mortsite != "", input$mortsex != "")
     wscr.mort %>% 
       filter(Cancer.Site == input$mortsite,
-             Stage.At.Diagnosis == input$mortstage,
              Gender == input$mortsex)
   })
   
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
   observe({
     df <- wscr.mort
-    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$mortstage)
-    df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
     # Instead of filtering by mortsex, select all sites available for either sex (or All)
-    if (!is.null(input$mortsex) && input$mortsex != "All") {
+    if (!is.null(input$mortsex) && input$mortsex != "" && input$mortsex != "All") {
       df <- df[df$Gender %in% c("All", input$mortsex), , drop = FALSE]
     }
     sites <- sort(unique(df$Cancer.Site))
@@ -689,32 +685,22 @@ server <- function(input, output, session) {
                       selected = isolate(input$mortsite))
   })
   
-  # On mortsite or mortsex change, update stages 
-  observe({
-    df <- wscr.mort
-    df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
-    df <- filter_if_needed(df, "Gender", input$mortsex)
-    if (!is.null(input$mortsex) && input$mortsex != "All") {
-      df <- df[df$Gender %in% c("All", input$mortsex), , drop = FALSE]
-    }
-    stages <- sort(unique(df$Stage.At.Diagnosis))
-    updateSelectInput(session, "mortstage", choices = c("Please choose a stage" = "", stages),
-                      selected = isolate(input$mortstage))
-  })
-  
   # On mortsite or mortstage change, update sexes
   observe({
     df <- wscr.mort
     df <- filter_if_needed(df, "Cancer.Site", input$mortsite)
-    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$mortstage)
     genders <- sort(unique(df$Gender))
     updateSelectInput(session, "mortsex", choices = c("Please choose a sex" = "", genders),
                       selected = isolate(input$mortsex))
   })
   
+  observe({
+    df <- filtered.mort()
+    print(df)
+  })
+  
   observeEvent(input$mortbutton, {
     updateSelectInput(session, "mortsite", selected = "")
-    updateSelectInput(session, "mortstage", selected = "")
     updateSelectInput(session, "mortsex", selected = "")
   })
   
@@ -1142,24 +1128,45 @@ server <- function(input, output, session) {
         
         
       }
-      
-      if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
-        geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
-          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-        print(geo.inc)
-        if (nrow(geo.inc) > 0) {
-          pal <- colorQuantile("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000, n = 5)
+      observe({
+        if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
+          geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
+            mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+          print(geo.inc)
+          if (nrow(geo.inc) > 0) {
+            pal <- colorQuantile("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000, n = 5)
+            proxy <- proxy %>%
+              addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                          popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                         "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                          group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+          }
+          
+        } else {
           proxy <- proxy %>%
-            addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                        popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+            clearGroup("cancerincidence")
         }
-        
-      } else {
-        proxy <- proxy %>%
-          clearGroup("cancerincidence")
-      }
+      })
+      
+      observe({
+        if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
+          geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
+            mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+          print(geo.mort)
+          if (nrow(geo.mort) > 0) {
+            pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
+            proxy <- proxy %>%
+              addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                          popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                         "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                          group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+          }
+          
+        } else {
+          proxy <- proxy %>%
+            clearGroup("cancermortality")
+        }
+      })
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
