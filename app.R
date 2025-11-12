@@ -462,6 +462,7 @@ server <- function(input, output, session) {
   # turn switch off if clear button is clicked
   observeEvent(input$clear, {
     update_switch("showchart", value = FALSE)
+   # update_switch("")
   })
   
   #### PALETTE FUNCTION ####
@@ -581,6 +582,11 @@ server <- function(input, output, session) {
     updateSelectInput(session, "naturalenv", selected = character(0))
     updateSelectInput(session, "airpol", selected = character(0))
     updateSelectInput(session, "builtenv", selected = character(0))
+    updateSelectInput(session, "incsite", selected = "")
+    updateSelectInput(session, "incstage", selected = "")
+    updateSelectInput(session, "incsex", selected = "")
+    updateSelectInput(session, "mortsite", selected = "")
+    updateSelectInput(session, "mortsex", selected = "")
     updateVarSelectInput(session, "foodenv", selected = character(0))
     
     # reset switches if needed
@@ -692,11 +698,6 @@ server <- function(input, output, session) {
     genders <- sort(unique(df$Gender))
     updateSelectInput(session, "mortsex", choices = c("Please choose a sex" = "", genders),
                       selected = isolate(input$mortsex))
-  })
-  
-  observe({
-    df <- filtered.mort()
-    print(df)
   })
   
   observeEvent(input$mortbutton, {
@@ -1137,7 +1138,7 @@ server <- function(input, output, session) {
             pal <- colorQuantile("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000, n = 5)
             proxy <- proxy %>%
               addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                          popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                           group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
           }
@@ -1157,7 +1158,7 @@ server <- function(input, output, session) {
             pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
             proxy <- proxy %>%
               addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste("Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                          popup = ~paste(NAMELSAD, "Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                           group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
           }
