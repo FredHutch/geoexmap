@@ -885,7 +885,7 @@ server <- function(input, output, session) {
   
   #### TABLE RENDER ####
   output$table <- renderReactable({
-    validate(need(base::ncol(table_cols()) > 0, "Please select a variable."))
+    validate(need(base::ncol(table_cols()) > 1, "Please select a variable."))
     
     reactable(table_cols(),
               defaultColDef = colDef(
@@ -1158,7 +1158,7 @@ server <- function(input, output, session) {
             pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
             proxy <- proxy %>%
               addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste(NAMELSAD, "Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                          popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                           group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
           }
