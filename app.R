@@ -670,6 +670,10 @@ server <- function(input, output, session) {
     updateSelectInput(session, "incsite", selected = "")
     updateSelectInput(session, "incstage", selected = "")
     updateSelectInput(session, "incsex", selected = "")
+    
+    leafletProxy("geoexmap") %>% 
+      clearGroup("cancerincidence") %>% 
+      clearControls()
   })
   
   filtered.mort <- reactive({
@@ -703,6 +707,10 @@ server <- function(input, output, session) {
   observeEvent(input$mortbutton, {
     updateSelectInput(session, "mortsite", selected = "")
     updateSelectInput(session, "mortsex", selected = "")
+    
+    leafletProxy("geoexmap") %>% 
+      clearGroup("cancermortality") %>% 
+      clearControls()
   })
   
   # track active variables
@@ -867,7 +875,7 @@ server <- function(input, output, session) {
     }
   })
   
-  #### MAP RENDER ####
+  #### INITIAL MAP RENDER ####
   output$geoexmap <- renderLeaflet({
     map <- leaflet(map_cols()) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
@@ -1135,12 +1143,14 @@ server <- function(input, output, session) {
             mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
           print(geo.inc)
           if (nrow(geo.inc) > 0) {
-            pal <- colorQuantile("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000, n = 5)
+            pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
+            val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
             proxy <- proxy %>%
               addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+                          group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+              addLegend(pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:"))
           }
           
         } else {
@@ -1156,11 +1166,13 @@ server <- function(input, output, session) {
           print(geo.mort)
           if (nrow(geo.mort) > 0) {
             pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
+            val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
             proxy <- proxy %>%
               addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+                          group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+              addLegend(pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
           }
           
         } else {
