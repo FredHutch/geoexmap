@@ -459,6 +459,11 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  showModal(modalDialog(
+    title = "Welcome to geoexmap!",
+    HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>. 
+    <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>")
+  ))
   # turn switch off if clear button is clicked
   observeEvent(input$clear, {
     update_switch("showchart", value = FALSE)
