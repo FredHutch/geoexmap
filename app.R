@@ -34,6 +34,8 @@ library(rlang)
 # empty shapefiles
 city.bounds <- st_read("Geo/city/cities.gpkg")
 county.bounds <- st_read("Geo/county/counties.gpkg")
+tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>% 
+  dplyr::select(c(GEOID, NAMELSAD, NAMELSADCO))
 
 # polygon data tied to census tracts or counties
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data") 
@@ -725,6 +727,8 @@ server <- function(input, output, session) {
   
   table_cols <- reactive({
     data[, 1] %>% 
+      st_drop_geometry() %>% 
+      merge(tract.bounds, by = "GEOID") %>% 
       cbind(map_cols()) %>% 
       select(-contains("geom")) %>% 
       st_drop_geometry()
@@ -898,7 +902,7 @@ server <- function(input, output, session) {
   
   #### TABLE RENDER ####
   output$table <- renderReactable({
-    validate(need(base::ncol(table_cols()) > 1, "Please select a variable."))
+    validate(need(base::ncol(table_cols()) > 3, "Please select a variable."))
     
     reactable(table_cols(),
               defaultColDef = colDef(
