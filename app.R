@@ -67,6 +67,8 @@ fqhc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "fqhc")
 
 alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "alc_retailers")
 
+microplastics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "microplastics") # 11/17 fix corrupted file later... won't read if it's in geoexmap data as a layer
+
 # polygon data not tied to census tracts
 superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
 
@@ -218,7 +220,8 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
                "Median household income" = "Median.HH.Income",
-               "Housing and transportation affordability" = "HT_Index")
+               "Housing and transportation affordability" = "HT_Index",
+               "Historic redlining" = "Historic.Redlining.Score")
 
 crimeenv <- c("Part I Offenses (Count)" = "total_p1",
               "Part I Offenses (Rate)" = "p1_rate",
@@ -257,7 +260,7 @@ age <- df_vars %>%
   dplyr::select(c(69:102))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(5:10, 124:130, 105:106, 163, 164)) 
+  dplyr::select(c(5:10, 124:130, 105:106, 163, 164, 165)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:50)) 
@@ -372,6 +375,7 @@ categories <- accordion(
                                                       nat_md,
                                                       title = "Tips",
                                                       placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
+    input_switch('microplastics', "Microplastics", value = FALSE),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
                    selectInput('airpol', NULL, airpol, selectize = TRUE, multiple = TRUE))
   ),
