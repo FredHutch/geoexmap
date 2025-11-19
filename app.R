@@ -376,6 +376,7 @@ categories <- accordion(
                                                       title = "Tips",
                                                       placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
     input_switch('microplastics', "Microplastics", value = FALSE),
+    div(id = 'micro_div', selectInput('setting', 'Choose marine setting', choices = unique(microplastics$Marine.Setting))),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
                    selectInput('airpol', NULL, airpol, selectize = TRUE, multiple = TRUE))
   ),
@@ -722,6 +723,14 @@ server <- function(input, output, session) {
     leafletProxy("geoexmap") %>% 
       clearGroup("cancermortality") %>% 
       clearControls()
+  })
+  
+  observeEvent(input$microplastics, {
+    show('micro_div')
+  })
+  
+  observe({
+    hide('micro_div')
   })
   
   # track active variables
