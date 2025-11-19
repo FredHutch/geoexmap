@@ -376,7 +376,7 @@ categories <- accordion(
                                                       title = "Tips",
                                                       placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
     input_switch('microplastics', "Microplastics", value = FALSE),
-    div(id = 'micro_div', selectInput('setting', 'Choose marine setting', choices = unique(microplastics$Marine.Setting))),
+    div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
                    selectInput('airpol', NULL, airpol, selectize = TRUE, multiple = TRUE))
   ),
@@ -424,7 +424,7 @@ categories <- accordion(
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
-  #shinyjs::useShinyjs(),
+  shinyjs::useShinyjs(),
   #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico/geoexmap_favicon.png")),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
@@ -724,15 +724,20 @@ server <- function(input, output, session) {
       clearGroup("cancermortality") %>% 
       clearControls()
   })
+
+   observeEvent(input$microplastics, {
+     if (input$microplastics) {
+       shinyjs::show('micro_div')
+     } else {
+       shinyjs::hide('micro_div')
+     }
   
-  observeEvent(input$microplastics, {
-    show('micro_div')
-  })
-  
-  observe({
-    hide('micro_div')
-  })
-  
+   })
+
+   observe({
+     hide('micro_div')
+   })
+
   # track active variables
   values <- reactiveValues(
     active_variables = character(0)
