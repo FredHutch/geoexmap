@@ -228,6 +228,46 @@ crimeenv <- c("Part I Offenses (Count)" = "total_p1",
               "Part II Offenses (Count)" = "total_p2",
               "Part II Offenses (Rate)" = "p2_rate")
 
+foodenv <- c("Population (2010)" = "Pop2010",
+             "Occupied Housing Units (2010)" = "OHU2010",
+             "Population > 1 mile from supermarket (total)" = "lapop1",
+             "Population > 1 mile from supermarket (proportion)" = "lapop1share",
+             "Low-income population > 1 mile from supermarket (total)" = "lalowi1",
+             "Low-income population > 1 mile from supermarket (proportion)" = "lalowi1share",
+             "Children age 0-17 > 1 mile from supermarket (total)"  = "lakids1",
+             "Children age 0-17 > 1 mile from supermarket (proportion)" = "lakids1share",
+             "Seniors age 65+ > 1 mile from supermarket (total)" = "laseniors1",
+             "Seniors age 65+ > 1 mile from supermarket (proportion)" = "laseniors1share",
+             "White population > 1 mile from supermarket (total)" = "lawhite1",
+             "White population > 1 mile from supermarket (proportion)" = "lawhite1share",
+             "Black population > 1 mile from supermarket (total)" = "lablack1",
+             "Black population > 1 mile from supermarket (proportion)" = "lablack1share",
+             "Asian population > 1 mile from supermarket (total)" = "laasian1",
+             "Asian population > 1 mile from supermarket (proportion)" = "laasian1share",
+             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (total)" = "lanhopi1",
+             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (proportion)" = "lanhopi1share",
+             "American Indian and Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
+             "American Indian and Alaska Native population > 1 mile from supermarket (proportion)" = "laaian1share",
+             "Other/Multiple race population > 1 mile from supermarket (total)" = "lamultir1",
+             "Other/Multiple race population > 1 mile from supermarket (proportion)" = "lamultir1share",
+             "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
+             "Hispanic or Latino population > 1 mile from supermarket (proportion)" = "lahisp1share",
+             "Housing units without a vehicle > 1 mile from supermarket (total)" = "lahunv1",
+             "Housing units without a vehicle > 1 mile from supermarket (proportion)" = "lahunv1share",
+             "Housing units receiving SNAP > 1 mile from supermarket (total)" = "lasnap1",
+             "Housing units receiving SNAP > 1 mile from supermarket (proportion)" = "lasnap1share",
+             "Children age 0-17 (2010)" = "TractKids",
+             "Seniors age 65+ (2010)" = "TractSeniors",
+             "White population (2010)" = "TractWhite",
+             "Black population (2010)" = "TractBlack",
+             "Asian population (2010)" = "TractAsian",
+             "Native Hawaiian and Other Pacific Islander population (2010)" = "TractNHOPI",
+             "American Indian and Alaska Native population (2010)" = "TractAIAN",
+             "Other/Multiple race population (2010)" = "TractOMultir",
+             "Hispanic or Latino Population (2010)" = "TractHispanic",
+             "Housing units without a vehicle (2010)" = "TractHUNV",
+             "Housing units receiving SNAP (2010)" = "TractSNAP")
+
 # define filters
 health_outcomes <- df_vars %>% 
   dplyr::select(c(22:33)) 
@@ -393,11 +433,11 @@ categories <- accordion(
     input_switch('superfund', "Superfund sites", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      varSelectInput('foodenv', label = span("Select variables", 
+      selectInput('foodenv', label = span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          food_env_md,
                                          title = "Tips",
-                                         placement = "right")), data = food_env_inp, multiple = TRUE)
+                                         placement = "right")), foodenv, selectize = TRUE, multiple = TRUE)
     )
   ),
   accordion_panel(
@@ -599,7 +639,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "incsex", selected = "")
     updateSelectInput(session, "mortsite", selected = "")
     updateSelectInput(session, "mortsex", selected = "")
-    updateVarSelectInput(session, "foodenv", selected = character(0))
+    updateSelectInput(session, "foodenv", selected = character(0))
     
     # reset switches if needed
     update_switch("transit", value = FALSE)
@@ -626,6 +666,11 @@ server <- function(input, output, session) {
   food_env_cols <- reactive({
     cbind(food_env) %>% 
       dplyr::select(!!!input$foodenv)
+  })
+  
+  crime_cols <- reactive({
+    df <- crime
+    df[, c(input$crime)]
   })
   
   #### OBSERVERS FOR WSCR DATA ####
@@ -693,6 +738,12 @@ server <- function(input, output, session) {
     wscr.mort %>% 
       filter(Cancer.Site == input$mortsite,
              Gender == input$mortsex)
+  })
+  
+  micro.dat <- reactive({
+    req(input$microplastics != "")
+    microplastics %>% 
+      filter(Marine.Setting %in% input$microplastics)
   })
   
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
@@ -1164,6 +1215,20 @@ server <- function(input, output, session) {
         
         
       }
+      
+      for (c in colnames(crime_cols())) {
+        print(c)
+        pal <- geoex.palette(c)
+        
+        if (!is.null(pal)){
+          proxy <- proxy %>% 
+            addPolygons(., fillColor = ~pal(crime_cols()[[c]]), stroke = input$showcounties, weight = 0.75, color = "black",
+                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                        label = c) %>% 
+            addLegend(pal = pal, values = ~crime_cols()[[c]], title = legend.titles(c)) 
+        }
+      }
+      
       observe({
         if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
           geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
@@ -1230,7 +1295,7 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc, input$superfund,
+    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc, input$superfund,
                    input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
                    input$upload, input$foodenv))
 }
