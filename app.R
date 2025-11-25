@@ -1186,16 +1186,17 @@ server <- function(input, output, session) {
       if (input$microplastics) {
         # might have to move this somewhere else
         print(micro.dat())
-        micro.dat()[["Concentration.class.text"]] <- factor(micro.dat()[["Concentration.class.text"]],
+        micro_data <- micro.dat()
+        micro_data$Concentration.class.text <- factor(micro_data$Concentration.class.text,
                               levels = c("Very low", "Low", "Medium", "High"),
                               ordered = TRUE)
-        pal <- colorFactor("YlOrBr", domain = levels(micro.dat()[["Concentration.class.text"]]))
+        pal <- colorFactor("YlOrBr", domain = levels(micro_data$Concentration.class.text))
         proxy <- proxy %>% 
-          addCircleMarkers(data = micro.dat(), lng = ~x, lat = ~y, color = pal(Concentration.class.text),
+          addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text),
                            radius = 4,
                            fillOpacity = 0.8) %>% 
           addLegend(pal = pal,
-                    values = ~micro.dat()[["Concentration.class.text"]],
+                    values = ~micro_data$Concentration.class.text,
                     title = "Microplastics Concentration")
       }
       
@@ -1310,7 +1311,7 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$builtenv, input$transit, input$alc, input$superfund,
+    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$micro, input$builtenv, input$transit, input$alc, input$superfund,
                    input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
                    input$upload, input$foodenv))
 }
