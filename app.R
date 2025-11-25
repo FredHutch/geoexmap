@@ -67,8 +67,7 @@ fqhc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "fqhc")
 
 alc <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "alc_retailers")
 
-microplastics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "microplastics") # 11/17 fix corrupted file later... won't read if it's in geoexmap data as a layer
-
+microplastics <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "microplastics")
 # polygon data not tied to census tracts
 superfund <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
 
@@ -741,9 +740,9 @@ server <- function(input, output, session) {
   })
   
   micro.dat <- reactive({
-    req(input$microplastics != "")
+    req(input$micro != "")
     microplastics %>% 
-      filter(Marine.Setting %in% input$microplastics)
+      filter(Marine.Setting %in% input$micro)
   })
   
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
@@ -1098,7 +1097,8 @@ server <- function(input, output, session) {
                       stroke = TRUE, weight = 0.9, color = "green",
                       fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
       } else {
-        
+        proxy <- proxy %>% 
+          clearGroup(group = "parks")
       }
       
       if (input$clinics) {
@@ -1184,6 +1184,22 @@ server <- function(input, output, session) {
           clearGroup(group = "fqhc")
       }
       
+      if (input$microplastics) {
+        # might have to move this somewhere else
+        print(micro.dat())
+        micro.dat()[["Concentration.class.text"]] <- factor(micro.dat()[["Concentration.class.text"]],
+                              levels = c("Very low", "Low", "Medium", "High"),
+                              ordered = TRUE)
+        pal <- colorFactor("YlOrBr", domain = levels(micro.dat()[["Concentration.class.text"]]))
+        proxy <- proxy %>% 
+          addCircleMarkers(data = micro.dat(), lng = ~x, lat = ~y, color = pal(Concentration.class.text),
+                           radius = 4,
+                           fillOpacity = 0.8) %>% 
+          addLegend(pal = pal,
+                    values = ~micro.dat()[["Concentration.class.text"]],
+                    title = "Microplastics Concentration")
+      }
+      
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -1222,7 +1238,7 @@ server <- function(input, output, session) {
         
         if (!is.null(pal)){
           proxy <- proxy %>% 
-            addPolygons(., fillColor = ~pal(crime_cols()[[c]]), stroke = input$showcounties, weight = 0.75, color = "black",
+            addPolygons(data = crime_cols(), fillColor = ~pal(crime_cols()[[c]]), stroke = input$showcounties, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = c) %>% 
             addLegend(pal = pal, values = ~crime_cols()[[c]], title = legend.titles(c)) 
