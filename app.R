@@ -644,6 +644,7 @@ server <- function(input, output, session) {
     update_switch("transit", value = FALSE)
     update_switch("showcounties", value = FALSE)
     update_switch("showcities", value = FALSE)
+    update_switch("microplastics", value = FALSE)
     
     # clear the map
     leafletProxy("geoexmap") %>%
@@ -1184,13 +1185,12 @@ server <- function(input, output, session) {
       }
       
       if (input$microplastics) {
-        # might have to move this somewhere else
-        print(micro.dat())
+        # duplicate to avoid error with retrieving cols from reactive dataset
         micro_data <- micro.dat()
-        micro_data$Concentration.class.text <- factor(micro_data$Concentration.class.text,
-                              levels = c("Very low", "Low", "Medium", "High"),
+        micro_data_conc <- factor(micro_data$Concentration.class.text,
+                              levels = c("Very Low", "Low", "Medium", "High"),
                               ordered = TRUE)
-        pal <- colorFactor("YlOrBr", domain = levels(micro_data$Concentration.class.text))
+        pal <- colorFactor("OrRd", domain = levels(micro_data_conc), ordered = TRUE)
         proxy <- proxy %>% 
           addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text),
                            radius = 4,
