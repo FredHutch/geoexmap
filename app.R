@@ -163,6 +163,7 @@ naturalenv <- c("UV index" = "UV.Index",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
                 "Radon" = "Radon",
+                "PFAS in drinking water" = "PFAS_dw",
                 "Avalanche risk" = "Avalanche.Risk.Score",
                 "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
                 "Cold wave risk" = "Cold.Wave.Risk.Score",
@@ -546,6 +547,8 @@ server <- function(input, output, session) {
      # bins = unique(stats::quantile(df_vars[[var]], na.rm = TRUE))
       #numbins = length(bins)
       
+      
+      
       if (var %in% g) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
@@ -563,8 +566,15 @@ server <- function(input, output, session) {
               palette = "Blues", domain = domain,
               na.color = "transparent", n = 5
         ))
-        # otherwise, var is in "bad"
-      } else {
+
+      } else if (var == "PFAS_dw") {
+        return(colorFactor(
+          palette = c("red", "green"), domain = domain,
+          levels = c(TRUE, FALSE)
+        ))
+      }
+      # otherwise, var is in "bad"
+      else {
         return(colorQuantile(
           palette = "YlOrRd", domain = domain,
           na.color = "transparent", n = 5
@@ -654,12 +664,12 @@ server <- function(input, output, session) {
   
   #### REACTIVE VALUES ####  
   map_cols <- reactive({
-    naturalenv <- cbind(natural_env, air_pol)
-    sociodemo <- cbind(sociodemo, age, sex, race)
+    #naturalenv <- cbind(natural_env, air_pol)
+    #sociodemo <- cbind(sociodemo, age, sex, race)
     
-    df <- cbind(health_outcomes, sociodemo, social_env, health_prevention, health_behaviors, natural_env, built_env)
+    df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env)
     
-    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
+    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
   }) %>% 
     bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
   
@@ -1215,21 +1225,26 @@ server <- function(input, output, session) {
         print(c)
         pal <- geoex.palette(c)
 
-        # if (map_cols()[[c]] == "PFAS_dw") {
-        #   proxy <- proxy %>% 
-        #     addPolygons(., fillColor = ~pal(map_cols()[[c]]))
-        # }
         # skip null to avoid geometry
         # else ...
+        
         if (!is.null(pal)){
+          print(map_cols()[[c]])
+          # if (map_cols()[[c]] == "PFAS_dw") {
+          #   pal <- colorFactor(palette = c("green", "red"),
+          #                      domain = map_cols[["PFAS_dw"]],
+          #                      levels = c(TRUE, FALSE))
+          #   proxy <- proxy %>%
+          #     addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
+          #                 fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+          # }
+
           proxy <- proxy %>% 
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c)) 
+            addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c))
         }
-        
-        
       }
       
       for (c in colnames(crime_cols())) {
