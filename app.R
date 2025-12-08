@@ -581,8 +581,8 @@ server <- function(input, output, session) {
 
       } else if (var == "PFAS_dw") {
         return(colorFactor(
-          palette = c("red", "green"), domain = domain,
-          levels = c(TRUE, FALSE)
+          palette = c("#780000", "#669bbc"), domain = domain,
+          levels = c(FALSE, TRUE)
         ))
       }
       # otherwise, var is in "bad"
@@ -1242,14 +1242,13 @@ server <- function(input, output, session) {
         
         if (!is.null(pal)){
           print(map_cols()[[c]])
+          pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
           if (!is.logical(map_cols()[[c]])){
-            pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
             pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
             pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
           } else {
-            pal_labs = c()
+            pal_labs = c(TRUE, FALSE)
           }
-          
 
           proxy <- proxy %>% 
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
