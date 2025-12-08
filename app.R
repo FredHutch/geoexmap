@@ -200,7 +200,23 @@ builtenv <- c("Walkability" = "Walkability",
               "Persons exposed to noise LAeq >=80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
               "Persons exposed to noise LAeq >=80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
               "Persons exposed to noise LAeq >=90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
-              "Persons exposed to noise LAeq >=90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
+              "Persons exposed to noise LAeq >=90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db",
+              "Open water" = "pct_Open_Water",
+              "Developed open" = "pct_Developed_Open",
+              "Low development" = "pct_Developed_Low",
+              "Moderate development" = "pct_Developed_Medium",
+              "High development" = "pct_Developed_High",
+              "Barren land" = "pct_Barren",
+              "Evergreen forest" = "pct_Evergreen_Forest",
+              "Shrubland" = "pct_Shrub",
+              "Grassland" = "pct_Grassland",
+              "Pasture" = "pct_Pasture",
+              "Cropland" = "pct_Crops",
+              "Woody wetlands" = "pct_Woody_Wetlands",
+              "Herbaceous wetlands" = "pct_Herbaceous_Wetlands",
+              "Deciduous forest" = "pct_Deciduous_Forest",
+              "Mixed forest" = "pct_Mixed_Forest",
+              "Perennial ice" = "pct_Perennial_Ice")
 
 socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Housing insecurity" = "Housing.Insecurity",
@@ -285,7 +301,7 @@ air_pol <- df_vars %>%
   dplyr::select(c(2, 136:140)) 
 
 built_env <- df_vars %>%
-  dplyr::select(c(3:4, 109:110, 112:123, 160)) 
+  dplyr::select(c(3:4, 109:110, 112:123, 160, 166:181)) 
 
 sociodemo <- df_vars %>% 
   dplyr::select(c(34)) 
@@ -354,7 +370,7 @@ categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
     selectInput('sociodemo', 
-                span("Select variables"),
+                htmltools::span("Select variables"),
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
     accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
@@ -365,7 +381,7 @@ categories <- accordion(
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
     selectInput('outcomes', 
-                span("Select variables", 
+                htmltools::span("Select variables", 
                      popover(bs_icon("lightbulb"),
                              health_out_md,
                              title = "Tips",
@@ -383,7 +399,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
-    selectInput('behaviors', span("Select variables", 
+    selectInput('behaviors', htmltools::span("Select variables", 
                                   popover(bs_icon("lightbulb"),
                                           health_bh_md,
                                           title = "Tips",
@@ -392,7 +408,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
-    selectInput('prevention', span("Select variables", 
+    selectInput('prevention', htmltools::span("Select variables", 
                                       popover(bs_icon("lightbulb"),
                                               prev_md,
                                               title = "Tips",
@@ -410,7 +426,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
-    selectInput('naturalenv', span("Select variables", 
+    selectInput('naturalenv', htmltools::span("Select variables", 
                                               popover(bs_icon("lightbulb"),
                                                       nat_md,
                                                       title = "Tips",
@@ -422,7 +438,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
-    selectInput('builtenv', span("Select variables", 
+    selectInput('builtenv', htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          built_md,
                                          title = "Tips",
@@ -433,7 +449,7 @@ categories <- accordion(
     input_switch('superfund', "Superfund sites", value = FALSE),
     accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      selectInput('foodenv', label = span("Select variables", 
+      selectInput('foodenv', label = htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          food_env_md,
                                          title = "Tips",
@@ -442,7 +458,7 @@ categories <- accordion(
   ),
   accordion_panel(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
-    selectInput('socialenv', span("Select variables", 
+    selectInput('socialenv', htmltools::span("Select variables", 
                                           popover(bs_icon("lightbulb"),
                                                   soc_md,
                                                   title = "Tips",
@@ -544,11 +560,7 @@ server <- function(input, output, session) {
       }
       
       domain = df_vars[[var]]
-     # bins = unique(stats::quantile(df_vars[[var]], na.rm = TRUE))
-      #numbins = length(bins)
-      
-      
-      
+
       if (var %in% g) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
@@ -1230,20 +1242,20 @@ server <- function(input, output, session) {
         
         if (!is.null(pal)){
           print(map_cols()[[c]])
-          # if (map_cols()[[c]] == "PFAS_dw") {
-          #   pal <- colorFactor(palette = c("green", "red"),
-          #                      domain = map_cols[["PFAS_dw"]],
-          #                      levels = c(TRUE, FALSE))
-          #   proxy <- proxy %>%
-          #     addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
-          #                 fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
-          # }
+          if (!is.logical(map_cols()[[c]])){
+            pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
+            pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
+            pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
+          } else {
+            pal_labs = c()
+          }
+          
 
           proxy <- proxy %>% 
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            addLegend(pal = pal, values = ~map_cols()[[c]], title = legend.titles(c))
+            addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c))
         }
       }
       
