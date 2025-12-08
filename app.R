@@ -581,7 +581,7 @@ server <- function(input, output, session) {
 
       } else if (var == "PFAS_dw") {
         return(colorFactor(
-          palette = c("#780000", "#669bbc"), domain = domain,
+          palette = c("#780000", "#fdf0d5"), domain = domain,
           levels = c(FALSE, TRUE)
         ))
       }
