@@ -634,7 +634,7 @@ server <- function(input, output, session) {
     if(col == "Obesity.among.Adults") return("Obesity (%)")
     if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("All teeth lost (%)")
     if(col == "Stroke.among.Adults") return("Stroke (%)")
-    if(col == "Total.Population") return("Total Population")
+    if(col == "Total.Population") return("Population (total)")
     if(col == "Earthquake.Risk.Score") return("Earthquake Risk")
     if(col == "Walkability") return("Walkability")
     if(col == "No.broadband.internet") return("Lack of Internet Access")
