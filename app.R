@@ -97,7 +97,7 @@ racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic Whi
           "Hispanic or Latino American Indian or Alaska Native (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
           "Hispanic or Latino Native Hawaiian or Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
           "Hispanic or Latino other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino other race (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
-          "Hispanic or Latino two or more races (total)" = "", "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
+          "Hispanic or Latino two or more races (total)" = "Two.or.More.Races.Hispanic.or.Latino", "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
 
 sexv <- c("Male (total)" = "Total.Male.Population",
           "Male (percentage)" = "Percent.Male",
