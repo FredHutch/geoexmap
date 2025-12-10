@@ -843,15 +843,21 @@ server <- function(input, output, session) {
   })
   
   #### REACTIVE VALUES ####  
+  # subcat_sociodem <- reactive({
+  #   cbind(age, sex, race) %>% 
+  #     dplyr::select(c(!!!input$age, !!!input$sex, !!!input$race))
+  # }) %>% 
+  #   bindCache(input$race, input$age, input$sex)
+  
   map_cols <- reactive({
     #naturalenv <- cbind(natural_env, air_pol)
-    #sociodemo <- cbind(sociodemo, age, sex, race)
+    #sociodemo_sub <- subcat_sociodem()
     
     df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env)
     
     df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
   }) %>% 
-    bindCache(input$outcomes, input$sociodemo, input$race, input$age, input$sex, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
+    bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
   
   food_env_cols <- reactive({
     cbind(food_env) %>% 
@@ -989,7 +995,7 @@ server <- function(input, output, session) {
       st_drop_geometry() %>% 
       merge(tract.bounds, by = "GEOID") %>% 
       cbind(map_cols()) %>% 
-      select(-contains("geom")) %>% 
+      dplyr::select(-contains("geom")) %>% 
       st_drop_geometry()
     })
   
