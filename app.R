@@ -1016,7 +1016,8 @@ server <- function(input, output, session) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
         layout(
           plot_bgcolor = '#e5ecf6',
-          xaxis = list(title = names(plotly.dat)[1])) %>% 
+          xaxis = list(title = names(plotly.dat)[1]),
+          yaxis = list(title = "Frequency")) %>% 
         config()
     } else if (ncol(plotly.dat) == 2) {
       plot_ly(data = plotly.dat, type = "scatter", x = plotly.dat[,1], y = plotly.dat[,2],
@@ -1513,7 +1514,7 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$micro, input$builtenv, input$transit, input$alc, input$superfund,
+    bindEvent(list(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$micro, input$builtenv, input$transit, input$alc, input$superfund,
                    input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
                    input$upload, input$foodenv))
 }
