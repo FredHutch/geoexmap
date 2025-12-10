@@ -670,6 +670,12 @@ server <- function(input, output, session) {
     if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Two or More Races Hispanic or Latino (total)")
     if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Two or More Races Hispanic or Latino (%)")
     
+    # sex
+    if(col == "Total.Male.Population") return("Male (total)")
+    if(col == "Total.Female.Population") return("Female (total)")
+    if(col == "Percent.Male") return("Male (%)")
+    if(col == "Percent.Female") return("Female (%)")
+    
     # age
     if(col == "Total.0.to.4.years") return("0-4 years (total)")
     if(col == "Percent.0.to.4.years") return("0-4 years (%)")
@@ -708,9 +714,58 @@ server <- function(input, output, session) {
     if(col == "Total.85.and.older") return("85+ years (total)")
     if(col == "Percent.85.and.older") return("85+ years (%)")
     
-    if(col == "Earthquake.Risk.Score") return("Earthquake risk")
+    if(col == "Social.Vulnerability.Index") return("Social vulnerability index (SVI)")
+    if(col == "Environmental.Justice.Index") return("Environmental justice index (EJI)")
+    if(col == "Unemployment") return("Unemployment (%)")
+    
+    if(col == "UV.Index") return("UV index (UVI)")
+    
+    if(col == "Radon") return("Radon")
+    
+    if(col == "Pesticide.Exposure") return("Pesticide exposure")
+    
+    if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
+    
+    # transportation noise model
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (%)")
+    
     if(col == "Walkability") return("Walkability")
+    
     if(col == "No.broadband.internet") return("No internet (%)")
+    if(col == "No.high.school.diploma") return("No high school diploma (%)")
+    if(col == "Single.parent.households") return("Single parent households (%)")
+    if(col == "Crowding") return("Crowding among housing units (%)")
+    if(col == "Poverty") return("Poverty (%)")
+    if(col == "Housing.cost.burden") return("Housing cost burden (%)")
+    
+    if(col == "Dew.point") return(paste0("Dew point ", "(\U00B0", "F)"))
+    if(col == "Maximum.temperature") return(paste0("Maximum temperature ", "(\U00B0", "F)"))
+    if(col == "Minimum.temperature") return(paste0("Minimum temperature ", "(\U00B0", "F)"))
+    if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
+    if(col == "Precipitation") return("Precipitation (in.)")
+    
+    if(col == "Wildfire.smoke") return(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
+    if(col == "Nitrogen.dioxide") return(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)"))
+    if(col == "Sulfur.dioxide") return("Sulfur dioxide (SO<sub>2</sub>) (ppb)")
+    if(col == "Carbon.monoxide") return("Carbon monoxide (CO) (ppm)")
+    if(col == "Ozone") return("Ozone (O<sub>3</sub>) (ppb)")
+    
+    if(col == "Population.density") return("Population density (persons per square mile)")
+    if(col == "Avalanche.Risk.Score") return("Avalanche risk")
+    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk")
+    if(col == "Earthquake.Risk.Score") return("Earthquake risk")
+      
   }
   
   #### CLEAR BUTTON OBSERVER ####
@@ -1099,16 +1154,19 @@ server <- function(input, output, session) {
       proxy <- leafletProxy("geoexmap", data = map_cols()) %>% 
         clearControls() %>% 
         clearShapes() %>% 
-        clearMarkers()
+        clearMarkers() %>% 
+        addProviderTiles(providers$CartoDB.Positron)
       
       # update the variable panel
       if (length(current_vars) > 0) {
         panel_html <- create_variable_panel(current_vars)
+        custom_attribution <- "My data citation &copy; Me, 2025"
         proxy <- proxy %>% addControl(
             html = panel_html,
             position = "bottomright",
             layerId = "variable_panel"
-          ) 
+          ) %>% 
+          addTiles(attribution = custom_attribution)
       }
       # for each chosen column, define the palette, and add polygons
       label = ""
