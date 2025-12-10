@@ -633,7 +633,7 @@ server <- function(input, output, session) {
     if(col == "Depression.among.Adults") return("Depression (%)")
     if(col == "Diagnosed.Diabetes.among.Adults") return("Diabetes (%)")
     if(col == "Obesity.among.Adults") return("Obesity (%)")
-    if(col == "All.Teeth.Lost.among.Adults.65.and.older") return("All teeth lost (%)")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("All teeth lost (%)")
     if(col == "Stroke.among.Adults") return("Stroke (%)")
     
     if(col == "Total.Population") return("Population (total)")
@@ -764,7 +764,47 @@ server <- function(input, output, session) {
     if(col == "Population.density") return("Population density (persons per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk")
     if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk")
+    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk")
+    if(col == "Drought.Risk.Score") return("Drought risk")
     if(col == "Earthquake.Risk.Score") return("Earthquake risk")
+    if(col == "Hail.Risk.Score") return("Hail risk")
+    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk")
+    if(col == "Hurricane.Risk.Score") return("Hurricane risk")
+    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk")
+    if(col == "Landslide.Risk.Score") return("Landslide risk")
+    if(col == "Lightning.Risk.Score") return("Lightning risk")
+    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk")
+    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk")
+    if(col == "Tornado.Risk.Score") return("Tornado risk")
+    if(col == "Tsunami.Risk.Score") return("Tsunami risk")
+    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk")
+    if(col == "Wildfire.Risk.Score") return("Wildfire risk")
+    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk")
+    
+    if(col == "bluespace") return("Blue space (%)")
+    if(col == "social_capital") return("Social capital")
+    
+    if(col == "PFAS_dw") return("Water tested positive for PFAS")
+    if(col == "Median.HH.Income") return("Median household income ($)")
+    if(col == "HT_Index") return("Housing and Transportation &copy; Index")
+    if(col == "Historic.Redlining.Score") return("Historic redlining")
+    
+    if(col == "pct_Open_Water") return("Open water (%)")
+    if(col == "pct_Developed_Open") return("Developed open land (%)")
+    if(col == "pct_Developed_Low") return("Minimally developed land (%)")
+    if(col == "pct_Developed_Medium") return("Moderately developed land (%)")
+    if(col == "pct_Developed_High") return("Highly developed land (%)")
+    if(col == "pct_Barren") return("Barren land (%)")
+    if(col == "pct_Evergreen_Forest") return("Evergreen forest (%)")
+    if(col == "pct_Shrub") return("Shrubland (%)")
+    if(col == "pct_Grassland") return("Grassland (%)")
+    if(col == "pct_Pasture") return("Pasture (%)")
+    if(col == "pct_Crops") return("Cropland (%)")
+    if(col == "pct_Woody_Wetlands") return("Woody wetlands (%)")
+    if(col == "pct_Herbaceous_Wetlands") return("Herbaceous wetlands (%)")
+    if(col == "pct_Deciduous_Forest") return("Deciduous forest (%)")
+    if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
+    if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
       
   }
   
@@ -1165,8 +1205,7 @@ server <- function(input, output, session) {
             html = panel_html,
             position = "bottomright",
             layerId = "variable_panel"
-          ) %>% 
-          addTiles(attribution = custom_attribution)
+          ) 
       }
       # for each chosen column, define the palette, and add polygons
       label = ""
