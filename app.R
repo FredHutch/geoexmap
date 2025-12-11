@@ -574,9 +574,13 @@ server <- function(input, output, session) {
             palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
             na.color="transparent", n = 5
           ))
-        } else return(colorQuantile(
-              palette = "Blues", domain = domain,
-              na.color = "transparent", n = 5
+        } # else return(colorQuantile(
+        #       palette = "Blues", domain = domain,
+        #       na.color = "transparent", n = 5
+        # ))
+        else return(colorBin(
+          palette = "Blues", domain = domain,
+          na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
         ))
 
       } else if (var == "PFAS_dw") {
@@ -587,10 +591,14 @@ server <- function(input, output, session) {
       }
       # otherwise, var is in "bad"
       else {
-        return(colorQuantile(
+        return(colorBin(
           palette = "YlOrRd", domain = domain,
-          na.color = "transparent", n = 5
+          na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
         ))
+        # return(colorQuantile(
+        #   palette = "YlOrRd", domain = domain,
+        #   na.color = "transparent", n = 5
+        # ))
       }
     },
     
@@ -1421,7 +1429,8 @@ server <- function(input, output, session) {
           print(map_cols()[[c]])
           pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
           if (!is.logical(map_cols()[[c]])){
-            pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
+            #pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
+            pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
             pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
           } else {
             pal_labs = c(TRUE, FALSE)
