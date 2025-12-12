@@ -313,7 +313,7 @@ race <- df_vars %>%
   dplyr::select(c(35:64))
 
 age <- df_vars %>%
-  dplyr::select(c(69:102))
+  dplyr::select(c(69:104))
 
 social_env <- df_vars %>% 
   dplyr::select(c(5:10, 124:130, 105:106, 163, 164, 165)) 
@@ -574,14 +574,15 @@ server <- function(input, output, session) {
             palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
             na.color="transparent", n = 5
           ))
-        } # else return(colorQuantile(
-        #       palette = "Blues", domain = domain,
-        #       na.color = "transparent", n = 5
-        # ))
-        else return(colorBin(
-          palette = "Blues", domain = domain,
-          na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
+        }  else return(colorQuantile(
+              palette = "Blues", domain = domain,
+              na.color = "transparent", n = 5
         ))
+        # else return(colorBin(
+        #   palette = "Blues", domain = domain,
+        #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
+        #   na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
+        # ))
 
       } else if (var == "PFAS_dw") {
         return(colorFactor(
@@ -591,14 +592,15 @@ server <- function(input, output, session) {
       }
       # otherwise, var is in "bad"
       else {
-        return(colorBin(
-          palette = "YlOrRd", domain = domain,
-          na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
-        ))
-        # return(colorQuantile(
+        # return(colorBin(
         #   palette = "YlOrRd", domain = domain,
-        #   na.color = "transparent", n = 5
+        #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
+        #   na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
         # ))
+        return(colorQuantile(
+          palette = "YlOrRd", domain = domain,
+          na.color = "transparent", n = 5
+        ))
       }
     },
     
@@ -704,7 +706,7 @@ server <- function(input, output, session) {
     if(col == "Total.40.to.44.years") return("40-44 years (total)")
     if(col == "Percent.40.to.44.years") return("40-44 years (%)")
     if(col == "Total.45.to.49.years") return("45-49 years (total)")
-    if(col == "Percent.45.to.49years") return("45-49 years (%)")
+    if(col == "Percent.45.to.49.years") return("45-49 years (%)")
     if(col == "Total.50.to.54.years") return("50-54 years (total)")
     if(col == "Percent.50.to.54.years") return("50-54 years (%)")
     if(col == "Total.55.to.59.years") return("55-59 years (total)")
@@ -740,7 +742,7 @@ server <- function(input, output, session) {
     if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (total)")
     if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (%)")
     if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (%)")
     if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (total)")
     if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (%)")
     if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (total)")
@@ -1421,16 +1423,14 @@ server <- function(input, output, session) {
       for (c in colnames(map_cols())) {
         print(c)
         pal <- geoex.palette(c)
-
-        # skip null to avoid geometry
-        # else ...
         
         if (!is.null(pal)){
           print(map_cols()[[c]])
           pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
           if (!is.logical(map_cols()[[c]])){
-            #pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
-            pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
+            pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
+            #pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
+            #pal_labs <- round(ggplot2::cut_number(map_cols()[[c]], n = 5, closed = "left"), 2)
             pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
           } else {
             pal_labs = c(TRUE, FALSE)
