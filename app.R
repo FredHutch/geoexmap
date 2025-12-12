@@ -264,8 +264,8 @@ foodenv <- c("Population (2010)" = "Pop2010",
              "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (proportion)" = "lanhopi1share",
              "American Indian and Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
              "American Indian and Alaska Native population > 1 mile from supermarket (proportion)" = "laaian1share",
-             "Other/Multiple race population > 1 mile from supermarket (total)" = "lamultir1",
-             "Other/Multiple race population > 1 mile from supermarket (proportion)" = "lamultir1share",
+             "Other/Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
+             "Other/Multiple race population > 1 mile from supermarket (proportion)" = "laomultir1share",
              "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
              "Hispanic or Latino population > 1 mile from supermarket (proportion)" = "lahisp1share",
              "Housing units without a vehicle > 1 mile from supermarket (total)" = "lahunv1",
@@ -280,7 +280,7 @@ foodenv <- c("Population (2010)" = "Pop2010",
              "Native Hawaiian and Other Pacific Islander population (2010)" = "TractNHOPI",
              "American Indian and Alaska Native population (2010)" = "TractAIAN",
              "Other/Multiple race population (2010)" = "TractOMultir",
-             "Hispanic or Latino Population (2010)" = "TractHispanic",
+             "Hispanic or Latino population (2010)" = "TractHispanic",
              "Housing units without a vehicle (2010)" = "TractHUNV",
              "Housing units receiving SNAP (2010)" = "TractSNAP")
 
@@ -316,7 +316,7 @@ age <- df_vars %>%
   dplyr::select(c(69:104))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(5:10, 124:130, 105:106, 163, 164, 165)) 
+  dplyr::select(c(5:10, 124:130, 105:106, 111, 141, 161, 163, 164, 165)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:50)) 
