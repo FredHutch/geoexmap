@@ -1,0 +1,2104 @@
+---
+title: "Geoexmap Processing"
+author: "Malia Cortez"
+date: "`r Sys.Date()`"
+output: html_document
+---
+## Setup
+```{r setup, eval = FALSE}
+# Process and save data to RDS file for use in geoexmap
+# MC :)
+
+# Processing:
+## Filter raw datasets for just WA census tracts
+## Use rasters to extract a mean or other aggregate for each census tract (rather than just using the raw rasters)
+## Combine and put all measures into one very wide dataset, where each row is a census tract and contains all corresponding data
+## Save to a RDS to conserve memory and use for geoexmap
+
+# quickly loading data
+library(data.table)
+library(readxl)
+
+# tidy and easy data manipulation
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+
+# shiny
+library(shiny)
+library(bslib)
+
+# LaTeX
+#library(tinytex)
+
+# raster/geospatial data manipulation and analysis
+library(raster)
+library(stars)
+library(terra)
+library(ncdf4)
+library(sf)
+library(sp)
+library(tmaptools)
+library(geosphere)
+library(geojsonR)
+library(spdep)
+library(FNN)
+library(exactextractr)
+
+# TIGER shapefiles
+library(tigris)
+
+# querying Census data
+library(tidycensus)
+
+# calculating entropy-based segregation measures
+library(segregation)
+library(OasisR)
+
+# plotting library for gut checking
+library(ggplot2)
+library(leaflet)
+library(mapdeck)
+
+# geocoding
+library(tidygeocoder)
+
+# web scraping
+library(rvest)
+
+# units
+library(units)
+
+# set working dir
+#setwd("X:/fast/vopham_t/grp/geoexmap-geoexDC/geoexmap")
+#library(tabulizer)
+wa.tracts <- st_read("geoexmap/Geo/2020/wa_tracts_2020.gpkg")
+```
+
+## Geometry Processing
+
+### Tract
+```{r, eval=FALSE}
+# load WA census tracts
+wa.tracts.2010 <- tracts(state = "WA", year = 2010, cb = TRUE)
+wa.tracts.2019 <- tracts(state = "WA", year = 2019, cb = TRUE)
+wa.tracts.2020 <- tracts(state = "WA", year = 2020, cb = TRUE)
+wa.tracts.2022 <- tracts(state = "WA", year = 2022, cb = TRUE)
+
+wa.tracts.2015 <- tracts(state = "WA", year = 2015, cb = TRUE)
+
+# same GEOIDs
+setdiff(wa.tracts.2020$GEOID, wa.tracts.2019$GEOID)
+setdiff(wa.tracts.2022$GEOID, wa.tracts.2020$GEOID)
+
+plot(wa.tracts$geometry)
+
+setdiff(wa.tracts.2019$GEOID, smoke$GEOID)
+setdiff(smoke$GEOID, wa.tracts.2019$GEOID)
+
+setdiff(wa.tracts$GEOID, smoke$GEOID)
+setdiff(smoke$GEOID, wa.tracts$GEOID)
+
+# extract multipolygons
+
+crs(wa.tracts)
+
+wa.tracts$HL_FIPS <- str_split_i(wa.tracts$NAME, "\\.", 1)
+length(unique(wa.tracts$GEOID))
+length(unique(wa.tracts$HL_FIPS))
+
+length(unique(wa.tracts.2019$GEOID))
+length(unique(smoke$GEOID))
+
+wa.tracts.2019 <- st_transform(wa.tracts.2019, crs = 4326)
+wa.tracts.2020 <- st_transform(wa.tracts.2020, crs = 4326)
+
+st_write(wa.tracts.2019, "geoexmap/Geo/wa_tracts_2019.gpkg", append = FALSE)
+st_write(wa.tracts.2020, "geoexmap/Geo/wa_tracts_2020.gpkg", append = FALSE)
+
+```
+
+```{r, eval=FALSE}
+wa.tracts <- st_read("geoexmap/Geo/2020/wa_tracts_2020.gpkg")
+wa.tracts.2019 <- st_read("geoexmap/Geo/2019/wa_tracts_2019.gpkg")
+```
+
+```{r, eval=FALSE}
+plot(wa.tracts.2020$geometry)
+```
+```{r, eval=FALSE}
+wa.tract.coords <- st_coordinates((st_centroid(st_geometry(wa.tracts))))
+wa.tracts.sp <- as(wa.tracts, "Spatial")
+
+neighbors <- poly2nb(wa.tracts.sp, row.names = wa.tracts$GEOID, queen = T)
+
+# create weights/list
+#list.queen <- nb2listw(neighbors, style = "W", zero.policy = TRUE)
+
+#neighbors.queen <- listw2mat(list.queen)
+
+neighbors.q <- nb2mat(neighbors, zero.policy = TRUE)
+```
+
+```{r, eval=FALSE}
+plot(wa.tracts.sp)
+plot(neighbors, wa.tract.coords, add = TRUE)
+```
+
+### City
+```{r, eval=FALSE}
+cities <- places(state = "WA", cb = TRUE)
+
+plot(cities$geometry)
+
+#st_write(cities, "geoexmap/Geo/city/cities.gpkg")
+```
+
+
+### County
+```{r, eval=FALSE}
+counties <- counties(state = "WA", cb = TRUE)
+
+plot(counties$geometry)
+
+st_write(counties, "geoexmap/Geo/county/counties.gpkg")
+```
+
+### Moran Test - Spatial Autocorrelation
+
+```{r, eval=FALSE}
+gmoran <- moran.test(caces.sp@data$no2, list.queen, alternative = "greater", na.action = na.exclude)
+gmoran
+gmoran[["p.value"]]
+```
+```{r, eval=FALSE}
+gmoran <- moran.test(caces.sp@data$so2, list.queen, alternative = "greater", na.action = na.exclude)
+gmoran
+gmoran[["p.value"]]
+```
+```{r, eval=FALSE}
+gmoran <- moran.test(caces.sp@data$co, list.queen, alternative = "greater", na.action = na.exclude)
+gmoran
+gmoran[["p.value"]]
+```
+All are significant, we reject the null in favor of the alternative hypothesis, supporting positive spatial autocorrelation.
+
+```{r, eval=FALSE}
+gmoranMC <- moran.mc(caces.sp@data$no2, list.queen, nsim = 999, na.action = na.exclude)
+gmoranMC
+hist(gmoranMC$res)
+abline(v = gmoranMC$statistic, col = "red")
+```
+```{r, eval=FALSE}
+gmoranMC <- moran.mc(caces.sp@data$so2, list.queen, nsim = 999, na.action = na.exclude)
+gmoranMC
+hist(gmoranMC$res)
+abline(v = gmoranMC$statistic, col = "red")
+```
+
+```{r, eval=FALSE}
+gmoranMC <- moran.mc(caces.sp@data$co, list.queen, nsim = 999, na.action = na.exclude)
+gmoranMC
+hist(gmoranMC$res)
+abline(v = gmoranMC$statistic, col = "red")
+```
+
+
+## PLACES Outcomes, Behaviors, Prevention (2024, 2023 - Cervical Screening and Core Preventative Services for 65+)
+```{r, eval=FALSE}
+# ---- OUTCOMES ----
+places.2024 <- fread("Data_Raw/PLACES__Census_Tract_Data__GIS_Friendly_Format___2024_release_20250324.csv") %>% 
+  filter(StateDesc == "Washington")
+
+places.2024$TractFIPS <- as.character(places.2024$TractFIPS)
+
+places.2023 <- fread("Data_Raw/PLACES__Census_Tract_Data__GIS_Friendly_Format___2023_release_20250324.csv") %>% 
+  filter(StateDesc == "Washington")
+
+setdiff(places.2024$TractFIPS, wa.tracts.2020$GEOID)
+setdiff(places.2023$TractFIPS, places.2024$TractFIPS)
+setdiff(places.2024$TractFIPS, wa.tracts.2022$GEOID)
+
+outcomes <- places.2024 %>% 
+  dplyr::select(c(TractFIPS, TotalPopulation, ARTHRITIS_CrudePrev, CASTHMA_CrudePrev, BPHIGH_CrudePrev,
+                  CANCER_CrudePrev, HIGHCHOL_CrudePrev, COPD_CrudePrev, CHD_CrudePrev, DEPRESSION_CrudePrev, 
+                  DIABETES_CrudePrev, TEETHLOST_CrudePrev, STROKE_CrudePrev, OBESITY_CrudePrev))
+
+behaviors <- places.2024 %>% 
+  dplyr::select(c(TractFIPS, BINGE_CrudePrev, CSMOKING_CrudePrev, LPA_CrudePrev, SLEEP_CrudePrev))
+
+prevention <- places.2024 %>% # missing cervical cancer screening, post-65 preventative care screening
+  dplyr::select(c(TractFIPS, ACCESS2_CrudePrev, CHECKUP_CrudePrev, DENTAL_CrudePrev, BPMED_CrudePrev, CHOLSCREEN_CrudePrev,
+                  MAMMOUSE_CrudePrev, COLON_SCREEN_CrudePrev))
+
+social <- places.2024 %>% 
+  dplyr::select(c(TractFIPS, FOODSTAMP_CrudePrev, FOODINSECU_CrudePrev, HOUSINSECU_CrudePrev, SHUTUTILITY_CrudePrev, LACKTRPT_CrudePrev,
+                  EMOTIONSPT_CrudePrev))
+
+outcomes$TractFIPS <- as.character(outcomes$TractFIPS)
+
+outcomes.geo <- merge(outcomes, wa.tracts, by.x = "TractFIPS", by.y = "GEOID") 
+
+behaviors.geo <- merge(behaviors, wa.tracts, by.x = "TractFIPS", by.y = "GEOID") %>% 
+  dplyr::select(-c(UVI))
+
+prevention.geo <- merge(prevention, wa.tracts, by.x = "TractFIPS", by.y = "GEOID")
+
+social.geo <- merge(social, wa.tracts, by.x = "TractFIPS", by.y = "GEOID")
+
+st_write(outcomes.geo, "geoexmap/Data_Processed/wa_outcomes.gpkg", append = FALSE)
+st_write(behaviors.geo, "geoexmap/Data_Processed/wa_behaviors.gpkg")
+st_write(prevention.geo, "geoexmap/Data_Processed/wa_prevention.gpkg")
+st_write(social.geo, "geoexmap/Data_Processed/wa_social.gpkg")
+```
+
+## Outcomes: WSCR Incidence + Mortality Data
+```{r, eval=FALSE}
+# looks like if we skip some rows, we can get what we want
+read_wscr <- function(path) {
+  tryCatch({
+    cat("\n Processing:", basename(path), "\n")
+    
+    # read lines to detect header/col names
+    lines <- readLines(path, n = 30, warn = FALSE)
+    
+    keywords <- c("Data Type", "Cancer Site", "Geography", "Age Group", "Year", "Gender", "Race", "Observations")
+    row.idx <- 0
+    
+    for (i in seq_along(lines)) {
+      matches <- sum(str_detect(lines[i], regex(keywords, ignore_case = TRUE)))
+      if (matches >= 3) {
+        row.idx <- i
+        cat("Header at line", i, "\n") # detect header
+        break
+      }
+    }
+    
+    skip <- if (row.idx > 0) row.idx - 1 else 0
+    cat("Skipping", skip, "lines\n")
+    
+    df <- read.csv(path, skip = skip)
+    
+    cat("File read! Dimensions:", nrow(df), "rows x", ncol(df), "columns\n")
+    cat("Columns:", paste(colnames(df), collapse = ", "))
+    
+    return(df)
+  }, error = function(e) {
+    warning("Failed - error: ", e$message, "\n")
+    return(NULL)
+  }
+  
+  )
+}
+```
+
+```{r, eval=FALSE}
+wscr <- list.files("X:\\fast\\vopham_t\\grp\\geoexmap-geoexDC\\geoexmap\\geoexmap\\Data_Raw\\WSCR\\")
+```
+
+```{r, eval=FALSE}
+setwd("X:\\fast\\vopham_t\\grp\\geoexmap-geoexDC\\geoexmap\\geoexmap\\Data_Raw\\WSCR\\")
+all_data <- map(wscr, read_wscr)
+```
+```{r, eval=FALSE}
+# data w 12 columns has stage at diagnosis
+# data w 11 do not
+# join to counties based on name
+counties <- st_read("geoexmap/Geo/county/counties.gpkg")
+```
+```{r, eval=FALSE}
+table(all$Geography)
+```
+
+```{r, eval=FALSE}
+# some reported at multi county level
+# map to individual counties
+west <- c("Clallam", "Jefferson", "Grays Harbor", "Mason", "Thurston", "Pacific", "Lewis", "Cowlitz", "Skamania", "Clark")
+kitsap_pierce <- c("Kitsap", "Pierce")
+king <- c("King")
+north <- c("Whatcom", "Skagit", "Snohomish", "Island", "San Juan")
+central <- c("Chelan", "Douglas", "Grant", "Kittitas", "Yakima", "Benton", "Franklin", "Klickitat")
+east <- c("Okanogan", "Ferry", "Stevens", "Pend Oreille", "Lincoln", "Spokane", "Adams", "Whitman", "Walla Walla", "Columbia", "Garfield", "Asotin")
+```
+
+```{r, eval=FALSE}
+library(plyr)
+incidence <- rbind(all_data[[1]], all_data[[2]], all_data[[3]])
+
+all <- do.call(rbind.fill, all_data)
+```
+
+```{r, eval=FALSE}
+# create county lookup list
+county.lookup <- list(
+  "West" = west,
+  "Kitsap-Pierce" = kitsap_pierce,
+  "King" = king,
+  "North" = north,
+  "Central" = central,
+  "East" = east
+)
+```
+
+```{r, eval=FALSE}
+# expand the table, add counties for multi-county region
+expanded <- all %>% 
+  rowwise() %>% 
+  mutate(
+    counties = list(
+      if (Geography %in% names(county.lookup)) {
+        county.lookup[[Geography]]
+      } else {
+        Geography
+      }
+    )
+  ) %>% 
+  unnest(counties)
+```
+
+```{r, eval=FALSE}
+wscr.exp <- expanded %>% 
+  filter(Geography != "")
+
+wscr.exp$Stage.At.Diagnosis[is.na(wscr.exp$Stage.At.Diagnosis)] <- "All"
+```
+
+```{r, eval=FALSE}
+wscr.inc <- wscr.exp %>% 
+  filter(Data.Type == "Incidence") %>% 
+  dplyr::select(-Data.Type) #%>% 
+  # pivot_wider(
+  #   id_cols = counties,
+  #   names_from = c(Cancer.Site, Stage.At.Diagnosis, Gender),
+  #   values_from = Age.Adj..Rate.per.100.000,
+  #   names_sep = "_"
+  # )
+
+wscr.mort <- wscr.exp %>% 
+  filter(Data.Type == "Mortality") %>% 
+  dplyr::select(-Data.Type)
+```
+
+```{r, eval=FALSE}
+# join tables together in app?
+#geo.wscr.inc <- merge(wscr.inc, counties, by.x = "COUNTY", by.y = "NAME", all.x = TRUE)
+#geo.wscr.mort <- 
+```
+```{r, eval=FALSE}
+fwrite(wscr.inc, "geoexmap/Data_Processed/wscr_inc.csv")
+fwrite(wscr.mort, "geoexmap/Data_Processed/wscr_mort.csv")
+```
+
+## Sociodemographics
+
+### ACS - Total Population, Age, Sex (Sam)
+```{r, eval=FALSE}
+tot.pop <- st_read("X:\\fast\\vopham_t\\grp\\geoexmap-geoexDC\\geoexmap\\geoexmap\\Data_Raw\\ACS_Age_Sex_Boundaries\\Tract.shp")
+
+tot.pop <- tot.pop %>% 
+  filter(State == "Washington")
+
+tot.pop.tidy <- get_decennial(geography = "tract", table = "B01003", state = "Washington", geometry = TRUE)
+
+#st_transform(crs = 4326)
+```
+
+### ACS - Race (Sam)
+Race table shells:
+- sex by age: B01001_001
+- race: B02001_001
+```{r, eval=FALSE}
+# get_decennial
+```
+
+## Natural Environment
+### PM 2.5
+```{r natural-env, eval=FALSE}
+#### PM 2.5 ####
+pm2.5_2022_nc <- ncdfnc_open('Data_Raw/V5NA04.02.HybridPM25.NorthAmerica.2022-2022-JUL.nc')
+
+{
+  sink('V5NA04.02.HybridPM25.NorthAmerica.2022-2022-JUL.txt')
+  print(pm2.5_2022_nc)
+  sink()
+}
+
+# capture data in lat/long form
+lon <- ncvar_get(pm2.5_2022_nc, "lon")
+lat <- ncvar_get(pm2.5_2022_nc, "lat", verbose = FALSE)
+
+# capture pm 2.5 data in an array
+# measured in microgram/cubic meter
+pm2.5_array_22 <- ncvar_get(pm2.5_2022_nc, "GWRPM25")
+
+# capture data in lat/long form
+lon <- ncvar_get(pm2.5_2020_nc, "lon")
+lat <- ncvar_get(pm2.5_2020_nc, "lat", verbose = FALSE)
+
+# capture pm 2.5 data in an array
+# measured in microgram/cubic meter
+pm2.5_array_20 <- ncvar_get(pm2.5_2020_nc, "GWRPM25")
+
+# 2d array
+dim(pm2.5_array_22)
+dim(pm2.5_array_20)
+
+nc_close(pm2.5_2022_nc)
+nc_close(pm2.5_2020_nc)
+
+# save to an array
+pm2.5_raster_22 <- raster(t(pm2.5_array_22), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), crs=CRS("+proj=longlat +datum=WGS84"))
+
+pm2.5_raster_20 <- raster(t(pm2.5_array_20), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), crs=CRS("+proj=longlat +datum=WGS84"))
+
+# convert to spatraster
+pm2.5_raster_22 <- as(pm2.5_raster_22, "SpatRaster")
+pm2.5_raster_20 <- as(pm2.5_raster_20, "SpatRaster")
+
+#plot(pm2.5_raster)
+
+r <- flip(pm2.5_raster_22, direction = "vertical")
+r2 <- flip(pm2.5_raster_20, direction = "vertical")
+
+plot(r)
+
+# check that projections are the same
+st_crs(wa.tracts.2020) == st_crs(pm2.5_raster_22)
+st_crs(wa.tracts.2020) == st_crs(pm2.5_raster_20)
+
+# crop to WA extent
+wa_pm2.5_22 <- crop(r, extent(wa.tracts.2020))
+wa_pm2.5_20 <- crop(r2, extent(wa.tracts.2020))
+
+par(mar=c(1, 1, 1, 1))
+plot(wa_pm2.5_22)
+plot(wa_pm2.5_20)
+
+# extract mean value of the raster for each census tract
+wa.tracts.2020$PM2.5 <- extract(wa_pm2.5_22, wa.tracts.2020, fun="mean", method = "simple", touches = FALSE,
+                           na.rm = TRUE) 
+wa.tracts.2020 <- wa.tracts.2020 %>% 
+  #dplyr::select(c(GEOID, NAME, geometry, PM2.5$layer)) %>% 
+  mutate(pm2.5_2022 = PM2.5$layer) %>% 
+  dplyr::select(c(GEOID, NAME, pm2.5_2022))
+
+wa.tracts.2020$PM2.5_2020 <- extract(wa_pm2.5_20, wa.tracts.2020, fun="mean", method = "simple", touches = FALSE,
+                           na.rm = TRUE)
+## DON'T NEED 2020
+wa.tracts <- wa.tracts.2020 %>% 
+  mutate(pm2.5_2020 = PM2.5_2020$layer) %>% 
+  dplyr::select(c(GEOID, NAME, pm2.5_2022, pm2.5_2020))
+
+st_write(wa.tracts, "geoexmap/Data_Processed/pm25_20-22.gpkg")
+```
+
+### Ozone (O3)
+```{r, eval=FALSE}
+ozone <- fread("Data_Raw/Daily_Census_Tract-Level_Ozone_Concentrations__2016_-_2020_20250324.csv")
+```
+
+
+### CACES: Nitrogen Dioxide (NO2), Sulfur Dioxide (SO2), Carbon Monoxide (CO) 
+```{r, eval=FALSE}
+# join 2019 tracts with caces
+caces <- fread("Data_Raw/WA_LUR_2020_O3_CO_SO2_NO2_PM25.csv") %>% 
+  pivot_wider(names_from = pollutant, values_from = pred_wght) %>% 
+    dplyr::select(c(fips, no2, so2, co))
+
+caces$fips <- as.character(caces$fips)
+
+wa.2019 <- st_read("geoexmap/Geo/2019/wa_tracts_2019.gpkg")
+
+caces.geo <- left_join(wa.2019, caces, by = c("GEOID" = "fips"))
+```
+
+```{r, eval=FALSE}
+caces.coords <- st_coordinates((st_centroid(st_geometry(caces.geo))))
+caces.sp <- as(caces.geo, "Spatial")
+
+# add neighbors for disjointed polygons
+addnbs <- function(sp.dat) {
+  neighbors <- spdep::poly2nb(sp.dat, row.names = sp.dat$GEOID, queen = TRUE, snap = 500)
+
+  count <- spdep::card(neighbors)
+
+  if(!any(count == 0)) return(neighbors)
+  
+  # get nearest neighbor index, use centroids
+  nnbs = spdep::knearneigh(coordinates(sp.dat))$nn
+  
+  no_edges_from <- which(count==0)
+  
+  for (i in no_edges_from) {
+    neighbors[[i]] = nnbs[i]
+  }
+  
+  return(neighbors)
+}
+
+neighbors <- addnbs(caces.sp)
+
+# neighbors object to matrix
+neighbors.q <- spdep::nb2mat(neighbors, zero.policy = TRUE)
+```
+
+
+```{r, eval=FALSE}
+# still 8 disconnected polygons
+spdep::n.comp.nb(neighbors)$nc
+```
+
+
+```{r, eval=FALSE}
+spat_impute <- function(data, weights, var, coords, k = 5) {
+  pollutant <- data[[var]]
+  missing_idx <- which(is.na(pollutant))
+  
+  if (length(missing_idx) == 0) return(pollutant)
+  
+  # first pass
+  # matrix where each row is the variable values repeated
+  value_matrix <- matrix(rep(pollutant, each = length(missing_idx)), 
+                        nrow = length(missing_idx))
+  # weights for missing obs
+  missing_weights <- weights[missing_idx, , drop = FALSE]
+  missing_weights[is.na(value_matrix)] <- 0
+  # row sums of weights
+  weight_sums <- rowSums(missing_weights)
+  # weighted sums
+  weighted_sums <- rowSums(missing_weights * value_matrix, na.rm = TRUE)
+  # weighted averages
+  imputed_values <- ifelse(weight_sums > 0, weighted_sums / weight_sums, NA)
+  
+  # do a second pass: knn for remaining NA
+  missing_idx_2 <- which(is.na(imputed_values))
+
+  if (length(missing_idx_2) > 0) {
+    library(FNN)
+
+    complete <- which(!is.na(pollutant))
+
+    if (length(complete) >= k) { # k: how many nearest neighbors to use when spatial neighbors missing
+      # get coords for obs that are still missing
+      missing.global <- missing_idx[missing_idx_2]
+      missing.coords <- coords[missing.global, , drop = FALSE]
+
+      knn.result <- get.knnx(coords[complete,],
+                             missing.coords,
+                             k = k)
+
+      nearest.idx.mat <- matrix(complete[knn.result$nn.index],
+                            nrow = length(missing_idx_2))
+      nearest.dist.mat <- knn.result$nn.dist # get nearest neighbors with IDW
+
+      # calc weights
+      weights_matrix_knn <- 1 / (nearest.dist.mat + 1e-10) # prevent division by 0
+      weights_sums_knn <- rowSums(weights_matrix_knn)
+      weights_matrix_knn <- weights_matrix_knn / weights_sums_knn
+
+      # neighbors for all missing obs
+      neighbor_values_matrix <- matrix(pollutant[nearest.idx.mat],
+                                       nrow = length(missing_idx_2))
+
+      # calc weighted avg
+      knn.imp <- rowSums(weights_matrix_knn * neighbor_values_matrix)
+
+      imputed_values[missing_idx_2] <- knn.imp
+    }
+  }
+  
+  result <- pollutant
+  result[missing_idx] <- imputed_values
+  return(result)
+}
+```
+
+```{r, eval=FALSE}
+caces.geo$no2_imp <- spat_impute(caces.geo, neighbors.q, "no2", caces.coords)
+caces.geo$so2_imp <- spat_impute(caces.geo, neighbors.q, "so2", caces.coords)
+caces.geo$co_imp <- spat_impute(caces.geo, neighbors.q, "co", caces.coords)
+```
+
+
+```{r, eval=FALSE}
+# gut check
+og.missing <- is.na(caces.geo$no2)
+caces.geo$imp <- ifelse(og.missing, "imputed", "observed")
+
+ggplot(caces.geo) +
+  geom_sf(aes(fill = no2_imp, color = imp), size = 0.3) +
+  scale_fill_viridis_c(name = "Air Pollution") +
+  scale_color_manual(values = c("imputed" = "red", "observed" = "transparent"), 
+                     name = "Data Type") +
+  theme_minimal() +
+  labs(title = "Air Pollution: Observed vs Imputed Values")
+```
+
+```{r, eval=FALSE}
+# transform to 2020 tracts (1772)
+# steps from nhgis
+## obtain data of interest for older geog
+## join the crosswalk to older geog
+## multiply older counts/values by crosswalk's interpolation weights, producing estimated counts for all intersections between older and newer geogs
+## sum these atom counts for each new census tract (group by the 2020)
+
+# get xwalk
+xwalk <- fread("X:/fast/vopham_t/grp/geoexmap-geoexDC/geoexmap/geoexmap/nhgis_tr2010_tr2020_53.csv")
+xwalk$tr2010ge <- as.character(xwalk$tr2010ge)
+
+## obtain data of interest for older geog (caces)
+# convert to sf
+caces.wa <- caces.geo %>% 
+  st_as_sf() %>% 
+  dplyr::select(c(GEOID, no2_imp, so2_imp, co_imp))
+
+
+## join the crosswalk to older geog
+caces.wa.xwalk <- merge(xwalk, caces.wa, by.x = "tr2010ge", by.y = "GEOID", all.x = TRUE)
+
+# using block groups for walkability
+#caces.wa.xwalk <- merge(xwalk, walkability, by.x = "bg2010ge", by.y = "GEOID", all.x = TRUE)
+
+
+## multiply older counts/values by crosswalk's interpolation weights, producing estimated counts for all intersections between older and newer geogs
+caces.wa.xwalk$no2_2020 <- caces.wa.xwalk$parea * caces.wa.xwalk$no2_imp
+caces.wa.xwalk$so2_2020 <- caces.wa.xwalk$parea * caces.wa.xwalk$so2_imp
+caces.wa.xwalk$co_2020 <- caces.wa.xwalk$parea * caces.wa.xwalk$co_imp
+
+## sum these atom counts for each new census tract (group by the 2020 tract fips)
+# there's literally only 1 missing why !
+length(unique(xwalk$tr2020ge))
+setdiff(wa.tracts$GEOID, xwalk$tr2020ge)
+
+caces.2020.wa <- caces.wa.xwalk %>% 
+  group_by(tr2020ge) %>% 
+  mutate(no2 = sum(no2_2020),
+         so2 = sum(so2_2020),
+         co = sum(co_2020)) %>% 
+  slice(1) %>% 
+  ungroup()
+
+# manually replace: tr2020ge: 53033990100
+caces.2020.wa$no2[caces.2020.wa$tr2020ge == 53033990100] <- 0.0
+caces.2020.wa$so2[caces.2020.wa$tr2020ge == 53033990100] <- 0.0
+caces.2020.wa$co[caces.2020.wa$tr2020ge == 53033990100] <- 0.0
+
+caces.2020.wa <- caces.2020.wa %>% 
+  filter(!is.na(no2)) %>% 
+  dplyr::select(c(tr2020ge, no2, so2, co))
+
+caces.wa.tracts <- merge(wa.tracts, caces.2020.wa, by.x = "GEOID", by.y = "tr2020ge", all.x = TRUE)
+```
+
+```{r, eval=FALSE}
+# i guess we're using spatial weights again ??
+caces.coords <- st_coordinates((st_centroid(st_geometry(caces.wa.tracts))))
+caces.sp <- as(caces.wa.tracts, "Spatial")
+
+neighbors <- addnbs(caces.sp)
+
+# neighbors object to matrix
+neighbors.q <- spdep::nb2mat(neighbors, zero.policy = TRUE)
+
+caces.wa.tracts$no2_imp <- spat_impute(caces.wa.tracts, neighbors.q, "no2", caces.coords)
+caces.wa.tracts$so2_imp <- spat_impute(caces.wa.tracts, neighbors.q, "so2", caces.coords)
+caces.wa.tracts$co_imp <- spat_impute(caces.wa.tracts, neighbors.q, "co", caces.coords)
+
+# yay!
+caces.final <- caces.wa.tracts %>% 
+  dplyr::select(c(GEOID, no2_imp, so2_imp, co_imp)) %>% 
+  st_as_sf()
+
+# finally!
+st_write(caces.final, "geoexmap/Data_Processed/wa_no2_so2_co.gpkg")
+```
+
+
+### Wildfire Smoke / Near Surface Smoke (2023)
+```{r, eval=FALSE}
+# smoke from Stanford ECHO
+
+# smoke.curr <- readRDS("../Archive/geoexmap_demo/Demo Data/smokePM2pt5_predictions_daily_tract_20060101-20231231.rds")
+# wa.curr <- smoke.curr %>% 
+#   filter(startsWith(GEOID, "53"))
+# 
+# smoke2020 <- wa.curr %>% 
+#   filter(lubridate::year(date) == 2020)
+# 
+# smoke2021 <- wa.curr %>% 
+#   filter(lubridate::year(date) == 2021)
+# 
+# fwrite(smoke2020, "Demo Data/wa_smoke_2020.csv")
+# fwrite(smoke2021, "Demo Data/wa_smoke_2021.csv")
+
+smoke23 <- fread("geoexmap/Data_Processed/wa_smoke_2023.csv")
+
+smoke20$GEOID <- as.character(smoke20$GEOID)
+smoke20$date <- as.Date(smoke20$date)
+
+smoke21$GEOID <- as.character(smoke21$GEOID)
+smoke21$date <- as.Date(smoke21$date)
+
+smoke22$GEOID <- as.character(smoke22$GEOID)
+smoke22$date <- as.Date(smoke22$date)
+
+smoke23$GEOID <- as.character(smoke23$GEOID)
+smoke23$date <- as.Date(smoke23$date)
+
+setdiff(wa.tracts$GEOID, smoke20$GEOID)
+
+length(unique(smoke23$GEOID))
+
+wa.tracts$GEOID <- as.character(wa.tracts$GEOID)
+
+wa.tracts.smoke <- wa.tracts %>% 
+  dplyr::select(c("GEOID"))
+
+# processing instructions from: https://www.dropbox.com/scl/fo/91k0aq80vp57qixkm508q/AIRVst386qB2G_N1XhnE4qk/tract?dl=0&preview=README.txt&rlkey=nutebc9pn2vsupr0p9ks4k73u&subfolder_nav_tracking=1
+process_smoke <- function(preds) {
+  dates <- seq.Date(ymd("20200101"), ymd("20231231"), by = "day")
+  
+  out <- expand.grid(GEOID = wa.tracts.smoke$GEOID, date = dates) # get full combination of tract days
+  out <- left_join(out, preds, by = c("GEOID", "date")) # match smokePM predictions on smoke days to tract days
+  
+  out <- mutate(out, smokePM_pred = replace_na(smokePM_pred, 0))
+  
+  return(out)
+}
+
+smoke20.full <- process_smoke(smoke20)
+smoke21.full <- process_smoke(smoke21)
+smoke22.full <- process_smoke(smoke22)
+smoke23.full <- process_smoke(smoke23)
+
+# groupby geoid and calculate annual average
+smoke_ann_avg <- function(dat) {
+  return(dat %>% 
+           group_by(GEOID) %>% 
+           summarize(wildfirePM2.5 = mean(smokePM_pred)))
+}
+
+avg.wildfire2020 <- smoke_ann_avg(smoke20.full)
+avg.wildfire2021 <- smoke_ann_avg(smoke21.full)
+avg.wildfire2022 <- smoke_ann_avg(smoke22.full)
+avg.wildfire2023 <- smoke_ann_avg(smoke23.full)
+
+# join with tract data
+wa.tracts.2020 <- merge(wa.tracts, avg.wildfire2020, by = "GEOID")
+wa.tracts.2021 <- merge(wa.tracts.2020, avg.wildfire2021, by = "GEOID")
+wa.tracts.2022 <- merge(wa.tracts.2021, avg.wildfire2022, by = "GEOID")
+wa.tracts.2023 <- merge(wa.tracts, avg.wildfire2023, by = "GEOID")
+
+# rename columns
+wa.tracts <- wa.tracts.2023
+
+names(wa.tracts)[names(wa.tracts) == "wildfirePM2.5.x"] <- "wildfirePM25_2020"
+names(wa.tracts)[names(wa.tracts) == "wildfirePM2.5.y"] <- "wildfirePM25_2021"
+names(wa.tracts)[names(wa.tracts) == "wildfirePM2.5.x.1"] <- "wildfirePM25_2022"
+names(wa.tracts)[names(wa.tracts) == "wildfirePM2.5.y.1"] <- "wildfirePM25_2023"
+
+st_write(wa.tracts, "geoexmap/Data_Processed/wildfire_smoke_2023.gpkg", append = FALSE)
+```
+
+### UV Radiation (2024)
+```{r, eval=FALSE}
+uv.world <- nc_open('Data_Raw/uvief2024_world.nc')
+
+{
+  sink('uvief2024_world.txt')
+  print(uv.world)
+  sink()
+}
+
+# capture data in lat/long form
+lon <- ncvar_get(uv.world, "PRODUCT/longitude")
+lat <- ncvar_get(uv.world, "PRODUCT/latitude", verbose = FALSE)
+
+# capture pm 2.5 data in an array
+# measured in microgram/cubic meter
+uvi.array <- ncvar_get(uv.world, "PRODUCT/uvi_clear")
+
+print(uvi.array)
+
+# 3d array - latitude (1440) x longitude (720) x days (366 in 2024)
+dim(uvi.array)
+
+# take mean of 3rd dimension
+mean.uvi <- rowMeans(uvi.array, dims = 2)
+
+dim(mean.uvi)
+
+nc_close(uv.world)
+
+# save to an array
+uvi.raster <- raster(t(mean.uvi), xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), crs=CRS("+proj=longlat +datum=WGS84"))
+
+uvi.spat <- as(uvi.raster, "SpatRaster")
+
+#plot(pm2.5_raster)
+
+r <- flip(uvi.spat, direction = "vertical")
+
+plot(r)
+
+# check that projections are the same
+st_crs(wa.tracts.2020) == st_crs(uvi.spat)
+
+# crop
+wa.uvi <- crop(r, extent(wa.tracts.2020))
+
+par(mar=c(1, 1, 1, 1))
+plot(wa.uvi)
+
+# extract mean value of the raster for each census tract
+wa.tracts.2020$UVI <- extract(wa.uvi, wa.tracts.2020, fun="mean", method = "simple", touches = FALSE,
+                           na.rm = TRUE) 
+
+wa.tracts.2020 <- wa.tracts.2020 %>% 
+  #dplyr::select(c(GEOID, NAME, geometry, PM2.5$layer)) %>% 
+  mutate(UVI = UVI$layer) %>% 
+  dplyr::select(c(GEOID, NAME, UVI))
+
+leaflet(wa.tracts.2020) %>% 
+  addTiles() %>% 
+  addPolygons(
+    stroke = TRUE,
+    weight = 1,
+    color = "black",
+    fillOpacity = 0.7,
+    smoothFactor = 0.5,
+    fillColor = ~colorBin("YlOrRd", UVI)(UVI)
+  )
+
+st_write(wa.tracts.2020, "geoexmap/Data_Processed/wa_uvi.gpkg")
+```
+
+
+### National Risk Index
+```{r, eval=FALSE}
+
+```
+
+### PRISM: Temperature, Precipitation, Dew Point
+```{r, eval=FALSE}
+ 
+```
+
+### Radon 
+```{r, eval=FALSE}
+radon <- fread("Data_Raw/ZIPCODE_Average_Radon_2001_2021.csv") #%>% 
+  #filter(STATEFP == 53)
+
+zcta.tract <- fread("zcta_tract_rel_10.txt", sep = ",") #%>% 
+  #filter(STATE == 53)
+
+# join data to zcta tract
+radon.xwalk <- merge(zcta.tract, radon, by.x = "ZCTA5", by.y = "ZIPCODE", all.x = TRUE)
+
+radon.xwalk$screen_tr <- (radon.xwalk$TRHUPCT / 100) * radon.xwalk$screen_conc 
+
+radon.tr <- radon.xwalk %>% 
+  group_by(GEOID) %>% 
+  mutate(screen_conc_tr = sum(screen_tr, na.rm = TRUE)) %>% 
+  slice(1)
+
+radon.nec <- radon.tr %>% 
+  dplyr::select(c(GEOID, screen_conc_tr))
+
+radon.nec$GEOID <- as.character(radon.nec$GEOID)
+
+# join with wa data
+# old geographies
+#wa.radon <- merge(wa.tracts.2019, radon.nec, by.x = "GEOID", by.y = "GEOID", all.x = TRUE)
+radon.geo <- left_join(wa.tracts.2019, radon.nec, by = c("GEOID" = "GEOID"))
+
+summary(radon.geo)
+```
+
+```{r, eval=FALSE}
+radon.coords <- st_coordinates((st_centroid(st_geometry(radon.geo))))
+radon.sp <- as(radon.geo, "Spatial")
+
+# add neighbors for disjointed polygons
+addnbs <- function(sp.dat) {
+  neighbors <- spdep::poly2nb(sp.dat, row.names = sp.dat$GEOID, queen = TRUE, snap = 500)
+
+  count <- spdep::card(neighbors)
+
+  if(!any(count == 0)) return(neighbors)
+  
+  # get nearest neighbor index, use centroids
+  nnbs = spdep::knearneigh(coordinates(sp.dat))$nn
+  
+  no_edges_from <- which(count==0)
+  
+  for (i in no_edges_from) {
+    neighbors[[i]] = nnbs[i]
+  }
+  
+  return(neighbors)
+}
+
+neighbors <- addnbs(radon.sp)
+
+# neighbors object to matrix
+neighbors.q <- spdep::nb2mat(neighbors, zero.policy = TRUE)
+
+spdep::n.comp.nb(neighbors)$nc
+```
+```{r, eval=FALSE}
+spat_impute <- function(data, weights, var, coords, k = 5) {
+  pollutant <- data[[var]]
+  missing_idx <- which(is.na(pollutant))
+  
+  if (length(missing_idx) == 0) return(pollutant)
+  
+  # first pass
+  # matrix where each row is the variable values repeated
+  value_matrix <- matrix(rep(pollutant, each = length(missing_idx)), 
+                        nrow = length(missing_idx))
+  # weights for missing obs
+  missing_weights <- weights[missing_idx, , drop = FALSE]
+  missing_weights[is.na(value_matrix)] <- 0
+  # row sums of weights
+  weight_sums <- rowSums(missing_weights)
+  # weighted sums
+  weighted_sums <- rowSums(missing_weights * value_matrix, na.rm = TRUE)
+  # weighted averages
+  imputed_values <- ifelse(weight_sums > 0, weighted_sums / weight_sums, NA)
+  
+  # do a second pass: knn for remaining NA
+  missing_idx_2 <- which(is.na(imputed_values))
+
+  if (length(missing_idx_2) > 0) {
+    library(FNN)
+
+    complete <- which(!is.na(pollutant))
+
+    if (length(complete) >= k) { # k: how many nearest neighbors to use when spatial neighbors missing
+      # get coords for obs that are still missing
+      missing.global <- missing_idx[missing_idx_2]
+      missing.coords <- coords[missing.global, , drop = FALSE]
+
+      knn.result <- get.knnx(coords[complete,],
+                             missing.coords,
+                             k = k)
+
+      nearest.idx.mat <- matrix(complete[knn.result$nn.index],
+                            nrow = length(missing_idx_2))
+      nearest.dist.mat <- knn.result$nn.dist # get nearest neighbors with IDW
+
+      # calc weights
+      weights_matrix_knn <- 1 / (nearest.dist.mat + 1e-10) # prevent division by 0
+      weights_sums_knn <- rowSums(weights_matrix_knn)
+      weights_matrix_knn <- weights_matrix_knn / weights_sums_knn
+
+      # neighbors for all missing obs
+      neighbor_values_matrix <- matrix(pollutant[nearest.idx.mat],
+                                       nrow = length(missing_idx_2))
+
+      # calc weighted avg
+      knn.imp <- rowSums(weights_matrix_knn * neighbor_values_matrix)
+
+      imputed_values[missing_idx_2] <- knn.imp
+    }
+  }
+  
+  result <- pollutant
+  result[missing_idx] <- imputed_values
+  return(result)
+}
+```
+
+```{r, eval=FALSE}
+# add new variable with imputed values
+radon.geo$rad_imp <- spat_impute(radon.geo, neighbors.q, "screen_conc_tr", radon.coords)
+```
+
+```{r, eval=FALSE}
+xwalk <- fread("X:/fast/vopham_t/grp/geoexmap-geoexDC/geoexmap/geoexmap/nhgis_tr2010_tr2020_53.csv")
+xwalk$tr2010ge <- as.character(xwalk$tr2010ge)
+
+## obtain data of interest for older geog
+# convert to sf
+radon <- radon.geo %>% 
+  dplyr::select(c(GEOID, rad_imp))
+
+
+## join the crosswalk to older geog
+radon.wa.xwalk <- merge(xwalk, radon, by.x = "tr2010ge", by.y = "GEOID", all.x = TRUE)
+```
+
+```{r, eval=FALSE}
+## multiply older counts/values by crosswalk's interpolation weights, producing estimated counts for all intersections between older and newer geogs
+radon.wa.xwalk$radon_2020 <- radon.wa.xwalk$wt_hu * radon.wa.xwalk$rad_imp
+```
+
+```{r, eval=FALSE}
+radon.2020.wa <- radon.wa.xwalk %>% 
+  #st_as_sf() %>% 
+  group_by(tr2020ge) %>% 
+  mutate(radon = sum(radon_2020, na.rm = TRUE)) %>% 
+  slice(1) %>% 
+  ungroup() %>%
+  dplyr::select(c(tr2020ge, radon)) %>% 
+  filter(startsWith(as.character(tr2020ge), "53")) 
+  
+
+radon.geo <- merge(wa.tracts, radon.2020.wa, by.x = "GEOID", by.y = "tr2020ge", all.x = TRUE) %>% 
+  dplyr::select(c(GEOID, radon))
+```
+
+```{r, eval=FALSE}
+# finally!
+st_write(radon.geo, "geoexmap/Data_Processed/wa_radon.gpkg", append = FALSE)
+```
+
+
+### PFAS in Drinking Water
+Steps:
+
+- link contaminant result data with PWS boundaries
+- then code with 0 = census tract doesn't overlap with water system with PFAS detected
+```{r, eval=FALSE}
+ucmr <- read_xlsx("Data_Raw/UCMR_Res_WA.xlsx")
+pws <- fread("Data_Raw/PWS/Tracts.csv")
+```
+
+```{r, eval=FALSE}
+wa.pws <- pws %>% 
+  filter(startsWith(PWSID, "WA"))
+```
+
+```{r, eval=FALSE}
+wa.ucmr <- merge(ucmr, wa.pws, by.x = "PWS ID", by.y = "PWSID")
+```
+
+```{r, eval=FALSE}
+# filter out lithium, <MRL
+wa.ucmr <- wa.ucmr %>% 
+  filter(Contaminant != "lithium")
+```
+
+```{r, eval=FALSE}
+# only detectable levels
+wa.ucmr.num <- wa.ucmr[wa.ucmr[, 4] != "< MRL",]
+
+wa.ucmr.num[, 4] <- as.numeric(wa.ucmr.num[,4])
+```
+
+```{r, eval=FALSE}
+# reduce to 1 row per GEOID
+# use mean, we won't be using values anyway
+
+# rename so we can get column name
+wa.ucmr.num <- wa.ucmr.num %>% 
+  rename("Result" = 4)
+
+wa.ucmr.tract <- wa.ucmr.num %>% 
+  group_by(GEOID20) %>% 
+  summarize(mean_result = mean(Result, na.rm = TRUE))
+
+wa.tracts.ucmr <- merge(wa.tracts, wa.ucmr.tract, by.x = "GEOID", by.y = "GEOID20", all.x = TRUE)
+```
+
+```{r, eval=FALSE}
+wa.tracts.ucmr$PFAS <- !is.na(wa.tracts.ucmr$mean_result)
+```
+`
+```{r, eval=FALSE}
+wa.tracts.ucmr <- wa.tracts.ucmr %>% 
+  dplyr::select(c(GEOID, PFAS))
+```
+
+```{r, eval=FALSE}
+st_write(wa.tracts.ucmr, "geoexmap/Data_Processed/wa_dw_pfas.gpkg", append = FALSE)
+```
+
+### Marine Microplastics
+Retrieved from bounding box, find the largest distance to WA boundaries and use as threshold
+```{r, eval=FALSE}
+microplastics.wa <- fread("Data_Raw/Marine Microplastic Concentrations (2).csv")
+micro.geo <- sf::st_as_sf(microplastics.wa, coords = c("Longitude(degree)", "Latitude (degree)")) %>%
+  st_set_crs(crs(wa.tracts)) %>% 
+  st_transform(crs = 4326)
+```
+
+```{r, eval=FALSE}
+distances <- st_distance(micro.geo, wa.tracts)
+```
+
+```{r, eval=FALSE}
+min.distances <- apply(distances, 1, min)
+```
+
+```{r, eval=FALSE}
+max(min.distances)
+```
+ Included points less than 70398.2 meters away from Washington borders (bounding box).
+ 
+```{r, eval=FALSE}
+st_write(micro.geo, "geoexmap/Data_Processed/microplastics.gpkg")
+```
+
+## Built Environment
+
+### Walkability
+Formula:
+w = block group's ranked score for intersection density (D3b)
+x = block group's ranked score for proximity to transit stops (D4a)
+y = block group's ranked score for employment mix (D2b_E8MixA)
+z = block group's ranked score for employment and household mix (D2a_EpHHm)
+NWI score = (w/3) + (x/3) + (y/6) + (z/6)
+```{r, eval=FALSE}
+# let's do our own calculation
+# formula:
+layers <- st_layers("Data_Raw/WalkabilityIndex/Natl_WI.gdb")
+
+walkability <- st_read("Data_Raw/WalkabilityIndex/Natl_WI.gdb", layer = "NationalWalkabilityIndex")
+
+walkability.wa <- walkability %>% 
+  filter(STATEFP == "53")
+```
+
+```{r, eval=FALSE}
+# get higher level tract fips
+walkability.wa$tractFIPS <- substr(walkability.wa$GEOID20, 1, 11)
+
+# group by tract and get mean rankings
+walkability.tr <- walkability.wa %>% 
+  group_by(tractFIPS) %>% 
+  mutate(int_density = mean(D3B_Ranked),
+         transit = mean(D4A_Ranked),
+         emp_mix = mean(D2B_Ranked),
+         emp_hh_mix = mean(D2A_Ranked)) %>% 
+  slice(1)
+
+# all good, we have values 1 - 20 now!
+walkability.tr$walk_score = (walkability.tr$int_density / 3) +
+  (walkability.tr$transit / 3) + (walkability.tr$emp_mix / 6) +
+  (walkability.tr$emp_hh_mix / 6)
+```
+
+```{r, eval=FALSE}
+xwalk <- fread("X:/fast/vopham_t/grp/geoexmap-geoexDC/geoexmap/geoexmap/nhgis_tr2010_tr2020_53.csv")
+xwalk$tr2010ge <- as.character(xwalk$tr2010ge)
+
+
+## join the crosswalk to older geog
+wa.xwalk <- merge(xwalk, walkability.tr, by.x = "tr2010ge", by.y = "tractFIPS", all.x = TRUE)
+
+# using block groups for walkability
+#caces.wa.xwalk <- merge(xwalk, walkability, by.x = "bg2010ge", by.y = "GEOID", all.x = TRUE)
+
+
+## multiply older counts/values by crosswalk's interpolation weights, producing estimated counts for all intersections between older and newer geogs
+wa.xwalk$walk_score_2020 <- wa.xwalk$wt_pop * wa.xwalk$walk_score
+
+walkability.2020 <- wa.xwalk %>% 
+  group_by(tr2020ge) %>% 
+  mutate(NatWalkInd2020 = sum(walk_score_2020, na.rm = TRUE)) %>% 
+  slice(1) %>% 
+  ungroup()
+
+# 0 to 20, recode 15 tracts to have 1
+
+walkability.2020$NatWalkInd2020[walkability.2020$NatWalkInd2020 < 1] <- 1
+
+walkability <- walkability.2020 %>% 
+  filter(!is.na(NatWalkInd2020)) %>% 
+  data.frame()
+
+walkability.geo <- merge(wa.tracts, walkability, by.x = "GEOID", by.y = "tr2020ge")
+
+walkability <- walkability.geo %>% 
+  dplyr::select(c(GEOID, NatWalkInd2020))
+```
+
+```{r, eval=FALSE}
+st_write(walkability, "geoexmap/Data_Processed/wa_walkability.gpkg", append = FALSE)
+```
+
+### Pesticides
+```{r, eval=FALSE}
+pest <- fread("Data_Raw/V3_Pesticide_Exposure.csv") %>% 
+  filter(!`County Name` == "n/a")
+```
+
+```{r, eval=FALSE}
+pest.geo <- merge(wa.tracts, pest, by.x = "GEOID", 
+                  by.y = "2020 Census Tract")
+
+pest.fin <- pest.geo %>% 
+  dplyr::select(c(GEOID, pesticide_lbs_mile2, `IBL Rank`))
+
+st_write(pest.fin, "geoexmap/Data_Processed/wa_pest_exposure.gpkg")
+```
+
+### Green Space: NDVI
+```{r, eval=FALSE}
+## NDVI
+ndvi <- raster("Data_Raw/Clipped_NDVI_WA_mean.tif")
+
+plot(ndvi)
+
+# convert to spatraster
+ndvi_raster <- as(ndvi, "SpatRaster")
+
+plot(ndvi_raster)
+
+# check that projections are the same
+st_crs(wa.tracts) == st_crs(ndvi_raster)
+
+# crop
+wa_ndvi <- crop(ndvi_raster, extent(wa.tracts))
+
+par(mar=c(1, 1, 1, 1))
+plot(wa_ndvi)
+
+# extract mean value of the raster for each census tract
+wa.tracts$ndvi <- extract(wa_ndvi, wa.tracts, fun="mean", method = "simple", touches = FALSE,
+                           na.rm = TRUE)
+
+wa.tracts.ndvi <- wa.tracts %>% 
+  drop_na() %>% 
+  mutate(NDVI = ndvi$NDVI) %>% 
+  dplyr::select(c(STATEFP, COUNTYFP, TRACTCE, GEOID, NAME, NDVI))
+
+#st_write(wa.tracts, dsn = paste0(getwd(), "/Demo Data/", "wa_tracts_ndvi.gpkg"))
+
+# try RDS for performance
+#saveRDS(wa.tracts, "Demo Data/wa_tracts_ndvi_pm25.rds")
+```
+
+
+### Blue Space
+```{r, eval=FALSE}
+bluespace1 <- rast("Data_Raw/occurrence_130W_50Nv1_4_2021.tif")
+
+plot(bluespace1)
+
+bluespace2 <- rast("Data_Raw/occurrence_120W_50Nv1_4_2021.tif")
+
+plot(bluespace2)
+
+bluespace <- merge(bluespace1, bluespace2)
+
+plot(bluespace)
+
+writeRaster(bluespace, file = "Data_Raw/bluespace.tif")
+```
+
+calc proportion area blue space in each tract with 100m buffer
+```{r, eval=FALSE}
+wa.tract.buffer <- st_buffer(wa.tracts, dist = 100)
+```
+
+```{r, eval=FALSE}
+plot(wa.tract.buffer$geom)
+```
+
+```{r, eval=FALSE}
+bluespace.wa <- rast("Data_Raw/bluespace.tif")
+```
+
+```{r, eval=FALSE}
+plot(bluespace.wa)
+```
+```{r, eval=FALSE}
+# get pixel area
+blue.area <- prod(res(bluespace.wa))
+
+# binary raster
+bluespace.thresh <- bluespace.wa >= 50
+
+# buffered tracts to terra spatvector
+tract.vect <- vect(wa.tract.buffer)
+```
+
+
+```{r, eval=FALSE}
+# extract proportion area
+# blue.prop <- extract(bluespace.thresh, tract.vect,
+#                      fun = mean, na.rm = TRUE, exact = TRUE)
+blue.prop <- exact_extract(bluespace.thresh, wa.tract.buffer, 'mean')
+
+wa.tracts$bluespace <- blue.prop
+```
+
+```{r, eval=FALSE}
+# gut check
+library(RColorBrewer)
+pal <- colorNumeric("Blues", domain = wa.tracts$bluespace)
+
+leaflet(wa.tracts) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(fillColor = ~pal(bluespace), weight = 0.5,
+              color = "black", fillOpacity = 0.7) %>% 
+  addLegend(pal = pal, values = ~bluespace, opacity = 0.7, title = NULL, position = "bottomright")
+```
+
+```{r, eval=FALSE}
+wa.tracts <- wa.tracts %>% 
+  dplyr::select(c(GEOID, bluespace))
+
+st_write(wa.tracts, "geoexmap/Data_Processed/wa_bluespace.gpkg")
+```
+
+### Light at Night (LAN) (2022)
+```{r, eval=FALSE}
+lan <- fread("Data_Raw/2024_1031_LAN/VIIRS_DNB/2022/AvgNighttimeRadiance_53.csv")
+
+lan$GEOID <- as.character(lan$GEOID)
+
+# use 2020 geometry
+setdiff(lan$GEOID, wa.tracts.2020$GEOID)
+setdiff(lan$GEOID, wa.tracts.2019$GEOID)
+setdiff(wa.tracts.2019$GEOID, lan$GEOID)
+setdiff(wa.tracts.2020$GEOID, lan$GEOID)
+setdiff(wa.tracts.2019$GEOID, lan$GEOID)
+
+wa.tracts.lan <- wa.tracts %>% 
+  merge(lan, by = "GEOID") %>% 
+  dplyr::select(-c(STATEFP.x, STATEFP.y, COUNTYFP.x, COUNTYFP.y, TRACTCE.x,
+            TRACTCE.y))
+
+wa.tracts.lan <- wa.tracts.lan %>% 
+  dplyr::select(-`.geo`)
+
+saveRDS(wa.tracts.lan, "Demo Data/wa_tracts_pm25_ndvi_lan.rds")
+
+## TODO: process GeoTIFF sent by Seigi
+viirs.2022.1 <- raster("Data_Raw/VIIRS_2022_CONUS-0000000000-0000000000.tif")
+plot(viirs.2022.1)
+viirs.2022.2 <- raster("Data_Raw/VIIRS_2022_CONUS-0000000000-0000032768.tif")
+plot(viirs.2022.2)
+```
+
+
+### Noise
+```{r, eval=FALSE}
+noise <- raster("Data_Raw/CONUS_L50dBA_sumDay_exi.tif")
+
+plot(noise)
+```
+```{r, eval=FALSE}
+# check that projections are the same
+st_crs(wa.tracts) == st_crs(noise)
+
+noise <- projectRaster(noise, crs = 4326)
+
+# crop
+wa_noise <- crop(noise, extent(wa.tracts))
+
+par(mar=c(1, 1, 1, 1))
+plot(wa_noise)
+
+st_crs(wa.tracts) == st_crs(wa_noise)
+
+# convert to spatraster
+wa_noise_raster <- as(wa_noise, "SpatRaster")
+
+plot(wa_noise_raster)
+
+# check that projections are the same
+st_crs(wa.tracts) == st_crs(wa_noise_raster)
+
+
+# extract mean value of the raster for each census tract
+wa.tracts$noise <- extract(wa_noise_raster, wa.tracts, fun = "mean", method = "simple", touches = FALSE,
+                           na.rm = TRUE)
+
+wa.tracts.noise <- wa.tracts %>% 
+  drop_na() %>% 
+  mutate(noise = noise$CONUS_L50dBA_sumDay_exi) %>% 
+  dplyr::select(c(STATEFP, COUNTYFP, TRACTCE, GEOID, NAME, noise))
+
+wa.noise <- wa.tracts.noise %>% 
+  dplyr::select(c(GEOID, noise))
+
+st_write(wa.noise, "geoexmap/Data_Processed/wa_noise.gpkg")
+```
+### Transportation Noise Exposure Model
+```{r, eval=FALSE}
+# read in
+noise.mod <- readRDS("Data_Raw/transportation_noise/tractresultWA.rds") %>% 
+  st_drop_geometry()
+```
+
+```{r, eval=FALSE}
+# 1773 tracts, join
+wa.tracts.noisemod <- merge(wa.tracts, noise.mod, by.x = "GEOID", by.y = "GEOID")
+```
+
+```{r, eval=FALSE}
+# waiting on trang's input
+wa.noise <- wa.tracts.noisemod %>% 
+  dplyr::select(c(GEOID, noise4050n, noise5060n, noise6070n, noise7080n, noise8090n, noise90n,
+           noise4050p, noise5060p, noise6070p, noise7080p, noise8090p, noise90p))
+```
+
+```{r, eval=FALSE}
+st_write(wa.noise, "geoexmap/Data_Processed/wa_noise_exp.gpkg")
+```
+
+### Transit Access
+```{r, eval=FALSE}
+transit <- st_read("Data_Raw/WSDOT_-_Transit_Stops.shp") %>% 
+  dplyr::select(c(stop_name, wheelchair, level6, stop_lat, stop_lon,
+           level5, level4, level3, level2,
+           level1))
+
+st_write(transit, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "transit", append = FALSE)
+```
+
+### Superfund Sites
+```{r, eval=FALSE}
+superfund_layers <- st_layers("Data_Raw/NPL_Boundaries.gdb")
+
+superfund <- st_read("Data_Raw/NPL_Boundaries.gdb", layer = "SITE_BOUNDARIES_SF")
+```
+```{r, eval=FALSE}
+wa.superfund <- superfund %>% 
+  filter(STATE_CODE == "WA")
+
+plot(wa.superfund)
+```
+
+```{r, eval=FALSE}
+wa.superfund <- wa.superfund %>% 
+  st_transform(crs = 4326)
+```
+
+```{r, eval=FALSE}
+st_write(wa.superfund, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "superfund")
+```
+
+### Parks
+```{r, eval=FALSE}
+us.parks <- st_read("Data_Raw/USA_Parks.gpkg")
+
+wa.state <- st_union(wa.tracts)
+
+wa.parks.filt <- st_contains(wa.state, us.parks, sparse = FALSE) %>% 
+  t()
+
+wa.parks <- us.parks %>% 
+  filter(wa.parks.filt)
+
+plot(wa.parks$SHAPE)
+
+crs(wa.parks)
+
+st_write(wa.parks, "geoexmap/Data_Processed/wa_parks.gpkg")
+```
+
+### Alcohol Retailers
+```{r, eval=FALSE}
+alc.retail <- fread("Data_Raw/LicenseeListDetails.csv")
+
+alc.retail$Zip <- substr(alc.retail$Zip, start = 1, stop = 5)
+
+colnames(alc.retail)
+
+alc.retail.coords <- alc.retail %>%
+  as_tibble() %>% 
+  geocode(street = Address, city = City, state = State, postalcode = Zip, method = "arcgis", lat = latitude, long = longitude)
+
+alc.retail.geo <- alc.retail.coords %>% 
+  st_as_sf(coords = c("longitude", "latitude")) %>% 
+  st_set_crs(4326)
+
+leaflet(alc.retail.geo) %>% 
+  setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
+  addMarkers() %>% 
+  addTiles() 
+
+st_write(alc.retail.geo, "geoexmap/Data_Processed/wa_alc_retailers.gpkg")
+```
+
+### Food Environment
+
+Variables
+- POP2010 - population count from 2010 census
+- OHU2010 - occupied housing unit count from 2010 census
+- lapop1 - low access, pop at 1 mile, number
+- lapop1share - low access, pop at 1 mile, share
+- lalowi1 - low access, low income pop at 1 mile, number
+- lalowi1share - low access, low income pop at 1 mile, share
+- lakids1 - low access, children 0-17 at 1 mile, number
+- lakids1share - Low access, children age 0-17 at 1 mile, share
+- laseniors1 - Low access, seniors age 65+ at 1 mile, number
+- laseniors1share - Low access, seniors age 65+ at 1 mile, share
+- lawhite1 - Low access, White population at 1 mile, number
+- lawhite1share - Low access, White population at 1 mile, share
+- lablack1 - Low access, Black or African American population at 1 mile, number
+- lablack1share - Low access, Black or African American population at 1 mile, share
+- laasian1 - Low access, Asian population at 1 mile, number
+- laasian1share - Low access, Asian population at 1 mile, share
+- lanhopi1 - Low access, Native Hawaiian and Other Pacific Islander population at 1 mile, number
+- lanhopi1share - Low access, Native Hawaiian and Other Pacific Islander population at 1 mile, share
+- laaian1 - Low access, American Indian and Alaska Native population at 1 mile, number
+- laaian1share - Low access, American Indian and Alaska Native population at 1 mile, share
+- laomultir1 - Low access, Other/Multiple race population at 1 mile, number
+- laomultir1share - Low access, Other/Multiple race population at 1 mile, share
+- lahisp1 - Low access, Hispanic or Latino population at 1 mile, number
+- lahisp1share - Low access, Hispanic or Latino population at 1 mile, share
+- lahunv1 - Vehicle access, housing units without and low access at 1 mile, number
+- lahunv1share - Vehicle access, housing units without and low access at 1 mile, share
+- lasnap1 - Low access, housing units receiving SNAP benefits at 1 mile, number
+- lasnap1share - Low access, housing units receiving SNAP benefits at 1 mile, share
+- TractKids - Total count of children age 0-17 in tract 
+- TractSeniors - Total count of seniors age 65+ in tract 
+- TractWhite - Total count of White population in tract 
+- TractBlack - Total count of Black or African American population in tract 
+- TractAsian - Total count of Asian population in tract 
+- TractNHOPI - Total count of Native Hawaiian and Other Pacific Islander population in tract 
+- TractAIAN - Total count of American Indian and Alaska Native population in tract 
+- TractOMultir - Total count of Other/Multiple race population in tract 
+- TractHispanic - Total count of Hispanic or Latino population in tract 
+- TractHUNV - Total count of housing units without a vehicle in tract 
+- TractSNAP - Total count of housing units receiving SNAP benefits in tract 
+
+
+```{r, eval=FALSE}
+healthy.food <- read_excel("Data_Raw/FoodAccessResearchAtlasData2019.xlsx", sheet = "Food Access Research Atlas")
+
+food.access <- healthy.food %>% 
+  dplyr::select(c(CensusTract, State, Pop2010, OHU2010, lapop1, lapop1share, lalowi1, lalowi1share, lakids1, lakids1share, laseniors1, 
+           laseniors1share, lawhite1, , lawhite1share, lablack1, lablack1share, laasian1, laasian1share, lanhopi1, lanhopi1share,
+           laaian1, laaian1share, laomultir1, laomultir1share, lahisp1, lahisp1share, lahunv1, lahunv1share, lasnap1, lasnap1share,
+           lasnap1share, TractKids, TractSeniors, TractWhite, TractBlack, TractAsian, TractNHOPI, TractAIAN, TractOMultir, TractHispanic,
+           TractHUNV, TractSNAP)) %>% 
+  filter(State == "Washington") %>% 
+  as.data.frame()
+
+food.access[food.access == "NULL"] <- NA
+i <- c(5:41)
+
+food.access[, i] <- sapply(food.access[, i], function(x) as.numeric(x))
+
+# columns 5-29 null in some rows
+food.access.geo <- merge(wa.tracts.2019, food.access, by.x = "GEOID", by.y = "CensusTract", all.x = TRUE)
+
+st_write(food.access.geo, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
+```
+
+### Land Use Land Cover (from Caroline!)
+```{r, eval=FALSE}
+# read in and take a look
+lulc <- st_read("geoexmap/Data_Processed/wa_tracts_NLCD_landcover.gpkg")
+```
+
+## Social Environment
+
+### PLACES
+
+### SDOH/Non-Medical Factors
+
+### EJI 
+```{r, eval=FALSE}
+## EJI
+eji <- fread("Data_Raw/EJI_2024_United_States.csv")
+
+eji <- eji %>% 
+  filter(STATEFP == 53) %>% 
+  mutate(GEOID_2020 = as.character(GEOID_2020)) 
+  
+
+wa.tracts.eji <- merge(eji, wa.tracts, by.x = "GEOID_2020", by.y = "GEOID")
+
+st_write(wa.tracts.eji, "geoexmap/Data_Processed/eji.gpkg")
+```
+
+### ADI / SVI
+ADI Contains some data that are suppressed or unreliable:
+- GQ: greater than 33.3% housing units are in group quarters
+- PH: population less than 100
+
+Moving forward with SVI
+```{r, eval=FALSE}
+## SVI (2020 geometry)
+svi <- fread("Data_Raw/SVI_WA_2022.csv")
+svi$FIPS <- as.character(svi$FIPS)
+
+missing <- svi[is.na(svi$RPL_THEMES)] # length 0
+
+svi <- svi %>% 
+  dplyr::select(c(FIPS, RPL_THEMES))
+
+svi.tracts.2022 <- merge(wa.tracts, svi, by.x = "GEOID", by.y = "FIPS") %>% 
+  dplyr::select(c(GEOID, RPL_THEMES))
+
+st_write(svi.tracts.2022, "geoexmap/Data_Processed/svi_2022.gpkg", append = FALSE)
+```
+
+### Median Household Income
+```{r, eval=FALSE}
+
+```
+
+### Racial Residential Segregation (Segregation/Entropy/Dissimilarity Indexs calculation)
+```{r, eval=FALSE}
+race.eth.bg <- fread("Data_Raw/nhgis0006_csv/nhgis0006_ds258_2020_blck_grp.csv")
+
+race.bg.wa <- race.eth.bg %>% 
+  filter(STATEA == 53) %>% 
+  dplyr::select(c(GEOCODE, STATEA, COUNTYA, TRACTA, U7J001, U7J002, U7J003, U7J004, U7J005, U7J006, U7J007))
+
+lookup <- c(white = "U7J001", 
+            black = "U7J002",
+            aian = "U7J003",
+            asian = "U7J004",
+            nhpi = "U7J005",
+            other = "U7J006",
+            twoplus = "U7J007")
+
+race.bg <- dplyr::rename(race.bg.wa, all_of(lookup))
+
+race.vars <- race.bg %>% 
+  dplyr::select(c(GEOCODE, white, black, aian, asian, nhpi, other, twoplus))
+```
+
+```{r, eval=FALSE}
+tract_dissim <- race.vars %>% 
+  mutate(tractFIPS = substr(GEOCODE, 1, 11)) %>% 
+  group_by(tractFIPS) %>% 
+  group_modify(~{
+    if(nrow(.x) > 1) {
+      # calc duncan's between multiple groups
+      race_matrix <- as.matrix(.x[, c("white", "black", "aian", "asian", "nhpi", "other", "twoplus")])
+      
+      dissim_value <- DMulti(race_matrix)
+      data.frame(dissim_index = dissim_value)
+    } else {
+      data.frame(dissim_index = 0)
+    }
+  }, .keep = TRUE)
+```
+
+```{r, eval=FALSE}
+seg.geo <- merge(wa.tracts, tract_dissim, by.x = "GEOID", by.y = "tractFIPS")
+
+st_write(seg.geo, "geoexmap/Data_Processed/wa_segregation.gpkg")
+```
+
+### Redlining (Sam)
+```{r, eval=FALSE}
+
+```
+
+### Location Affordability Index
+```{r, eval=FALSE}
+lai <- st_read("Data_Raw/Location_Affordability_Index_v3_-8685058346409073024/LOCATION_AFFORDABILITY_INDEX_v3_.shp")
+```
+
+### H + T Index
+```{r, eval=FALSE}
+ht.index <- fread("Data_Raw/htaindex2022_data_tracts_53.csv")
+```
+
+```{r, eval=FALSE}
+# remove quotes from tract fips column
+ht.index$tract <- as.numeric(gsub(".*?([0-9]+).*", "\\1", ht.index$tract))
+```
+
+```{r, eval=FALSE}
+ht.geo <- merge(wa.tracts, ht.index, by.x = "GEOID", by.y = "tract", all.x = TRUE) %>% 
+  dplyr::select(GEOID, ht_ami)
+```
+
+```{r, eval=FALSE}
+st_write(ht.geo, "geoexmap/Data_Processed/ht_index.gpkg")
+```
+
+
+```{r, eval=FALSE}
+# convert to 2020 tracts
+lai.coords <- st_coordinates((st_centroid(st_geometry(lai))))
+lai.sp <- as(lai, "Spatial")
+
+# add neighbors for disjointed polygons
+neighbors <- addnbs(lai.sp)
+
+# neighbors object to matrix
+neighbors.q <- spdep::nb2mat(neighbors, zero.policy = TRUE)
+```
+```{r, eval=FALSE}
+# get xwalk
+xwalk <- fread("X:/fast/vopham_t/grp/geoexmap-geoexDC/geoexmap/geoexmap/nhgis_tr2010_tr2020_53.csv")
+xwalk$tr2010ge <- as.character(xwalk$tr2010ge)
+
+## obtain data of interest for older geog (caces)
+# convert to sf
+lai <- lai %>% 
+  st_as_sf() %>% 
+  dplyr::select(c(GEOID, no2_imp, so2_imp, co_imp))
+
+## join the crosswalk to older geog
+caces.wa.xwalk <- merge(xwalk, lai, by.x = "tr2010ge", by.y = "GEOID", all.x = TRUE)
+
+# using block groups for walkability
+#caces.wa.xwalk <- merge(xwalk, walkability, by.x = "bg2010ge", by.y = "GEOID", all.x = TRUE)
+
+
+## multiply older counts/values by crosswalk's interpolation weights, producing estimated counts for all intersections between older and newer geogs
+caces.wa.xwalk$no2_2020 <- caces.wa.xwalk$parea * caces.wa.xwalk$no2_imp
+caces.wa.xwalk$so2_2020 <- caces.wa.xwalk$parea * caces.wa.xwalk$so2_imp
+caces.wa.xwalk$co_2020 <- caces.wa.xwalk$parea * caces.wa.xwalk$co_imp
+
+## sum these atom counts for each new census tract (group by the 2020 tract fips)
+# there's literally only 1 missing why !
+length(unique(xwalk$tr2020ge))
+setdiff(wa.tracts$GEOID, xwalk$tr2020ge)
+
+caces.2020.wa <- caces.wa.xwalk %>% 
+  group_by(tr2020ge) %>% 
+  mutate(no2 = sum(no2_2020),
+         so2 = sum(so2_2020),
+         co = sum(co_2020)) %>% 
+  slice(1) %>% 
+  ungroup()
+
+# manually replace: tr2020ge: 53033990100
+caces.2020.wa$no2[caces.2020.wa$tr2020ge == 53033990100] <- 0.0
+caces.2020.wa$so2[caces.2020.wa$tr2020ge == 53033990100] <- 0.0
+caces.2020.wa$co[caces.2020.wa$tr2020ge == 53033990100] <- 0.0
+
+caces.2020.wa <- caces.2020.wa %>% 
+  filter(!is.na(no2)) %>% 
+  dplyr::select(c(tr2020ge, no2, so2, co))
+
+caces.wa.tracts <- merge(wa.tracts, caces.2020.wa, by.x = "GEOID", by.y = "tr2020ge", all.x = TRUE)
+```
+
+### Social Capital
+tutorial from: https://rpubs.com/timothyfraser/social_capital_indices
+```{r, eval=FALSE}
+soc.cap <- read.csv("Data_Raw/index_tracts_V3_04_10_2022.csv")
+```
+
+```{r, eval=FALSE}
+wa.soc <- soc.cap %>% 
+  filter(state == "WA", year == 2020)
+```
+
+```{r, eval=FALSE}
+# join with tract geo
+wa.soc.geo <- merge(wa.tracts, wa.soc, by.x = "GEOID", by.y = "geoid")
+```
+
+```{r, eval=FALSE}
+# write to file
+st_write(wa.soc.geo, "geoexmap/Data_Processed/wa_social_capital.gpkg")
+```
+
+### Crimes
+```{r, eval=FALSE}
+# scratch that, WA county-level NIBRS
+wa.crime <- read.csv("Data_Raw/WA_NIBRS_CRIME/Washington_State_Uniform_Crime_Reporting_-_National_Incident_Based_Reporting_System_20250925.csv")
+```
+
+```{r, eval=FALSE}
+wa.crime.recent <- wa.crime %>% 
+  filter(INDEXYEAR == 2023, LOCATION == "COUNTY TOTAL")
+```
+
+```{r, eval=FALSE}
+# part i and part ii offenses
+# part i: homicide, rape, robbery, aggravated assault, burglary, larceny-theft, motor vehicle theft, arson, human trafficking, animal cruelty
+# part ii: other assaults (simple), forgery/counterfeiting, fraud, embezzlement, stolen property: buying, receiving, possessing, vandalism, weapons: carrying, possessing, etc., prostitution/commercialized vice, drug abuse, gambling, offenses against family and children, DUI, liquor laws, drunkenness, disorderly conduct, vagrancy, all other offenses, suspicion, curfew/loitering laws
+str(wa.crime.recent)
+```
+
+```{r, eval=FALSE}
+# join with counties
+crime.p1 <- wa.crime.recent %>% 
+  select(c(COUNTY, POPULATION, PRSNTOTAL, PRSNRATE, SCTYTOTAL, SCTYRATE, PRPRTYTOTAL, PRPRTYRATE, MURDER, MANSLAUGHTER, FORCIBLE_SEX, ROBBERY, ASSAULT, BURGLARY, THEFT, ARSON, HUMAN_TRAFFICKING, KIDNAPPING_ABDUCTION, ANIMAL_CRUELTY))
+crime.p2 <- wa.crime.recent %>% 
+  select(c(COUNTY, POPULATION, PRSNTOTAL, PRSNRATE, SCTYTOTAL, SCTYRATE, PRPRTYTOTAL, PRPRTYRATE, COUNTERFEITING_FORGERY, DESTRUCTION_OF_PROPERTY, WEAPON_LAW_VIOLATION, PROSTITUTION, NON_FORCIBLE_SEX, BRIBERY, DRUG_VIOLATIONS, GAMBLING_VIOLATIONS, VIOL_OF_NO_CONTACT, EXTORTION_BLACKMAIL))
+```
+
+```{r, eval=FALSE}
+crime.p1$total_p1 <- rowSums(crime.p1[, c("MURDER", "MANSLAUGHTER", "FORCIBLE_SEX", "ROBBERY", "ASSAULT", "BURGLARY", "THEFT", "ARSON", "HUMAN_TRAFFICKING", "KIDNAPPING_ABDUCTION", "ANIMAL_CRUELTY")])
+
+crime.p2$total_p2 <- rowSums(crime.p2[, c("COUNTERFEITING_FORGERY", "DESTRUCTION_OF_PROPERTY", "WEAPON_LAW_VIOLATION", "PROSTITUTION", "NON_FORCIBLE_SEX", "BRIBERY", "DRUG_VIOLATIONS", "GAMBLING_VIOLATIONS", "VIOL_OF_NO_CONTACT", "EXTORTION_BLACKMAIL")])
+```
+
+```{r, eval=FALSE}
+# calculate part 1 and part 2 offenses per 1000 people
+# number / pop * 1000
+crime.p1$p1_rate <- crime.p1$total_p1 / crime.p1$POPULATION * 1000
+
+crime.p2$p2_rate <- crime.p2$total_p2 / crime.p2$POPULATION * 1000
+```
+
+```{r, eval=FALSE}
+crime.overall <- merge(crime.p1, crime.p2)
+
+crime.overall$COUNTY <- str_to_title(tolower(crime.overall$COUNTY))
+
+crime.geo <- merge(counties, crime.overall, by.x = "NAME", by.y = "COUNTY") %>% 
+  select(-c(STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, NAMELSAD, STUSPS, STATE_NAME, LSAD, ALAND, AWATER))
+```
+
+```{r, eval=FALSE}
+st_write(crime.geo, "geoexmap/Data_Processed/crime.gpkg")
+```
+
+### Urbanicity/Rurality (Population Density)
+```{r, eval=FALSE}
+tot.pop <- st_read("geoexmap/Data_Processed/TotPop_AgeSex.gpkg") %>% 
+  dplyr::select(c(1:7))
+
+tot.pop$area <- st_area(tot.pop)
+
+tot.pop$area <- set_units(tot.pop$area, "mi^2")
+
+tot.pop$popdensity <- tot.pop$Total.population / tot.pop$area
+
+pop.density <- tot.pop %>% 
+  dplyr::select(c(GEOID, popdensity))
+
+st_write(pop.density, "geoexmap/Data_Processed/wa_popdensity.gpkg", append = FALSE)
+```
+
+## Healthcare Access
+Minimal processing, point geometry.
+
+### Cancer Programs
+```{r, eval=FALSE}
+# scrape cancer programs
+##html <- read_html("https://www.facs.org/hospital-and-facilities/?searchTerm=&institution=CocHospital&address=wa&sort=relevance&page=3")
+cancer.progs <- fread("Data_Raw/cancer_programs_wa.csv")
+
+cancer.prog.coords <- cancer.progs %>%
+  as_tibble() %>% 
+  geocode(address = Address, method = "arcgis", lat = latitude, long = longitude)
+
+cancer.prog.geo <- cancer.prog.coords %>% 
+  st_as_sf(coords = c("longitude", "latitude")) %>% 
+  st_set_crs(4326)
+
+leaflet(cancer.prog.geo) %>% 
+  setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
+  addMarkers() %>% 
+  addTiles() 
+
+st_write(cancer.prog.geo, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg",
+         layer = "cancer_progs", append = FALSE)
+```
+
+## Data Combining
+```{r, eval=FALSE}
+# what do we have so far?
+setwd("X:/fast/vopham_t/grp/geoexmap-geoexDC/geoexmap/geoexmap")
+ 
+places.social <- st_read("geoexmap/Data_Processed/wa_social.gpkg") %>% 
+  st_drop_geometry()
+places.prevention <- st_read("geoexmap/Data_Processed/wa_prevention.gpkg") %>% 
+  st_drop_geometry()
+race.ethnicity <- st_read("geoexmap/Data_Processed/ACS_Race_Ethnicity.gpkg") %>% 
+  st_drop_geometry()
+pop.age.sex <- st_read("geoexmap/Data_Processed/TotPop_AgeSex.gpkg") %>% 
+  st_drop_geometry()
+svi <- st_read("geoexmap/Data_Processed/svi_2022.gpkg") %>% 
+  st_drop_geometry()
+eji <- st_read("geoexmap/Data_Processed/eji.gpkg") %>% 
+  st_drop_geometry()
+uvi <- st_read("geoexmap/Data_Processed/wa_uvi.gpkg") %>% 
+  st_drop_geometry()
+places.behaviors <- st_read("geoexmap/Data_Processed/wa_behaviors.gpkg") %>% 
+  st_drop_geometry()
+places.outcomes <- st_read("geoexmap/Data_Processed/wa_outcomes.gpkg") %>% 
+  st_drop_geometry()
+radon <- st_read("geoexmap/Data_Processed/wa_radon.gpkg") %>% 
+  st_drop_geometry()
+walkability <- st_read("geoexmap/Data_Processed/wa_walkability.gpkg") %>% 
+  st_drop_geometry()
+ozone <- st_read("geoexmap/Data_Processed/wa_ozone_geo.gpkg") %>% 
+  st_drop_geometry()
+pesticides <- st_read("geoexmap/Data_Processed/wa_pest_exposure.gpkg") %>% 
+  st_drop_geometry()
+segregation <- st_read("geoexmap/Data_Processed/wa_segregation.gpkg") %>% 
+  st_drop_geometry()
+noise <- st_read("geoexmap/Data_Processed/wa_noise_exp.gpkg") %>% 
+  st_drop_geometry()
+sdoh <- st_read("geoexmap/Data_Processed/SDOH_measures.gpkg") %>% 
+  st_drop_geometry()
+prism <- st_read("geoexmap/Data_Processed/wa_tracts_2020_PRISM.gpkg") %>% 
+  st_drop_geometry()
+smoke <- st_read("geoexmap/Data_Processed/wildfire_smoke_2023.gpkg") %>% 
+  st_drop_geometry()
+caces <- st_read("geoexmap/Data_Processed/wa_no2_so2_co.gpkg") %>% 
+  st_drop_geometry()
+popdensity <- st_read("geoexmap/Data_Processed/wa_popdensity.gpkg") %>% 
+  st_drop_geometry()
+uvi <- st_read("geoexmap/Data_Processed/wa_uvi.gpkg") %>% 
+  st_drop_geometry()
+risk <- st_read("geoexmap/Data_Processed/National_Risk_Index.gpkg") %>% 
+  st_drop_geometry()
+bluespace <- st_read("geoexmap/Data_Processed/wa_bluespace.gpkg") %>% 
+  st_drop_geometry()
+social.capital <- st_read("geoexmap/Data_Processed/wa_social_capital.gpkg") %>% 
+  dplyr::select(c(GEOID, social_capital)) %>% 
+  st_drop_geometry()
+pfas <- st_read("geoexmap/Data_Processed/wa_dw_pfas.gpkg") %>% 
+  st_drop_geometry()
+income <- st_read("geoexmap/Data_Processed/med_house_income.gpkg") %>% 
+  st_drop_geometry()
+ht.index <- st_read("geoexmap/Data_Processed/ht_index.gpkg") %>% 
+  st_drop_geometry()
+redlining <- st_read("geoexmap/Data_Processed/redlining.gpkg") %>% 
+  st_drop_geometry()
+lulc <- st_read("geoexmap/Data_Processed/wa_tracts_NLCD_landcover.gpkg") %>% 
+  st_drop_geometry()
+
+crime <- st_read("geoexmap/Data_Processed/crime.gpkg") %>% 
+  st_transform(crs = 4326)
+
+cancer.progs <- st_read("geoexmap/Data_Processed/wa_cancer_programs.gpkg")
+parks <- st_read("geoexmap/Data_Processed/wa_parks.gpkg")
+transit <- st_read("Data_Raw/WSDOT_-_Transit_Stops.shp")
+alc.retailers <- st_read("geoexmap/Data_Processed/wa_alc_retailers.gpkg")
+
+clinics <- st_read("geoexmap/Data_Processed/clinics.gdb") %>% 
+  st_transform(crs = 4326)
+ems.stations <- st_read("geoexmap/Data_Processed/ems_stations.gdb") %>% 
+  st_transform(crs = 4326)
+hospitals <- st_read("geoexmap/Data_Processed/hospitals.gdb") %>% 
+  st_transform(crs = 4326)
+pharmacies <- st_read("geoexmap/Data_Processed/pharmacies.gdb") %>% 
+  st_transform(crs = 4326)
+wic.clinics <- st_read("geoexmap/Data_Processed/wic_clinics.gdb") %>% 
+  st_transform(crs = 4326)
+wic.retailers <- st_read("geoexmap/Data_Processed/WIC_retailers.gdb") %>% 
+  st_transform(crs = 4326)
+
+fqhc <- fread("geoexmap/Data_Processed/FQHC.csv") %>% 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4269) %>% 
+  st_transform(crs = 4326)
+
+microplastics <- st_read("geoexmap/Data_Processed/microplastics.gpkg")
+
+pm25.ndvi.lan <- readRDS("geoexmap/Data_Processed/wa_tracts_pm25_ndvi_lan.rds")
+
+geoexmap.data <- pm25.ndvi.lan %>% 
+  left_join(places.social, by = c("GEOID" = "TractFIPS")) %>% 
+  left_join(places.prevention, by = c("GEOID" = "TractFIPS")) %>% 
+  left_join(race.ethnicity, by = "GEOID") %>% 
+  left_join(pop.age.sex, by = "GEOID") %>% 
+  left_join(svi, by = "GEOID") %>% 
+  left_join(eji, by = c("GEOID" = "GEOID_2020")) %>% 
+  left_join(uvi, by = "GEOID") %>% 
+  left_join(places.behaviors, by = c("GEOID" = "TractFIPS")) %>% 
+  left_join(places.outcomes, by = c("GEOID" = "TractFIPS")) %>% 
+  left_join(ozone, by = "GEOID") %>% 
+  left_join(radon, by = "GEOID") %>% 
+  left_join(walkability, by = "GEOID") %>% 
+  left_join(pesticides, by = "GEOID") %>% 
+  left_join(segregation, by = "GEOID") %>% 
+  left_join(noise, by = "GEOID") %>% 
+  left_join(sdoh, by = c("GEOID" = "locationid")) %>% 
+  left_join(prism, by = "GEOID") %>% 
+  left_join(smoke, by = "GEOID") %>% 
+  left_join(caces, by = "GEOID") %>% 
+  left_join(popdensity, by = "GEOID") %>% 
+  left_join(risk, by = c("GEOID" = "TRACTFIPS")) %>% 
+  left_join(bluespace, by = "GEOID") %>% 
+  left_join(social.capital, by = "GEOID") %>%  
+  left_join(pfas, by = "GEOID") %>% 
+  left_join(income, by = "GEOID") %>% 
+  left_join(ht.index, by = "GEOID") %>% 
+  left_join(redlining, by = "GEOID") %>% 
+  left_join(lulc, by = "GEOID") %>% 
+  dplyr::select(c(GEOID, pm2.5_t, ndvi_r, avg_rad, FOODSTAMP_CrudePrev, FOODINSECU_CrudePrev, HOUSINSECU_CrudePrev, SHUTUTILITY_CrudePrev,
+                  LACKTRPT_CrudePrev, EMOTIONSPT_CrudePrev, ACCESS2_CrudePrev, CHECKUP_CrudePrev, DENTAL_CrudePrev, BPMED_CrudePrev,
+                  CHOLSCREEN_CrudePrev, MAMMOUSE_CrudePrev, COLON_SCREEN_CrudePrev, BINGE_CrudePrev, CSMOKING_CrudePrev, LPA_CrudePrev, SLEEP_CrudePrev,
+                  ARTHRITIS_CrudePrev, CASTHMA_CrudePrev, BPHIGH_CrudePrev, CANCER_CrudePrev, HIGHCHOL_CrudePrev, COPD_CrudePrev,
+                  CHD_CrudePrev, DEPRESSION_CrudePrev, DIABETES_CrudePrev, OBESITY_CrudePrev, TEETHLOST_CrudePrev, STROKE_CrudePrev, Total_population,
+                  hispanic_or_latino, pct_hispanic_or_latino, white_non_hispanic, pct_white_non_hispanic, black_non_hispanic, pct_black_non_hispanic,
+                  aian_non_hispanic, pct_aian_non_hispanic, asian_non_hispanic, pct_asian_non_hispanic, nhpi_non_hispanic, pct_nhpi_non_hispanic,
+                  other_non_hispanic, pct_other_non_hispanic, two_or_more_non_hispanic, pct_two_or_more_non_hispanic, white_hispanic_and_latino,
+                  pct_white_hispanic_and_latino, black_hispanic_and_latino, pct_black_hispanic_and_latino, aian_hispanic_and_latino, pct_aian_hispanic_and_latino,
+                  asian_hispanic_and_latino, pct_asian_hispanic_and_latino, nhpi_hispanic_and_latino, pct_nhpi_hispanic_and_latino, other_hispanic_and_latino,
+                  pct_other_hispanic_and_latino, two_or_more_hispanic_and_latino, pct_two_or_more_hispanic_and_latino, Total.male.population, pct_male,
+                  Total.female.population, pct_female,
+                  X0_to_4_years_old, pct_0_to_4_years_old, X5_to_9_years_old, pct_5_to_9_years_old, X10_to_14_years_old,
+                  pct_10_to_14_years_old, X15_to_19_years_old, pct_15_to_19_years_old, X20_to_24_years_old, 
+                  pct_20_to_24_years_old, X25_to_29_years_old, pct_25_to_29_years_old,
+                  X30_to_34_years_old, pct_30_to_34_years_old, X35_to_39_years_old, pct_35_to_39_years_old, 
+                  X40_to_44_years_old, pct_40_to_44_years_old, X45_to_49_years_old, pct_45_to_49_years_old, 
+                  X50_to_54_years_old, pct_50_to_54_years_old, X55_to_59_years_old, pct_55_to_59_years_old, 
+                  X60_to_64_years_old, pct_60_to_64_years_old, X65_to_69_years_old, pct_65_to_69_years_old, 
+                  X70_to_74_years_old, pct_70_to_74_years_old, X75_to_79_years_old, pct_75_to_79_years_old,
+                  X80_to_84_years_old, pct_80_to_84_years_old, X85_years_and_over, pct_85_years_and_over, 
+                  RPL_THEMES, RPL_EJI, UVI, radon, NatWalkInd2020, pesticide_lbs_mile2, 
+                  dissim_index, noise4050n, noise5060n, noise6070n, noise7080n, noise8090n, noise90n, 
+                  noise4050p, noise5060p, noise6070p, noise7080p, noise8090p, noise90p, Unemployment, No.broadband, No.high.school.diploma,
+                  Single.parent.households, Crowding, Poverty,
+                  Housing.cost.burden, dew, temp_max, temp_min, temp_mean, precip, wildfirePM2.5, no2_imp, so2_imp, co_imp, DS_O3_pred, popdensity, 
+                  AVLN_RISKV, CFLD_RISKV, CWAV_RISKV, DRGT_RISKV, ERQK_RISKV, HAIL_RISKV, HWAV_RISKV, HRCN_RISKV, ISTM_RISKV, LNDS_RISKV, LTNG_RISKV, RFLD_RISKV,
+                  SWND_RISKV, TRND_RISKV, TSUN_RISKV, VLCN_RISKV, WFIR_RISKV, WNTW_RISKV, bluespace, social_capital, PFAS, Income, ht_ami, HRS2020, pct_Open_Water, pct_Developed_Open, pct_Developed_Low,
+                  pct_Developed_Medium, pct_Developed_High, pct_Barren, pct_Evergreen_Forest,
+                  pct_Shrub, pct_Grassland, pct_Pasture, pct_Crops, pct_Woody_Wetlands, pct_Herbaceous_Wetlands,
+                  pct_Deciduous_Forest, pct_Mixed_Forest, pct_Perennial_Ice))
+
+setnames(geoexmap.data,
+         old = names(geoexmap.data),
+         new = c("GEOID", "Particulate Matter 2.5", "Green Space", "Nighttime Radiance", "Food Stamps", "Food Insecurity", "Housing Insecurity",
+                 "Utility Services Threat", "Lacking Reliable Transportation", "Lack of Social and Emotional Support", "Lack of Health Insurance",
+                 "Routine Checkup in the Past Year", "Visited Dentist in Past Year", "Taking Medicine to Control High Blood Pressure",
+                 "Cholesterol Screening", "Mammography Use among Women 50 to 74", "Colorectal Cancer Screening among Adults 45 to 75", 
+                 "Binge Drinking among Adults", "Cigarette Smoking among Adults", "No Leisure-time Physical Activity among Adults", 
+                 "Short Sleep Duration", "Arthritis among Adults", "Asthma among Adults", "High Blood Pressure among Adults", 
+                 "Cancer or Melanoma among Adults", "High Cholesterol among Screened Adults", "COPD among Adults", "Coronary Heart Disease among Adults",
+                 "Depression among Adults", "Diagnosed Diabetes among Adults", "Obesity among Adults", "All Teeth Lost among Adults 65 and Older", 
+                 "Stroke among Adults", "Total Population", "Hispanic or Latino", "Percent Hispanic or Latino", "White NonHispanic",
+                 "Percent White NonHispanic", "Black NonHispanic", "Percent Black NonHispanic", "American Indian Alaska Native NonHispanic", 
+                 "Percent American Indian Alaska Native NonHispanic", "Asian NonHispanic", "Percent Asian NonHispanic", "Native Hawaiian Pacific Islander NonHispanic", 
+                 "Percent Native Hawaiian Pacific Islander NonHispanic", "Other Race NonHispanic", "Percent Other Race NonHispanic", "Two or More Races NonHispanic",
+                 "Percent Two or More Races NonHispanic", "White Hispanic or Latino", "Percent White Hispanic or Latino",
+                 "Black Hispanic or Latino",  "Percent Black Hispanic or Latino", "American Indian Alaska Native Hispanic or Latino",
+                 "Percent American Indian Alaska Native Hispanic or Latino", "Asian Hispanic or Latino", "Percent Asian Hispanic or Latino", 
+                 "Native Hawaiian Pacific Islander Hispanic or Latino", "Percent Native Hawaiian Pacific Islander Hispanic or Latino", 
+                 "Other Race Hispanic or Latino", "Percent Other Race Hispanic or Latino", 
+                "Two or More Races Hispanic or Latino", "Percent Two or More Races Hispanic or Latino", "Total Male Population", "Percent Male", 
+                "Total Female Population",  "Percent Female", "Total 0 to 4 years", "Percent 0 to 4 years",
+                "Total 5 to 9 years", "Percent 5 to 9 years", "Total 10 to 14 years", "Percent 10 to 14 years", "Total 15 to 19 years", "Percent 15 to 19 years", "Total 20 to 24 years", "Percent 20 to 24 years", "Total 25 to 29 years", "Percent 25 to 29 years", 
+                "Total 30 to 34 years","Percent 30 to 34 years", "Total 35 to 39 years", "Percent 35 to 39 years", "Total 40 to 44 years", "Percent 40 to 44 years", "Total 45 to 49 years", "Percent 45 to 49 years", "Total 50 to 54 years", "Percent 50 to 54 years",
+                "Total 55 to 59 years", "Percent 55 to 59 years", "Total 60 to 64 years", "Percent 60 to 64 years", 
+                "Total 65 to 69 years",  "Percent 65 to 69 years", "Total 70 to 74 years", "Percent 70 to 74 years", "Total 75 to 79 years", "Percent 75 to 79 years",
+                "Total 80 to 84 years", "Percent 80 to 84 years", "Total 85 and older", "Percent 85 and older", "Social Vulnerability Index", "Environmental Justice Index", "UV Index", 
+                 "Radon", "Walkability", "Pesticide Exposure", "Racial Residential Segregation", "N Noise More than LAeq 45 to 50 db", "N Noise More than LAeq 50 to 60 db", "N Noise More than LAeq 60 to 70 db", "N Noise More than LAeq 70 to 80 db", "N Noise More than LAeq 80 to 90 db", "N Noise More than LAeq 90 db",
+                "Pct Noise More than LAeq 45 to 50 db", "Pct Noise More than LAeq 50 to 60 db", "Pct Noise More than LAeq 60 to 70 db",
+                "Pct Noise More than LAeq 70 to 80 db", "Pct Noise More than LAeq 80 to 90 db", "Pct Noise More than LAeq 90 db", "Unemployment", 
+                 "No broadband internet", "No high school diploma", "Single parent households", "Crowding", "Poverty", "Housing cost burden", 
+                 "Dew point", "Maximum temperature", "Minimum temperature", "Average temperature", "Precipitation", "Wildfire smoke", "Nitrogen dioxide",
+                 "Sulfur dioxide", "Carbon monoxide", "Ozone", "Population density", "Avalanche Risk Score", "Coastal Flooding Risk Score", "Cold Wave Risk Score",
+                "Drought Risk Score", "Earthquake Risk Score", "Hail Risk Score", "Heat Wave Risk Score", "Hurricane Risk Score", "Ice Storm Risk Score", "Landslide Risk Score", "Lightning Risk Score", "Riverine Flooding Risk Score", "Strong Wind Risk Score", "Tornado Risk Score", "Tsunami Risk Score",
+                "Volcanic Activity Risk Score", "Wildfire Risk Score", "Winter Weather Risk Score", "bluespace", "social_capital", "PFAS_dw", "Median HH Income", "HT_Index", "Historic Redlining Score",
+                "pct_Open_Water", "pct_Developed_Open", "pct_Developed_Low",
+                  "pct_Developed_Medium", "pct_Developed_High", "pct_Barren", "pct_Evergreen_Forest",
+                  "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
+                  "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice", "geometry"))
+
+st_write(geoexmap.data, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data", append = FALSE)
+
+st_write(crime, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime", append = FALSE)
+
+st_write(cancer.progs, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "cancer_progs", append = FALSE)
+st_write(parks, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "parks", append = FALSE)
+st_write(transit, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "transit", append = FALSE)
+st_write(alc.retailers, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "alc_retailers", append = FALSE)
+
+st_write(clinics, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "clinics", append = FALSE)
+st_write(ems.stations, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "ems", append = FALSE)
+st_write(hospitals, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "hospitals", append = FALSE)
+st_write(pharmacies, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "pharmacies", append = FALSE)
+st_write(wic.clinics, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_clinics", append = FALSE)
+st_write(wic.retailers, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "wic_retailers", append = FALSE)
+st_write(fqhc, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "fqhc", append = FALSE)
+st_write(microplastics, "geoexmap/Data_Processed/complete/geoexmap_data.gpkg", layer = "microplastics", append = FALSE)
+```
+

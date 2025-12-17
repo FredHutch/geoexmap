@@ -370,7 +370,10 @@ categories <- accordion(
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
     selectInput('sociodemo', 
-                htmltools::span("Select variables"),
+                htmltools::span("Select variables",
+                                popover(bs_icon("question-circle"),
+                                        "See more info about this category",
+                                        placement = "right")),
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
     accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
@@ -489,7 +492,9 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(categories,
                                 width = "400px"),
-              leafletOutput("geoexmap"),
+              bslib::card(
+                leafletOutput("geoexmap"),
+                   card_footer(popover(bs_icon('question-circle'), title = "Attribution", "here it is"))),
               conditionalPanel(
                 condition = "(input.showchart == true ) || (input.clear == null && input.clear == 0)",
                 absolutePanel(
@@ -511,7 +516,7 @@ ui <- page_navbar(
                                 width = "400px"),
               reactableOutput("table")
             )),
-  nav_panel("Documentation",
+  nav_panel("Documentation", 'docs',
             h2("Version History")),
   nav_panel("Contact us",
             h3("Questions or comments?"),
@@ -559,7 +564,8 @@ server <- function(input, output, session) {
         return(NULL)
       }
       
-      domain = df_vars[[var]]
+      domain <- df_vars[[var]]
+      breaks <- unique(ggplot2::cut_number(df_vars[[var]], n = 5))
 
       if (var %in% g) {
         return(colorQuantile(
