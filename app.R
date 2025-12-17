@@ -484,7 +484,6 @@ categories <- accordion(
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
-  #title = tags$img(src = "/geoexmap-logo.png", height = '92.32px', width = '214.8px'),
   tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico/geoexmap_favicon.png")),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
@@ -565,7 +564,7 @@ server <- function(input, output, session) {
       }
       
       domain <- df_vars[[var]]
-      breaks <- unique(ggplot2::cut_number(df_vars[[var]], n = 5))
+      #breaks <- unique(ggplot2::cut_number(df_vars[[var]], n = 5))
 
       if (var %in% g) {
         return(colorQuantile(
@@ -1017,7 +1016,7 @@ server <- function(input, output, session) {
   
   #### DOWNLOAD HANDLER ####
   output$download <- downloadHandler(
-    filename = "geoexmap_download.gpkg",
+    filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
     content = function(file) {
       st_write(map_cols(), file)
     }
