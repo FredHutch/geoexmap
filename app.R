@@ -484,7 +484,7 @@ categories <- accordion(
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
-  tags$head(tags$link(rel = "shortcut icon", href = "favicon.ico/geoexmap_favicon.png")),
+  tags$head(tags$link(rel = "shortcut icon", href = "/favicon.ico/geoexmap_favicon.png")),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
   nav_panel("Map",
@@ -516,7 +516,9 @@ ui <- page_navbar(
               reactableOutput("table")
             )),
   nav_panel("Documentation", 'docs',
-            h2("Version History")),
+            h2("Version History"),
+            h2("Processing Steps"),
+            tags$iframe(seamless = "seamless", src = "/geoexmap_tech_doc.html")),
   nav_panel("Contact us",
             h3("Questions or comments?"),
             a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org")),
@@ -564,7 +566,8 @@ server <- function(input, output, session) {
       }
       
       domain <- df_vars[[var]]
-      #breaks <- unique(ggplot2::cut_number(df_vars[[var]], n = 5))
+      #breaks <- 
+      #breaks <- ggplot2::cut_number(df_vars[[var]], n = 5).bincode(domain, breaks)
 
       if (var %in% g) {
         return(colorQuantile(
