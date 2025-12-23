@@ -565,7 +565,7 @@ server <- function(input, output, session) {
   
   g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Cholesterol.Screening",
          "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
-         "Colorectal.Cancer.Screening.among.Adults.45.to.75", "Walkability")
+         "Colorectal.Cancer.Screening.among.Adults.45.to.75", "Walkability", "social_capital", "Median.HH.Income", "HT_Index")
   b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults", 
          "Food.Stamps", "Food.Insecurity",
          "Housing.Insecurity", "Utility.Services.Threat", "Lacking.Reliable.Transportation", 
@@ -574,8 +574,22 @@ server <- function(input, output, session) {
          "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
-         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults") 
-  n <- c("Nighttime.Radiance", "Total.Population", names(sociodemo), names(sex), names(race), names(age))
+         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults",
+         "Radon", "Pesticide.Exposure", "Racial.Residential.Segregation", "N.Noise.More.than.LAeq.45.to.50.db",
+         "N.Noise.More.than.LAeq.50.to.60.db", "N.Noise.More.than.LAeq.60.to.70.db", "N.Noise.More.than.LAeq.70.to.80.db", 
+         "N.Noise.More.than.LAeq.80.to.90.db", "N.Noise.More.than.LAeq.90.db", "Pct.Noise.More.than.LAeq.45.to.50.db",
+         "Pct.Noise.More.than.LAeq.50.to.60.db", "Pct.Noise.More.than.LAeq.60.to.70.db", "Pct.Noise.More.than.LAeq.70.to.80.db", 
+         "Pct.Noise.More.than.LAeq.80.to.90.db", "Pct.Noise.More.than.LAeq.90.db", "Unemployment", "No.broadband.internet",
+         "No.high.school.diploma", "Single.parent.households", "Crowding", "Poverty", "Housing.cost.burden", "Maximum.temperature",
+         "Minimum.temperature", "Average.temperature", "Wildfire.smoke", "Nitrogen.dioxide", "Sulfur.dioxide", "Carbon.monoxide",
+         "Ozone", "Avalanche.Risk.Score", "Coastal.Flooding.Risk.Score", "Cold.Wave.Risk.Score", "Drought.Risk.Score", "Earthquake.Risk.Score",
+         "Hail.Risk.Score", "Heat.Wave.Risk.Score", "Hurricane.Risk.Score", "Ice.Storm.Risk.Score", "Landslide.Risk.Score", "Lightning.Risk.Score", "Riverine.Flooding.Risk.Score",
+         "Strong.Wind.Risk.Score", "Tornado.Risk.Score", "Tsunami.Risk.Score", "Volcanic.Activity.Risk.Score", "Wildfire.Risk.Score", "Winter.Weather.Risk.Score",
+         "Historic.Redlining.Score") 
+  n <- c("Nighttime.Radiance", names(sociodemo), names(sex), names(race), names(age), "Precipitation", "Population.density", "bluespace",
+         "pct_Open_Water", "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "Pct_Barren",
+         "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
+         "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice")
   
   # define palette by variable
   geoex.palette <- function(var) {
@@ -591,10 +605,10 @@ server <- function(input, output, session) {
       
       if(var %in% percent.vars) {
         if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
-        else if (var %in% n) return(colorBin(palette = ))
+        else if (var %in% b) return(colorBin(palette = "YlOrRd", domain = domain, na.color = "transparent", bins = pct.breaks))
       }
 
-      if (var %in% g && !var %in% percent.vars) {
+      if (var %in% g && !(var %in% percent.vars)) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
           na.color = "transparent", n = 5
@@ -1460,8 +1474,15 @@ server <- function(input, output, session) {
         if (!is.null(pal)){
           print(map_cols()[[c]])
           pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
-          if (!is.logical(map_cols()[[c]])){
+          if (any(map_cols()[[c]] %in% percent.vars)) {
+            print("variable is a percentage")
+            pal_labs <- c(0, 20, 40, 60, 80, 100)
+            print(pal_labs)
+          }
+          else if (!is.logical(map_cols()[[c]])){
+
             pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
+            
             #pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
             #pal_labs <- round(ggplot2::cut_number(map_cols()[[c]], n = 5, closed = "left"), 2)
             pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
@@ -1473,7 +1494,8 @@ server <- function(input, output, session) {
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c))
+            #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c))
+            addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
         }
       }
       
