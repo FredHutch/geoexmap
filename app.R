@@ -542,7 +542,28 @@ server <- function(input, output, session) {
   #### PALETTE FUNCTION ####
   # define categories for palettes
   # "good", "bad", "neutral"
-  g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Denstist.in.Past.Year", "Cholesterol.Screening",
+  # percent variables for legend breaks
+  percent.vars <- c("Food.Stamps", "Food.Insecurity", "Housing.Insecurity", "Utility.Services.Threat",
+                    "Lacking.Reliable.Transportation", "Lack.of.Social.and.Emotional.Support", "Lack.of.Health.Insurance",
+                    "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Taking.Medicine.to.Control.High.Blood.Pressure",
+                    "Cholesterol.Screening", "Mammography.Use.among.Women.50.to.74", "Colorectal.Cancer.Screening.among.Adults.45.to.75",
+                    "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults", "No.Leisure.time.Physical.Activity.among.Adults", 
+                    "Short.Sleep.Duration", "Arthritis.among.Adults", "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "Cancer.or.Melanoma.among.Adults",
+                    "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults", "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults",
+                    "Diagnosed.Diabetes.among.Adults", "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.Older", "Stroke.among.Adults", "Hispanic.or.Latino",
+                    "Percent.White.NonHispanic", "Percent.Black.NonHispanic", "Percent.American.Indian.Alaska.Native.NonHispanic", "Percent.Asian.NonHispanic", "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic", 
+                    "Percent.Other.Race.NonHispanic", "Percent.Two.or.More.Races.NonHispanic", "Percent.White.Hispanic.or.Latino", "Percent.Black.Hispanic.or.Latino", "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino", 
+                    "Percent.Asian.Hispanic.or.Latino", "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Percent.Other.Race.Hispanic.or.Latino", "Percent.Two.or.More.Races.Hispanic.or.Latino", "Percent.Male", "Percent.Female", 
+                    "Percent.0.to.4.years", "Percent.5.to.9.years", "Percent.10.to.14.years", "Percent.15.to.19.years", "Percent.20.to.24.years", "Percent.25.to.29.years", "Percent.30.to.34.years", "Percent.35.to.39.years", 
+                    "Percent.40.to.44.years", "Percent.45.to.49.years", "Percent.50.to.54.years", "Percent.55.to.59.years", "Percent.60.to.64.years", "Percent.65.to.69.years", "Percent.70.to.74.years", "Percent.75.to.79.years", "Percent.80.to.84.years",
+                    "Percent.85.and.older", "Pct.Noise.More.than.LAeq.45.to.50.db", "Pct.Noise.More.than.LAeq.50.to.60.db", "Pct.Noise.More.than.LAeq.60.to.70.db", "Pct.Noise.More.than.LAeq.70.to.80.db", 
+                    "Pct.Noise.More.than.LAeq.80.to.90.db", "Pct.Noise.More.than.LAeq.90.db", "Unemployment", "No.broadband.internet", "No.high.school.diploma", "Single.parent.households", "Crowding", "Poverty", "Housing.cost.burden", "pct_Open_Water",
+                    "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "pct_Barren", "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
+                    "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice"
+                    )
+  #percent.vars <- c()
+  
+  g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Cholesterol.Screening",
          "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
          "Colorectal.Cancer.Screening.among.Adults.45.to.75", "Walkability")
   b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults", 
@@ -554,9 +575,9 @@ server <- function(input, output, session) {
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
          "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults") 
-  n <- c("Nighttime.Radiance", "Total.Population")
+  n <- c("Nighttime.Radiance", "Total.Population", names(sociodemo), names(sex), names(race), names(age))
   
-  
+  # define palette by variable
   geoex.palette <- function(var) {
     tryCatch({
       # skip geometry column to avoid error
@@ -566,10 +587,14 @@ server <- function(input, output, session) {
       }
       
       domain <- df_vars[[var]]
-      #breaks <- 
-      #breaks <- ggplot2::cut_number(df_vars[[var]], n = 5).bincode(domain, breaks)
+      pct.breaks <- c(0, 20, 40, 60, 80, 100)
+      
+      if(var %in% percent.vars) {
+        if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
+        else if (var %in% n) return(colorBin(palette = ))
+      }
 
-      if (var %in% g) {
+      if (var %in% g && !var %in% percent.vars) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
           na.color = "transparent", n = 5
@@ -589,7 +614,7 @@ server <- function(input, output, session) {
         # else return(colorBin(
         #   palette = "Blues", domain = domain,
         #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
-        #   na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
+        #   na.color = "transparent", bins = breaks
         # ))
 
       } else if (var == "PFAS_dw") {
