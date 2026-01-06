@@ -40,6 +40,9 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
 # polygon data tied to census tracts or counties
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data") 
 
+data <- data %>% 
+  mutate(across(where(is.numeric), ~na_if(., 0)))
+
 food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
 
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
@@ -158,7 +161,6 @@ airpol <- c("PM2.5" = "Particulate.Matter.2.5",
             "Ozone (O3)" = "Ozone")
 
 naturalenv <- c("UV index" = "UV.Index",
-                "Dew point" = "Dew.point",
                 "Maximum temperature" = "Maximum.temperature",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
@@ -295,13 +297,13 @@ health_prevention <- df_vars %>%
   dplyr::select(c(11:17)) 
 
 natural_env <- df_vars %>%
-  dplyr::select(c(107:108, 131:135, 142:159, 162)) 
+  dplyr::select(c(107:108, 131:134, 141:158, 161)) 
 
 air_pol <- df_vars %>% 
-  dplyr::select(c(2, 136:140)) 
+  dplyr::select(c(2, 135:139)) 
 
 built_env <- df_vars %>%
-  dplyr::select(c(3:4, 109:110, 112:123, 160, 166:181)) 
+  dplyr::select(c(3:4, 109:110, 112:123, 159, 165:180)) 
 
 sociodemo <- df_vars %>% 
   dplyr::select(c(34)) 
@@ -316,7 +318,7 @@ age <- df_vars %>%
   dplyr::select(c(69:104))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(5:10, 124:130, 105:106, 111, 141, 161, 163, 164, 165)) 
+  dplyr::select(c(5:10, 124:130, 105:106, 111, 140, 160, 162, 163, 164)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:50)) 
