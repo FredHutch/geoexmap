@@ -30,7 +30,7 @@ library(dplyr)
 library(rsconnect)
 library(rlang)
 
-#### LOAD DATA ####
+#### LOAD DATA #### 
 # empty shapefiles
 city.bounds <- st_read("Geo/city/cities.gpkg")
 county.bounds <- st_read("Geo/county/counties.gpkg")
