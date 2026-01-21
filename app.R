@@ -38,8 +38,11 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
   dplyr::select(c(GEOID, NAMELSAD, NAMELSADCO))
 
 # polygon data tied to census tracts or counties
-data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data") 
+data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data")
 
+og.data <- data
+
+# change here so that mapped values are NA if 0--to map transparently on the map
 data <- data %>% 
   mutate(across(where(is.numeric), ~na_if(., 0)))
 
@@ -541,7 +544,7 @@ server <- function(input, output, session) {
    # update_switch("")
   })
   
-  #### PALETTE FUNCTION ####
+  #### PALETTE ####
   # define categories for palettes
   # "good", "bad", "neutral"
   # percent variables for legend breaks
@@ -552,7 +555,7 @@ server <- function(input, output, session) {
                     "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults", "No.Leisure.time.Physical.Activity.among.Adults", 
                     "Short.Sleep.Duration", "Arthritis.among.Adults", "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "Cancer.or.Melanoma.among.Adults",
                     "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults", "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults",
-                    "Diagnosed.Diabetes.among.Adults", "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.Older", "Stroke.among.Adults", "Hispanic.or.Latino",
+                    "Diagnosed.Diabetes.among.Adults", "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.Older", "Stroke.among.Adults", "Percent.Hispanic.or.Latino",
                     "Percent.White.NonHispanic", "Percent.Black.NonHispanic", "Percent.American.Indian.Alaska.Native.NonHispanic", "Percent.Asian.NonHispanic", "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic", 
                     "Percent.Other.Race.NonHispanic", "Percent.Two.or.More.Races.NonHispanic", "Percent.White.Hispanic.or.Latino", "Percent.Black.Hispanic.or.Latino", "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino", 
                     "Percent.Asian.Hispanic.or.Latino", "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Percent.Other.Race.Hispanic.or.Latino", "Percent.Two.or.More.Races.Hispanic.or.Latino", "Percent.Male", "Percent.Female", 
@@ -563,7 +566,6 @@ server <- function(input, output, session) {
                     "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "pct_Barren", "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
                     "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice"
                     )
-  #percent.vars <- c()
   
   g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Cholesterol.Screening",
          "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
@@ -588,7 +590,7 @@ server <- function(input, output, session) {
          "Hail.Risk.Score", "Heat.Wave.Risk.Score", "Hurricane.Risk.Score", "Ice.Storm.Risk.Score", "Landslide.Risk.Score", "Lightning.Risk.Score", "Riverine.Flooding.Risk.Score",
          "Strong.Wind.Risk.Score", "Tornado.Risk.Score", "Tsunami.Risk.Score", "Volcanic.Activity.Risk.Score", "Wildfire.Risk.Score", "Winter.Weather.Risk.Score",
          "Historic.Redlining.Score") 
-  n <- c("Nighttime.Radiance", names(sociodemo), names(sex), names(race), names(age), "Precipitation", "Population.density", "bluespace",
+  n <- c("Nighttime.Radiance", "Percent.Hispanic.or.Latino",  names(sociodemo), names(sex), names(race), names(age), "Precipitation", "Population.density", "bluespace",
          "pct_Open_Water", "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "Pct_Barren",
          "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
          "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice")
@@ -608,6 +610,8 @@ server <- function(input, output, session) {
       if(var %in% percent.vars) {
         if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
         else if (var %in% b) return(colorBin(palette = "YlOrRd", domain = domain, na.color = "transparent", bins = pct.breaks))
+        # otherwise var in n
+        else return(colorBin(palette = "Blues", domain = domain, na.color = "transparent", bins = pct.breaks))
       }
 
       if (var %in% g && !(var %in% percent.vars)) {
@@ -660,6 +664,7 @@ server <- function(input, output, session) {
   }
   
   #### LEGEND TITLES ####
+  # defines legend titles based on defined column
   legend.titles <- function(col) {
     if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index")
@@ -1030,16 +1035,17 @@ server <- function(input, output, session) {
       clearGroup("cancermortality") %>% 
       clearControls()
   })
-
-   observeEvent(input$microplastics, {
-     if (input$microplastics) {
-       shinyjs::show('micro_div')
-     } else {
-       shinyjs::hide('micro_div')
-     }
   
-   })
-
+  # if microplastics switch is true, then show filtering criteria for microplastics
+  observeEvent(input$microplastics, {
+    if (input$microplastics) {
+      shinyjs::show('micro_div')
+    } else {
+      shinyjs::hide('micro_div')
+    }
+    
+  })
+  
    observe({
      hide('micro_div')
    })
@@ -1237,7 +1243,7 @@ server <- function(input, output, session) {
               ))
     })
   
-  #### MAIN OBSERVER LOGIC AND PROXIES ####
+  #### MAIN OBSERVER LOGIC ####
   observe({
     # if (ncol(map_cols()) == 4) {
     #   print("Disabling select inputs...")
@@ -1276,6 +1282,7 @@ server <- function(input, output, session) {
       # for each chosen column, define the palette, and add polygons
       label = ""
       
+      ##### point control flow #####
       if (input$transit) {
         print("Adding points")
         
@@ -1458,6 +1465,7 @@ server <- function(input, output, session) {
                     title = "Microplastics Concentration")
       }
       
+      ##### map (food environment) #####
       for (c in colnames(food_env_cols())) {
         pal <- geoex.palette(c)
         
@@ -1468,6 +1476,26 @@ server <- function(input, output, session) {
             addLegend(pal = pal, values = ~food_env_cols()[[c]], title = legend.titles(c))
         }
       }
+      ##### map (main data) #####
+      get_pal_labs <- function(col) {
+        # first check if percentage--overrides others
+        if (col %in% percent.vars) {
+          return(c(0, 20, 40, 60, 80, 100))
+        }
+        
+        # get around PFAS label
+        if (!is.logical(col)) {
+          if (col != "Percent.Male" & col != "Percent.Female") {
+            pal_labs <- round(quantile(col, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
+            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+          } else {
+            #pal_labs <- round(quantile(col))
+          }
+          
+        } else {
+          return(c(TRUE, FALSE))
+        }
+      }
       
       for (c in colnames(map_cols())) {
         print(c)
@@ -1476,31 +1504,31 @@ server <- function(input, output, session) {
         if (!is.null(pal)){
           print(map_cols()[[c]])
           pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
-          if (any(map_cols()[[c]] %in% percent.vars)) {
-            print("variable is a percentage")
-            pal_labs <- c(0, 20, 40, 60, 80, 100)
-            print(pal_labs)
-          }
-          else if (!is.logical(map_cols()[[c]])){
-
-            pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
-            
-            #pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
-            #pal_labs <- round(ggplot2::cut_number(map_cols()[[c]], n = 5, closed = "left"), 2)
-            pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
-          } else {
-            pal_labs = c(TRUE, FALSE)
-          }
+          # if (any(map_cols()[[c]] %in% percent.vars)) {
+          #   print("variable is a percentage")
+          #   pal_labs <- c(0, 20, 40, 60, 80, 100)
+          #   print(pal_labs)
+          # }
+          # else if (!is.logical(map_cols()[[c]])){
+          #   pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
+          #   
+          #   #pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
+          #   #pal_labs <- round(ggplot2::cut_number(map_cols()[[c]], n = 5, closed = "left"), 2)
+          #   pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
+          # } else {
+          #   pal_labs = c(TRUE, FALSE)
+          # }
 
           proxy <- proxy %>% 
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c))
-            addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
+            addLegend(colors = pal_colors, labels = get_pal_labs(c), title = legend.titles(c))
+            #addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
         }
       }
       
+      ##### map (crime) #####
       for (c in colnames(crime_cols())) {
         print(c)
         pal <- geoex.palette(c)
@@ -1514,6 +1542,7 @@ server <- function(input, output, session) {
         }
       }
       
+      ##### map (WSCR incidence) #####
       observe({
         if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
           geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
@@ -1536,6 +1565,7 @@ server <- function(input, output, session) {
         }
       })
       
+      ##### map (WSCR incidence) #####
       observe({
         if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
           geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
