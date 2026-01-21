@@ -489,7 +489,6 @@ categories <- accordion(
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
-  tags$head(tags$link(rel = "shortcut icon", href = "/favicon.ico/geoexmap_favicon.png")),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
   nav_panel("Map",
