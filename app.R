@@ -517,7 +517,10 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(categories, 
                                 width = "400px"),
-              reactableOutput("table")
+              accordion_panel("Census Tract Data", reactableOutput("table")),
+              accordion_panel("County Data"),
+              accordion_panel("Standalone Data")
+              
             )),
   nav_panel("Documentation", 'docs',
             h2("Version History"),
