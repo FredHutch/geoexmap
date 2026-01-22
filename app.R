@@ -605,6 +605,7 @@ server <- function(input, output, session) {
       
       domain <- df_vars[[var]]
       pct.breaks <- c(0, 20, 40, 60, 80, 100)
+      m_f_breaks <- c(0, 50, 100)
       
       if(var %in% percent.vars) {
         if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
@@ -1476,19 +1477,22 @@ server <- function(input, output, session) {
         }
       }
       ##### map (main data) #####
-      get_pal_labs <- function(col) {
+      # x - data vector
+      # col - column name
+      get_pal_labs <- function(x, col) {
         # first check if percentage--overrides others
         if (col %in% percent.vars) {
           return(c(0, 20, 40, 60, 80, 100))
         }
         
         # get around PFAS label
-        if (!is.logical(col)) {
+        if (!is.logical(x)) {
           if (col != "Percent.Male" & col != "Percent.Female") {
-            pal_labs <- round(quantile(col, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
+            
+            pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
             return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
           } else {
-            #pal_labs <- round(quantile(col))
+            pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
           }
           
         } else {
@@ -1522,7 +1526,7 @@ server <- function(input, output, session) {
             addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            addLegend(colors = pal_colors, labels = get_pal_labs(c), title = legend.titles(c))
+            addLegend(colors = pal_colors, labels = get_pal_labs(map_cols()[[c]], c), title = legend.titles(c))
             #addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
         }
       }
