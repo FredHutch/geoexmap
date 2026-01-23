@@ -610,14 +610,15 @@ server <- function(input, output, session) {
       pct.breaks <- c(0, 20, 40, 60, 80, 100)
       m_f_breaks <- c(0, 50, 100)
       
-      if(var %in% percent.vars) {
+      # first check if percentage--overrides
+      if (var %in% percent.vars) {
         if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
         else if (var %in% b) return(colorBin(palette = "YlOrRd", domain = domain, na.color = "transparent", bins = pct.breaks))
         # otherwise var in n
-        else return(colorBin(palette = "Blues", domain = domain, na.color = "transparent", bins = pct.breaks))
+        else return(colorBin(palette = "Purples", domain = domain, na.color = "transparent", bins = pct.breaks))
       }
 
-      if (var %in% g && !(var %in% percent.vars)) {
+      else if (var %in% g) {
         return(colorQuantile(
           palette = "YlGn", domain = domain,
           na.color = "transparent", n = 5
@@ -1485,18 +1486,23 @@ server <- function(input, output, session) {
       get_pal_labs <- function(x, col) {
         # first check if percentage--overrides others
         if (col %in% percent.vars) {
-          return(c(0, 20, 40, 60, 80, 100))
+          print("percentage")
+          if (col != "Percent.Male" & col != "Percent.Female") {
+            # pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
+            # return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+            pal_labs <- c(0, 20, 40, 60, 80, 100)
+            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1]) # first lag is NA
+          } else {
+            pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
+            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+          }
+          
         }
         
         # get around PFAS label
-        if (!is.logical(x)) {
-          if (col != "Percent.Male" & col != "Percent.Female") {
-            
-            pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
-            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-          } else {
-            pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
-          }
+        else if (!is.logical(x)) {
+          pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # will need to change for some vars
+          return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
           
         } else {
           return(c(TRUE, FALSE))
@@ -1508,8 +1514,10 @@ server <- function(input, output, session) {
         pal <- geoex.palette(c)
         
         if (!is.null(pal)){
-          print(map_cols()[[c]])
+          x <- map_cols()[[c]]
           pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
+          print(length(pal_colors))
+          print(length(get_pal_labs(map_cols()[[c]], c)))
           # if (any(map_cols()[[c]] %in% percent.vars)) {
           #   print("variable is a percentage")
           #   pal_labs <- c(0, 20, 40, 60, 80, 100)
@@ -1524,12 +1532,26 @@ server <- function(input, output, session) {
           # } else {
           #   pal_labs = c(TRUE, FALSE)
           # }
+          
+          # get labels from function
+          pal_labs <- get_pal_labs(x, c)
+          
+          # 2) reconstruct breaks from labels
+          parts  <- strsplit(pal_labs, " - ", fixed = TRUE)
+          lower  <- as.numeric(vapply(parts, `[[`, character(1L), 1L))
+          upper  <- as.numeric(vapply(parts, `[[`, character(1L), 2L))
+          mids   <- (lower + upper) / 2
+          
+          # 3) evaluate the palette at the midpoints -> one color per label
+          pal_colors <- pal(mids)
+          print(length(pal_colors))
+          print(length(pal_labs))
 
           proxy <- proxy %>% 
-            addPolygons(., fillColor = ~pal(map_cols()[[c]]), stroke = input$showbounds, weight = 0.75, color = "black",
+            addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            addLegend(colors = pal_colors, labels = get_pal_labs(map_cols()[[c]], c), title = legend.titles(c))
+            addLegend(colors = pal_colors, labels = get_pal_labs(x, c), title = legend.titles(c))
             #addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
         }
       }
