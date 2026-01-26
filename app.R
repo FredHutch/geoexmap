@@ -788,7 +788,7 @@ server <- function(input, output, session) {
     
     if(col == "UV.Index") return("UV index (UVI)")
     
-    if(col == "Radon") return("Radon")
+    if(col == "Radon") return("Radon gas concentration (Bq/m<sup>3</sup>)")
     
     if(col == "Pesticide.Exposure") return("Pesticide exposure")
     
@@ -830,24 +830,24 @@ server <- function(input, output, session) {
     if(col == "Ozone") return("Ozone (O<sub>3</sub>) (ppb)")
     
     if(col == "Population.density") return("Population density (persons per square mile)")
-    if(col == "Avalanche.Risk.Score") return("Avalanche risk")
-    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk")
-    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk")
-    if(col == "Drought.Risk.Score") return("Drought risk")
-    if(col == "Earthquake.Risk.Score") return("Earthquake risk")
-    if(col == "Hail.Risk.Score") return("Hail risk")
-    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk")
-    if(col == "Hurricane.Risk.Score") return("Hurricane risk")
-    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk")
-    if(col == "Landslide.Risk.Score") return("Landslide risk")
-    if(col == "Lightning.Risk.Score") return("Lightning risk")
-    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk")
-    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk")
-    if(col == "Tornado.Risk.Score") return("Tornado risk")
-    if(col == "Tsunami.Risk.Score") return("Tsunami risk")
-    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk")
-    if(col == "Wildfire.Risk.Score") return("Wildfire risk")
-    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk")
+    if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value ($)")
+    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value ($)")
+    if(col == "Drought.Risk.Score") return("Drought risk value ($)")
+    if(col == "Earthquake.Risk.Score") return("Earthquake risk value ($)")
+    if(col == "Hail.Risk.Score") return("Hail risk value ($)")
+    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk value ($)")
+    if(col == "Hurricane.Risk.Score") return("Hurricane risk value ($)")
+    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk value ($)")
+    if(col == "Landslide.Risk.Score") return("Landslide risk value ($)")
+    if(col == "Lightning.Risk.Score") return("Lightning risk value ($)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk value ($)")
+    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk value ($)")
+    if(col == "Tornado.Risk.Score") return("Tornado risk value ($)")
+    if(col == "Tsunami.Risk.Score") return("Tsunami risk value ($)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk value ($)")
+    if(col == "Wildfire.Risk.Score") return("Wildfire risk value ($)")
+    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value ($)")
     
     if(col == "bluespace") return("Blue space (%)")
     if(col == "social_capital") return("Social capital")
@@ -911,16 +911,7 @@ server <- function(input, output, session) {
   })
   
   #### REACTIVE VALUES ####  
-  # subcat_sociodem <- reactive({
-  #   cbind(age, sex, race) %>% 
-  #     dplyr::select(c(!!!input$age, !!!input$sex, !!!input$race))
-  # }) %>% 
-  #   bindCache(input$race, input$age, input$sex)
-  
   map_cols <- reactive({
-    #naturalenv <- cbind(natural_env, air_pol)
-    #sociodemo_sub <- subcat_sociodem()
-    
     df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env)
     
     df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
@@ -1207,7 +1198,7 @@ server <- function(input, output, session) {
         list(data = food_env_inp, input_id = "foodenv", update_fn = updateVarSelectInput)
       )
       
-      # Find the matching category and update
+      # find the matching category and update
       for (category in variable_lookup) {
         if (var_to_remove %in% colnames(category$data)) {
           current_selection <- input[[category$input_id]]
@@ -1518,20 +1509,6 @@ server <- function(input, output, session) {
           pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
           print(length(pal_colors))
           print(length(get_pal_labs(map_cols()[[c]], c)))
-          # if (any(map_cols()[[c]] %in% percent.vars)) {
-          #   print("variable is a percentage")
-          #   pal_labs <- c(0, 20, 40, 60, 80, 100)
-          #   print(pal_labs)
-          # }
-          # else if (!is.logical(map_cols()[[c]])){
-          #   pal_labs <- round(quantile(map_cols()[[c]], seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # depends on n from palette
-          #   
-          #   #pal_labs <- round(BAMMtools::getJenksBreaks(map_cols()[[c]], 6), 2)
-          #   #pal_labs <- round(ggplot2::cut_number(map_cols()[[c]], n = 5, closed = "left"), 2)
-          #   pal_labs <- paste(lag(pal_labs), pal_labs, sep = " - ")[-1] # first lag is NA
-          # } else {
-          #   pal_labs = c(TRUE, FALSE)
-          # }
           
           # get labels from function
           pal_labs <- get_pal_labs(x, c)
