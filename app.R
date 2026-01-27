@@ -486,6 +486,8 @@ categories <- accordion(
   
 )
 
+table.cats <- categories
+
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
@@ -515,10 +517,10 @@ ui <- page_navbar(
             )),
   nav_panel("Table",
             layout_sidebar(
-              sidebar = sidebar(categories, 
+              sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion_panel("Census Tract Data", reactableOutput("table")),
-              accordion_panel("County Data"),
+              accordion_panel("Census Tract Data", reactableOutput("ct_table")),
+              accordion_panel("County Data", reactableOutput("cnty_crime_table")),
               accordion_panel("Standalone Data")
               
             )),
@@ -1050,7 +1052,8 @@ server <- function(input, output, session) {
     active_variables = character(0)
   )
   
-  table_cols <- reactive({
+  # census tract table
+  ct_table_cols <- reactive({
     data[, 1] %>% 
       st_drop_geometry() %>% 
       merge(tract.bounds, by = "GEOID") %>% 
@@ -1058,6 +1061,57 @@ server <- function(input, output, session) {
       dplyr::select(-contains("geom")) %>% 
       st_drop_geometry()
     })
+  
+  #ct_food_table_cols <- reactive({})
+  
+  # county tables
+  cnty_crime_table_cols <- reactive({
+    selected_crime <- crime_cols() %>%  # selected columns from crime
+      st_drop_geometry()
+    
+    crime_df <- crime %>%  
+      dplyr::select(-contains("geom"))
+    
+    selected_col_names <- names(selected_crime)
+    
+    all_cols <- names(crime_df) # vector of column names
+    
+    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE))
+    
+    #p1_index <- which(all_cols == "p1_rate") # index for end of p1 offenses
+    #p2_index <- which(all_cols == "p2_rate") # index for end of p2 offenses
+    
+    # find position of selected col
+   # selected_idx <- which(all_cols == selected_col_name)
+    
+    if (is_p1) {
+      p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
+      selected_idx <- which(all_cols == p1_col)
+      crime_df[, all_cols[1:selected_idx]] %>% 
+        # dplyr::select(1:all_of(selected_idx)) %>% 
+         dplyr::select(-contains("geom")) #%>% 
+        # #st_drop_geometry()
+    } else {
+      p2_col <- selected_col_names[grepl("_p2$|^p2_", selected_col_names, ignore.case = TRUE)]
+      
+      p1_index <- which(all_cols == "p1_rate")  
+      selected_index <- which(all_cols == p2_col)
+      
+      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%  
+        # dplyr::select(1:2, all_of((p1_index + 1):selected_idx)) %>% 
+         dplyr::select(-contains("geom")) #%>% 
+        #st_drop_geometry()
+    }
+    
+    
+  })
+  
+  # cnty_wscr_table_cols <- reactive({
+  #   
+  # })
+  
+  # point tables
+  # ...
   
   #### DOWNLOAD HANDLER ####
   output$download <- downloadHandler(
@@ -1227,16 +1281,22 @@ server <- function(input, output, session) {
   })
   
   #### TABLE RENDER ####
-  output$table <- renderReactable({
-    validate(need(base::ncol(table_cols()) > 3, "Please select a variable."))
+  output$ct_table <- renderReactable({
+    validate(need(base::ncol(ct_table_cols()) > 3, "Please select a variable."))
     
-    reactable(table_cols(),
+    reactable(ct_table_cols(),
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) if(is.numeric(value)) round(value, 3) else value,
                 align = "left"
               ))
     })
+  
+  output$cnty_crime_table <- renderReactable({
+    validate(need(base::ncol(crime_cols()) > 1, "Please select a variable."))
+    
+    reactable(cnty_crime_table_cols())
+  })
   
   #### MAIN OBSERVER LOGIC ####
   observe({
