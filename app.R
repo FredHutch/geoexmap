@@ -480,8 +480,8 @@ categories <- accordion(
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
-    fileInput("upload", "Upload a shapefile"),
-    downloadButton("download", "Download data")
+    fileInput("upload", "Upload a shapefile")#,
+    #downloadButton("download", "Download data")
   )
   
 )
@@ -519,7 +519,7 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion_panel("Census Tract Data", reactableOutput("ct_table")),
+              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download"))),
               accordion_panel("County Data", reactableOutput("cnty_crime_table")),
               accordion_panel("Standalone Data")
               
@@ -1082,7 +1082,6 @@ server <- function(input, output, session) {
       p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
       selected_idx <- which(all_cols == p1_col)
       crime_df[, all_cols[1:selected_idx]] %>% 
-        # dplyr::select(1:all_of(selected_idx)) %>% 
          dplyr::select(-contains("geom")) %>% 
          st_drop_geometry()
     } else {
@@ -1091,13 +1090,10 @@ server <- function(input, output, session) {
       p1_index <- which(all_cols == "p1_rate")  
       selected_idx <- which(all_cols == p2_col)
       
-      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%  
-        # dplyr::select(1:2, all_of((p1_index + 1):selected_idx)) %>% 
+      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%
          dplyr::select(-contains("geom")) %>% 
          st_drop_geometry()
     }
-    
-    
   })
   
   # cnty_wscr_table_cols <- reactive({
@@ -1112,6 +1108,13 @@ server <- function(input, output, session) {
     filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
     content = function(file) {
       st_write(map_cols(), file)
+    }
+  )
+  
+  output$downloadcttab <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "geoexmap_2020_tract_download.gpkg")},
+    content = function(file) {
+      st_write(ct_table_cols(), file)
     }
   )
   
