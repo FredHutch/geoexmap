@@ -1072,35 +1072,29 @@ server <- function(input, output, session) {
     crime_df <- crime %>%  
       dplyr::select(-contains("geom"))
     
-    selected_col_names <- names(selected_crime)
+    selected_col_names <- names(selected_crime) # selected column names
     
     all_cols <- names(crime_df) # vector of column names
     
-    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE))
-    
-    #p1_index <- which(all_cols == "p1_rate") # index for end of p1 offenses
-    #p2_index <- which(all_cols == "p2_rate") # index for end of p2 offenses
-    
-    # find position of selected col
-   # selected_idx <- which(all_cols == selected_col_name)
+    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)) # find if p1 is in any column names
     
     if (is_p1) {
       p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
       selected_idx <- which(all_cols == p1_col)
       crime_df[, all_cols[1:selected_idx]] %>% 
         # dplyr::select(1:all_of(selected_idx)) %>% 
-         dplyr::select(-contains("geom")) #%>% 
-        # #st_drop_geometry()
+         dplyr::select(-contains("geom")) %>% 
+         st_drop_geometry()
     } else {
       p2_col <- selected_col_names[grepl("_p2$|^p2_", selected_col_names, ignore.case = TRUE)]
       
       p1_index <- which(all_cols == "p1_rate")  
-      selected_index <- which(all_cols == p2_col)
+      selected_idx <- which(all_cols == p2_col)
       
       crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%  
         # dplyr::select(1:2, all_of((p1_index + 1):selected_idx)) %>% 
-         dplyr::select(-contains("geom")) #%>% 
-        #st_drop_geometry()
+         dplyr::select(-contains("geom")) %>% 
+         st_drop_geometry()
     }
     
     
