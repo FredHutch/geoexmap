@@ -15,6 +15,7 @@ library(tidyverse)
 library(sf)
 library(data.table)
 library(reactable)
+library(markdown)
 
 library(leaflet)
 library(leaflet.extras)
@@ -40,7 +41,7 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
 # polygon data tied to census tracts or counties
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data")
 
-og.data <- data
+og.data <- data # keep original data for data download
 
 # change here so that mapped values are NA if 0--to map transparently on the map
 data <- data %>% 
@@ -330,11 +331,10 @@ food_env_inp <- food_env %>%
 
 #### DEFINE MARKDOWN FOR TIPS ####
 # define markdown text for tips
-health_out_md <- markdown("
-                          - Diabetes: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)
-                          - Obesity: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)
-                          - Cancer incidence: learn about [risk factors for cancer in general and ways to prevent cancer](https://www.cancer.gov/about-cancer/causes-prevention/patient-prevention-overview-pdq)
-                          ")
+# health_out_md <- markdown("- Diabetes: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)
+#                           - Obesity: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)
+#                           - Cancer incidence: learn about [risk factors for cancer in general and ways to prevent cancer](https://www.cancer.gov/about-cancer/causes-prevention/patient-prevention-overview-pdq)
+#                           ")
 health_bh_md <- markdown("
                          - Cigarette smoking: learn about ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)
                          - No leisure-time physical activity: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)
@@ -369,6 +369,11 @@ soc_md <- markdown("
                    - Lack of reliable transportation: call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [WA statewide helpline](https://wa211.org/)
                    ")
 
+health_out_md <- list(
+  "Diagnosed.Diabetes.among.Adults" = "- Diabetes: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)",
+  "Obesity.among.Adults" = "- Obesity: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)"
+  ) # gotta figure out cancer incidence... icon?
+
 # -------- UI ELEMENTS --------
 categories <- accordion(
   open = FALSE,
@@ -389,11 +394,13 @@ categories <- accordion(
   accordion_panel(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
     selectInput('outcomes', 
-                htmltools::span("Select variables", 
-                     popover(bs_icon("lightbulb"),
-                             health_out_md,
+                htmltools::span("Select variables",
+                     popover(bs_icon("question-circle"),
+                             "Select one or more health outcomes to see tips.",
+                             #health_out_md,
                              title = "Tips",
-                             placement = "right")), outcomes, selectize = TRUE, multiple = TRUE),
+                             placement = "right",
+                             id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence",
                     selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
@@ -519,8 +526,9 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download"))),
-              accordion_panel("County Data", reactableOutput("cnty_crime_table")),
+              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download")),
+                              accordion_panel("2010 Census Tracts")),
+              accordion_panel("County Data", accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download"))),
               accordion_panel("Standalone Data")
               
             )),
@@ -547,6 +555,42 @@ server <- function(input, output, session) {
     update_switch("showchart", value = FALSE)
    # update_switch("")
   })
+  
+  #### DYNAMIC TIP LOGIC ####
+  # convert markdown to html for tips
+  # md_to_html <- function(text) {
+  #   tmp <- textConnection(text)
+  #   on.exit(close(tmp))
+  #   html <- markdownToHTML(tmp, fragment.only = TRUE)
+  #   HTML(html)
+  # }
+  
+  outcomes_md <- reactive({
+    if (is.null(input$outcomes) || length(input$outcomes) == 0) {
+      return("Select one or more health outcomes to see tips.")
+    }
+    
+    paste(unlist(health_out_md[input$outcomes]), collapse = "\n")
+  })
+  
+  observeEvent(input$outcomes, {
+    update_popover(
+      "outcome_popover",
+      content = markdown(outcomes_md())
+    )
+  })
+  # output$outcomes_icon <- renderUI({
+  #   popover(
+  #     bs_icon("question-circle"),
+  #     title = "Tips",
+  #     content = markdown(outcomes_md()),
+  #     placement = "right"
+  #   )
+  # })
+  
+  # dynamic_md <- reactive({
+  #   if
+  # })
   
   #### PALETTE ####
   # define categories for palettes
@@ -1054,7 +1098,7 @@ server <- function(input, output, session) {
   
   # census tract table
   ct_table_cols <- reactive({
-    data[, 1] %>% 
+    og.data[, 1] %>% 
       st_drop_geometry() %>% 
       merge(tract.bounds, by = "GEOID") %>% 
       cbind(map_cols()) %>% 
@@ -1112,9 +1156,16 @@ server <- function(input, output, session) {
   )
   
   output$downloadcttab <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_2020_tract_download.gpkg")},
+    filename = function() {paste0(Sys.Date(), "geoexmap_2020_tract_download.csv")},
     content = function(file) {
       st_write(ct_table_cols(), file)
+    }
+  )
+  
+  output$downloadcntycrime <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "geoexmap_county_crime_download.csv")},
+    content = function(file) {
+      st_write(crime_cols(), file)
     }
   )
   
