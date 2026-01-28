@@ -363,12 +363,14 @@ health_prev_md <- list("Lack.of.Health.Insurance" = "- **Lack of health insuranc
                 "Colorectal.Cancer.Screening.among.Adults.45.to.75" = "- **Colorectal cancer screening**: What are ways to get [screened for colorectal cancer](https://www.fredhutch.org/en/research/institutes-networks-ircs/population-health-colorectal-cancer-screening-program/resources.html)? How can you use [MyGeneRisk](https://mygenerisk-colon.fredhutch.org/), a free tool to learn about your risk of developing colorectal cancer?"
                 )
 
-# prev_md <- markdown("
-#                     - Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington
-#                     - Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)
-#                     - Mammography use: learn about the [benefits of mammography](https://www.cdc.gov/breast-cancer/screening/index.html)
-#                     - Colorectal cancer screening: learn about the [benefits of colorectal cancer screening](https://www.cdc.gov/colorectal-cancer/screening/index.html)
-#                     ")
+airpol_md_list <- list("Particulate.Matter.2.5" = "- **Particulate matter <2.5 microns in diameter (PM<sub>2.5</sub>)**: What is [PM<sub>2.5</sub>](https://www.stateofglobalair.org/pollution-sources/pm25)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+                       "Nitrogen.dioxide" = "- **Nitrogen dioxide (NO<sub>2</sub>)**: What is [NO<sub>2</sub>](https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/nitrogen-dioxide)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+                       "Ozone" = "- **Ozone (O<sub>3</sub>)**: What is [O<sub>3</sub>](https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/ozone)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+                       "Carbon.monoxide" = "- **Carbon monoxide (CO)**: What is [CO](https://www.lung.org/clean-air/indoor-air/indoor-air-pollutants/carbon-monoxide)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+                       "Sulfur.dioxide" = "- **Sulfur dioxide (SO<sub>2</sub>)**: What is [SO<sub>2</sub>](https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/sulfur-dioxide)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+                       "Wildfire.smoke" = "- **Wildfire smoke**: What is [wildfire smoke](https://ecology.wa.gov/air-climate/air-quality/smoke-fire/wildfire-smoke)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels? How can you learn about the current [wildfire smoke forecast](https://airqualitymap.ecology.wa.gov/?view=forecast) in your area (select <u>**Smoke Forecast**</u> from the View menu)? How can you [prepare for wildfires](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/wildfires)?"
+                       )
+
 nat_md <- markdown("
                    - Air pollutants: learn about ways to [protect yourself from air pollution](http://www.breatheasy.tips)
                    - Ultraviolet radiation (UV): learn about [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)
@@ -409,7 +411,7 @@ categories <- accordion(
     "Health Outcomes", icon = bs_icon("heart-pulse"),
     selectInput('outcomes', 
                 htmltools::span("Select variables",
-                     popover(bs_icon("question-circle"),
+                     popover(bs_icon("lightbulb"),
                              "Select one or more health outcomes to see tips.",
                              title = "Tips",
                              placement = "right",
@@ -428,7 +430,7 @@ categories <- accordion(
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
     selectInput('behaviors', htmltools::span("Select variables", 
-                                  popover(bs_icon("question-circle"),
+                                  popover(bs_icon("lightbulb"),
                                           "Select one or more health behaviors to see tips.",
                                           title = "Tips",
                                           placement = "right",
@@ -436,9 +438,10 @@ categories <- accordion(
                  multiple = TRUE, selectize = TRUE)
   ),
   accordion_panel(
-    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
+    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
     selectInput('prevention', htmltools::span("Select variables", 
-                                      popover(bs_icon("question-circle"),
+                                      popover(bs_icon("lightbulb"),
+                                              # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
                                               "Select one or more prevention measures to see tips.",
                                               title = "Tips",
                                               placement = "right",
@@ -464,7 +467,12 @@ categories <- accordion(
     input_switch('microplastics', "Microplastics", value = FALSE),
     div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
-                   selectInput('airpol', NULL, airpol, selectize = TRUE, multiple = TRUE))
+                   selectInput('airpol', htmltools::span("Select variables",
+                                                         popover(bs_icon("question-circle"),
+                                                                 "Select one or more air pollutants to see tips.",
+                                                                 title = "Tips",
+                                                                 placement = "right",
+                                                                 id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
     "Built Environment", icon = bs_icon("buildings"),
@@ -618,6 +626,21 @@ server <- function(input, output, session) {
     paste(unlist(health_prev_md[input$prevention]), collapse = "\n")
   })
   
+  airpol_md <- reactive({
+    if (is.null(input$airpol) || length(input$airpol) == 0) {
+      return("Select one or more air pollutants to see tips.")
+    }
+    
+    has_tip <- input$airpol %in% names(airpol_md_list) # create vector for inputs that have corresponding tips
+    sel_with_tip <- input$airpol[has_tip] # subset
+    
+    if (length(sel_with_tip) == 0) {
+      return("No tips available for selected air pollutants.")
+    }
+    
+    paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
+  })
+  
   observeEvent(input$outcomes, {
     update_popover(
       "outcome_popover",
@@ -636,6 +659,13 @@ server <- function(input, output, session) {
     update_popover(
       "prevention_popover",
       content = markdown(prev_md())
+    )
+  })
+  
+  observeEvent(input$airpol, {
+    update_popover(
+      "airpopover",
+      content = markdown(airpol_md())
     )
   })
   # output$outcomes_icon <- renderUI({
