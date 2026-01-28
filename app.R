@@ -330,12 +330,18 @@ food_env_inp <- food_env %>%
   st_drop_geometry()
 
 #### DEFINE MARKDOWN FOR TIPS ####
-# define markdown text for tips
-
 health_out_md <- list(
+  "Arthritis.among.Adults" = "- **Arthritis**: What are [risk factors for arthritis](https://www.cdc.gov/arthritis/basics/index.html)? What are ways to [treat arthritis](https://www.arthritis.org/treatments) and [manage arthritis](https://www.cdc.gov/arthritis/prevention/index.html)?",
+  "Asthma.among.Adults" = "- **Asthma**: What are [risk factors for asthma](https://www.lung.org/lung-health-diseases/lung-disease-lookup/asthma/learn-about-asthma/what-causes-asthma)? What are ways to [treat asthma](https://www.nhlbi.nih.gov/health/asthma/treatment-action-plan#How-is-asthma-treated?) and [manage asthma](https://www.cdc.gov/asthma/control/index.html)?",
+  "High.Blood.Pressure.among.Adults" = "- **High blood pressure**: What are [risk factors for high blood pressure](https://www.cdc.gov/high-blood-pressure/risk-factors/index.html)? What are ways to [treat high blood pressure](https://www.nhlbi.nih.gov/health/high-blood-pressure/treatment) and [control high blood pressure](https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure)?",
+  "Cancer.or.Melanoma.among.Adults" = "- **Cancer**: What are [risk factors for cancer](https://www.cancer.org/cancer/risk-prevention/understanding-cancer-risk.html)? What are ways to [prevent cancer](https://www.cdc.gov/cancer/prevention/index.html)? What are ways to [treat cancer](https://www.cancer.org/cancer/managing-cancer.html) and [live well after cancer treatment](https://www.cancer.org/cancer/survivorship.html)? What are [healthy recipes and nutrition resources](https://www.cookforyourlife.org/) for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a [Survivorship Care Plan](https://www.fredhutch.org/en/patient-care/services/survivorship/survivorship-clinic.html)?",
+  "High.Cholesterol.among.Screened.Adults" = "- **High cholesterol**: What are [risk factors for high cholesterol](https://www.cdc.gov/cholesterol/risk-factors/index.html)? What are ways to [treat high cholesterol](https://www.heart.org/en/health-topics/cholesterol/prevention-and-treatment-of-high-cholesterol-hyperlipidemia) and [manage high cholesterol](https://www.heart.org/en/healthy-living/healthy-lifestyle/lifes-essential-8/how-to-control-cholesterol-fact-sheet)?",
+  "COPD.among.Adults" = "- **Chronic obstructive pulmonary disease (COPD)**: What are [risk factors for COPD](https://www.nhlbi.nih.gov/health/copd/causes)? What are ways to [treat COPD](https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/treating) and [manage COPD](https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/living-with-copd)?",
+  "Coronary.Heart.Disease.among.Adults" = "- **Heart disease**: What are [risk factors for heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/risk-factors)? What are ways to [treat heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/treatment) and [manage heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/living-with)?",
+  "Depression.among.Adults" = "- **Depression**: What are [risk factors for depression](https://www.psychiatry.org/patients-families/depression/what-is-depression#section_0)? What are ways to [treat depression](https://www.cdc.gov/tobacco/campaign/tips/diseases/depression-anxiety.html#treatments) and [manage depression](https://adaa.org/understanding-anxiety/depression/tips)? ",
   "Diagnosed.Diabetes.among.Adults" = "- **Diabetes**: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)",
-  "Obesity.among.Adults" = "- **Obesity**: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)",
-  "Cancer.or.Melanoma.among.Adults" = "- **Cancer incidence**: learn about [risk factors for cancer in general and ways to prevent cancer](https://www.cancer.gov/about-cancer/causes-prevention/patient-prevention-overview-pdq)"
+  "Obesity.among.Adults" = "- **Obesity**: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)"
+  
 ) 
 
 health_bh_md <- list(
@@ -343,6 +349,10 @@ health_bh_md <- list(
   "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)",
   "Short.Sleep.Duration" = "- **Short sleep duration**: learn about ways to [get better sleep](https://www.cdc.gov/sleep/about/index.html)"
 )
+
+prev_md <- list("Lack.of.Health.Insurance" = "- Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington",
+                "Routine.Checkup.in.the.Past.Year" = "- Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)",
+                "Mammography.Use.among.Women.50.to.74")
 
 prev_md <- markdown("
                     - Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington
@@ -378,11 +388,7 @@ categories <- accordion(
   open = FALSE,
   accordion_panel(
     "Sociodemographics", icon = bs_icon("person-vcard"),
-    selectInput('sociodemo', 
-                htmltools::span("Select variables",
-                                popover(bs_icon("question-circle"),
-                                        "See more info about this category",
-                                        placement = "right")),
+    selectInput('sociodemo', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
     accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
@@ -561,8 +567,8 @@ server <- function(input, output, session) {
       return("Select one or more health outcomes to see tips.")
     }
     
-    has_tip <- input$outcomes %in% names(health_out_md)
-    sel_with_tip <- input$outcomes[has_tip]
+    has_tip <- input$outcomes %in% names(health_out_md) # create vector for inputs that have corresponding tips
+    sel_with_tip <- input$outcomes[has_tip] # subset
     
     if (length(sel_with_tip) == 0) {
       return("No tips available for selected outcomes.")
@@ -577,8 +583,8 @@ server <- function(input, output, session) {
       return("Select one or more health outcomes to see tips.")
     }
     
-    has_tip <- input$behaviors %in% names(health_bh_md)
-    sel_with_tip <- input$behaviors[has_tip]
+    has_tip <- input$behaviors %in% names(health_bh_md) # create vector for inputs that have corresponding tips
+    sel_with_tip <- input$behaviors[has_tip] # subset
     
     if (length(sel_with_tip) == 0) {
       return("No tips available for selected behaviors.")
