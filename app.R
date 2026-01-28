@@ -339,27 +339,36 @@ health_out_md <- list(
   "COPD.among.Adults" = "- **Chronic obstructive pulmonary disease (COPD)**: What are [risk factors for COPD](https://www.nhlbi.nih.gov/health/copd/causes)? What are ways to [treat COPD](https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/treating) and [manage COPD](https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/living-with-copd)?",
   "Coronary.Heart.Disease.among.Adults" = "- **Heart disease**: What are [risk factors for heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/risk-factors)? What are ways to [treat heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/treatment) and [manage heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/living-with)?",
   "Depression.among.Adults" = "- **Depression**: What are [risk factors for depression](https://www.psychiatry.org/patients-families/depression/what-is-depression#section_0)? What are ways to [treat depression](https://www.cdc.gov/tobacco/campaign/tips/diseases/depression-anxiety.html#treatments) and [manage depression](https://adaa.org/understanding-anxiety/depression/tips)? ",
-  "Diagnosed.Diabetes.among.Adults" = "- **Diabetes**: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)",
-  "Obesity.among.Adults" = "- **Obesity**: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)"
-  
+  "Diagnosed.Diabetes.among.Adults" = "- **Diabetes**: What are [risk factors for diabetes](https://www.cdc.gov/diabetes/risk-factors/index.html)? What are ways to [treat diabetes](https://diabetes.org/living-with-diabetes/treatment-care) and [manage diabetes](https://www.cdc.gov/diabetes/living-with/index.html)?",
+  "Obesity.among.Adults" = "- **Obesity**: What are [risk factors for obesity](https://www.cdc.gov/obesity/risk-factors/risk-factors.html)? What are ways to [treat obesity](https://diabetes.org/obesity) and [manage your weight](https://www.cdc.gov/diabetes/living-with/index.html)?",
+  "All.Teeth.Lost.among.Adults.65.and.Older" = "- **Tooth loss**: What are [risk factors for tooth loss](https://www.cdc.gov/oral-health/about/about-tooth-loss.html#cdc_disease_basics_population-who-is-at-risk)? What are ways to [treat tooth loss](https://www.cdc.gov/oral-health/about/about-tooth-loss.html#cdc_disease_basics_treatment-treatment-and-recovery) and [manage oral health?](https://www.cdc.gov/oral-health/prevention/oral-health-tips-for-adults.html)",
+  "Stroke.among.Adults" = "- **Stroke**: What are [risk factors for stroke](https://www.cdc.gov/stroke/risk-factors/index.html)? What are ways to [treat stroke](https://www.cdc.gov/stroke/treatment/index.html) and [rehab after experiencing a stroke](https://www.stroke.org/en/life-after-stroke)?"
 ) 
 
+cancer_mort_md <- markdown("What are risk factors for cancer? What are ways to prevent cancer? What are ways to treat cancer and live well after cancer treatment? What are healthy recipes and nutrition resources for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a Survivorship Care Plan?")
+
 health_bh_md <- list(
-  "Cigarette.Smoking.among.Adults" = "- **Cigarette smoking**: learn about ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)",
+  "Binge.Drinking.among.Adults" = "- **Binge drinking**: What are ways that can help with [starting to drink less](https://www.cdc.gov/drink-less-be-your-best/getting-started-with-drinking-less/index.html)?",
+  "Cigarette.Smoking.among.Adults" = "- **Cigarette smoking**: What are ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)? How do I download [QuitBot](https://quitbot.net/), a free smartphone app to help quit smoking?",
   "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)",
   "Short.Sleep.Duration" = "- **Short sleep duration**: learn about ways to [get better sleep](https://www.cdc.gov/sleep/about/index.html)"
 )
 
-prev_md <- list("Lack.of.Health.Insurance" = "- Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington",
-                "Routine.Checkup.in.the.Past.Year" = "- Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)",
-                "Mammography.Use.among.Women.50.to.74")
+health_prev_md <- list("Lack.of.Health.Insurance" = "- **Lack of health insurance**: How can I [apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for free or low-cost Medicaid health insurance in Washington state?",
+                "Routine.Checkup.in.the.Past.Year" = "- **Routine checkup**: What are ways to [stay up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)?",
+                "Visited.Dentist.in.Past.Year" = "- **Dental care**: What are ways to [maintain dental health](https://www.cdc.gov/oral-health/prevention/oral-health-tips-for-adults.html)?",
+                "Taking.Medicine.to.Control.High.Blood.Pressure" = "- **High blood pressure medication use**: What are ways to [better manage taking blood pressure medication](https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure/managing-high-blood-pressure-medications)?",
+                "Cholesterol.Screening" = "- **Cholesterol screening**: What are ways to [test for cholesterol](https://www.cdc.gov/cholesterol/testing/index.html)?",
+                "Mammography.Use.among.Women.50.to.74" = "- **Mammography**: What are ways to get a [mammogram](https://www.komen.org/breast-cancer/screening/), which helps to screen for breast cancer? How can I schedule a mammogram on the [Fred Hutch Mammography Van](https://www.fredhutch.org/en/patient-care/prevention/breast-cancer-screening/mammogram-van.html)?",
+                "Colorectal.Cancer.Screening.among.Adults.45.to.75" = "- **Colorectal cancer screening**: What are ways to get [screened for colorectal cancer](https://www.fredhutch.org/en/research/institutes-networks-ircs/population-health-colorectal-cancer-screening-program/resources.html)? How can you use [MyGeneRisk](https://mygenerisk-colon.fredhutch.org/), a free tool to learn about your risk of developing colorectal cancer?"
+                )
 
-prev_md <- markdown("
-                    - Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington
-                    - Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)
-                    - Mammography use: learn about the [benefits of mammography](https://www.cdc.gov/breast-cancer/screening/index.html)
-                    - Colorectal cancer screening: learn about the [benefits of colorectal cancer screening](https://www.cdc.gov/colorectal-cancer/screening/index.html)
-                    ")
+# prev_md <- markdown("
+#                     - Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington
+#                     - Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)
+#                     - Mammography use: learn about the [benefits of mammography](https://www.cdc.gov/breast-cancer/screening/index.html)
+#                     - Colorectal cancer screening: learn about the [benefits of colorectal cancer screening](https://www.cdc.gov/colorectal-cancer/screening/index.html)
+#                     ")
 nat_md <- markdown("
                    - Air pollutants: learn about ways to [protect yourself from air pollution](http://www.breatheasy.tips)
                    - Ultraviolet radiation (UV): learn about [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)
@@ -429,10 +438,11 @@ categories <- accordion(
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
     selectInput('prevention', htmltools::span("Select variables", 
-                                      popover(bs_icon("lightbulb"),
-                                              prev_md,
+                                      popover(bs_icon("question-circle"),
+                                              "Select one or more prevention measures to see tips.",
                                               title = "Tips",
-                                              placement = "right")), prevention, selectize = TRUE, multiple = TRUE)
+                                              placement = "right",
+                                              id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add"),
@@ -593,6 +603,21 @@ server <- function(input, output, session) {
     paste(unlist(health_bh_md[input$behaviors]), collapse = "\n")
   })
   
+  prev_md <- reactive({
+    if (is.null(input$prevention) || length(input$prevention) == 0) {
+      return("Select one or more prevention measures to see tips.")
+    }
+    
+    has_tip <- input$prevention %in% names(health_prev_md) # create vector for inputs that have corresponding tips
+    sel_with_tip <- input$prevention[has_tip] # subset
+    
+    if (length(sel_with_tip) == 0) {
+      return("No tips available for selected prevention measures.")
+    }
+    
+    paste(unlist(health_prev_md[input$prevention]), collapse = "\n")
+  })
+  
   observeEvent(input$outcomes, {
     update_popover(
       "outcome_popover",
@@ -604,6 +629,13 @@ server <- function(input, output, session) {
     update_popover(
       "behavior_popover",
       content = markdown(behaviors_md())
+    )
+  })
+  
+  observeEvent(input$prevention, {
+    update_popover(
+      "prevention_popover",
+      content = markdown(prev_md())
     )
   })
   # output$outcomes_icon <- renderUI({
@@ -755,7 +787,7 @@ server <- function(input, output, session) {
     if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support (%)")
     if(col == "Lack.of.Health.Insurance") return("No health insurance (%)")
     if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in past year (%)")
-    if(col == "Visited.Denstist.in.Past.Year") return("Visited dentist in past year (%)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in past year (%)")
     if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Taking blood pressure medication (%)")
     if(col == "Cholesterol.Screening") return("Cholesterol screening (%)")
     if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer (%)")
