@@ -331,15 +331,19 @@ food_env_inp <- food_env %>%
 
 #### DEFINE MARKDOWN FOR TIPS ####
 # define markdown text for tips
-# health_out_md <- markdown("- Diabetes: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)
-#                           - Obesity: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)
-#                           - Cancer incidence: learn about [risk factors for cancer in general and ways to prevent cancer](https://www.cancer.gov/about-cancer/causes-prevention/patient-prevention-overview-pdq)
-#                           ")
-health_bh_md <- markdown("
-                         - Cigarette smoking: learn about ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)
-                         - No leisure-time physical activity: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)
-                         - Short sleep duration: learn about ways to [get better sleep](https://www.cdc.gov/sleep/about/index.html)
-                         ")
+
+health_out_md <- list(
+  "Diagnosed.Diabetes.among.Adults" = "- **Diabetes**: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)",
+  "Obesity.among.Adults" = "- **Obesity**: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)",
+  "Cancer.or.Melanoma.among.Adults" = "- **Cancer incidence**: learn about [risk factors for cancer in general and ways to prevent cancer](https://www.cancer.gov/about-cancer/causes-prevention/patient-prevention-overview-pdq)"
+) 
+
+health_bh_md <- list(
+  "Cigarette.Smoking.among.Adults" = "- **Cigarette smoking**: learn about ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)",
+  "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)",
+  "Short.Sleep.Duration" = "- **Short sleep duration**: learn about ways to [get better sleep](https://www.cdc.gov/sleep/about/index.html)"
+)
+
 prev_md <- markdown("
                     - Lack of health insurance: learn about [how to apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for Medicaid in Washington
                     - Routine checkup: learn about the [benefits of staying up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)
@@ -369,11 +373,6 @@ soc_md <- markdown("
                    - Lack of reliable transportation: call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [WA statewide helpline](https://wa211.org/)
                    ")
 
-health_out_md <- list(
-  "Diagnosed.Diabetes.among.Adults" = "- Diabetes: learn about ways to [prevent diabetes](https://www.cdc.gov/diabetes/prevention-type-2/index.html)",
-  "Obesity.among.Adults" = "- Obesity: learn about ways to [prevent obesity](https://www.nhlbi.nih.gov/health/overweight-and-obesity/prevention)"
-  ) # gotta figure out cancer incidence... icon?
-
 # -------- UI ELEMENTS --------
 categories <- accordion(
   open = FALSE,
@@ -397,7 +396,6 @@ categories <- accordion(
                 htmltools::span("Select variables",
                      popover(bs_icon("question-circle"),
                              "Select one or more health outcomes to see tips.",
-                             #health_out_md,
                              title = "Tips",
                              placement = "right",
                              id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
@@ -415,11 +413,12 @@ categories <- accordion(
   accordion_panel(
     "Health Behaviors", icon = bs_icon("person-walking"),
     selectInput('behaviors', htmltools::span("Select variables", 
-                                  popover(bs_icon("lightbulb"),
-                                          health_bh_md,
+                                  popover(bs_icon("question-circle"),
+                                          "Select one or more health behaviors to see tips.",
                                           title = "Tips",
-                                          placement = "right")), behaviors,
-                 multiple = TRUE, selectize = TRUE,)
+                                          placement = "right",
+                                          id = "behavior_popover")), behaviors,
+                 multiple = TRUE, selectize = TRUE)
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48 px"),
@@ -557,26 +556,48 @@ server <- function(input, output, session) {
   })
   
   #### DYNAMIC TIP LOGIC ####
-  # convert markdown to html for tips
-  # md_to_html <- function(text) {
-  #   tmp <- textConnection(text)
-  #   on.exit(close(tmp))
-  #   html <- markdownToHTML(tmp, fragment.only = TRUE)
-  #   HTML(html)
-  # }
-  
   outcomes_md <- reactive({
     if (is.null(input$outcomes) || length(input$outcomes) == 0) {
       return("Select one or more health outcomes to see tips.")
     }
     
+    has_tip <- input$outcomes %in% names(health_out_md)
+    sel_with_tip <- input$outcomes[has_tip]
+    
+    if (length(sel_with_tip) == 0) {
+      return("No tips available for selected outcomes.")
+    }
+    
     paste(unlist(health_out_md[input$outcomes]), collapse = "\n")
+  })
+  
+  behaviors_md <- reactive({
+    #req(input$behaviors)
+    if (is.null(input$behaviors) || length(input$behaviors) == 0) {
+      return("Select one or more health outcomes to see tips.")
+    }
+    
+    has_tip <- input$behaviors %in% names(health_bh_md)
+    sel_with_tip <- input$behaviors[has_tip]
+    
+    if (length(sel_with_tip) == 0) {
+      return("No tips available for selected behaviors.")
+    }
+    
+    paste(unlist(health_bh_md[input$behaviors]), collapse = "\n")
   })
   
   observeEvent(input$outcomes, {
     update_popover(
       "outcome_popover",
       content = markdown(outcomes_md())
+    )
+  })
+  
+  observeEvent(input$behaviors, {
+    update_popover(
+      "behavior_popover",
+      content = markdown(behaviors_md())
     )
   })
   # output$outcomes_icon <- renderUI({
@@ -622,7 +643,7 @@ server <- function(input, output, session) {
          "Food.Stamps", "Food.Insecurity",
          "Housing.Insecurity", "Utility.Services.Threat", "Lacking.Reliable.Transportation", 
          "Lack.Of.Health.Insurance", "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults",
-         "No.Leisure.Time.Physical.Activity.among.Adults", "Short.Sleep.Duration",
+         "No.Leisure.time.Physical.Activity.among.Adults", "Short.Sleep.Duration",
          "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
          "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
          "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
@@ -735,7 +756,7 @@ server <- function(input, output, session) {
     if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Colorectal cancer screening (%)")
     if(col == "Binge.Drinking.among.Adults") return("Binge drinking (%)")
     if(col == "Cigarette.Smoking.among.Adults") return("Cigarette smoking (%)")
-    if(col == "No.Leisure.Time.Physical.Activity.among.Adults") return("No physical activity (%)")
+    if(col == "No.Leisure.time.Physical.Activity.among.Adults") return("No physical activity (%)")
     if(col == "Short.Sleep.Duration") return("Short sleep duration (%)")
     if(col == "Arthritis.among.Adults") return("Arthritis (%)")
     if(col == "Asthma.among.Adults") return("Asthma (%)")
