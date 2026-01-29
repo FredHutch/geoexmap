@@ -4,21 +4,17 @@
 
 library(shiny)
 library(shinyjs)
-# library(shinycssloaders)
+
 library(htmltools)
-#library(htmlwidgets)
-#library(crosstalk)
 library(reactable)
 library(tidyverse)
 library(sf)
 library(data.table)
-library(reactable)
 library(markdown)
 
 library(leaflet)
 library(leaflet.extras)
 library(leaflet.extras2)
-library(mapview)
 library(plotly)
 
 library(RColorBrewer)
@@ -26,7 +22,6 @@ library(bslib)
 library(bsicons)
 library(dplyr)
 
-library(rsconnect)
 library(rlang)
 
 #### LOAD DATA #### 
@@ -613,10 +608,10 @@ ui <- page_navbar(
               accordion_panel("Standalone Data")
               
             )),
-  nav_panel("Documentation", 'docs',
+  nav_panel("Documentation",
             h2("Version History"),
-            h2("Processing Steps"),
-            tags$iframe(seamless = "seamless", src = "/geoexmap_tech_doc.html")),
+            h2("Technical Documentation"),
+            a("geoexmap_technical_documentation.pdf", target = "_blank", href = "geoexmap_technical_documentation.pdf")),
   nav_panel("Contact us",
             h3("Questions or comments?"),
             a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org")),
@@ -1843,6 +1838,7 @@ server <- function(input, output, session) {
             addLegend(pal = pal, values = ~food_env_cols()[[c]], title = legend.titles(c))
         }
       }
+      
       ##### map (main data) #####
       # x - data vector
       # col - column name
@@ -1885,13 +1881,13 @@ server <- function(input, output, session) {
           # get labels from function
           pal_labs <- get_pal_labs(x, c)
           
-          # 2) reconstruct breaks from labels
+          # reconstruct breaks from labels
           parts  <- strsplit(pal_labs, " - ", fixed = TRUE)
           lower  <- as.numeric(vapply(parts, `[[`, character(1L), 1L))
           upper  <- as.numeric(vapply(parts, `[[`, character(1L), 2L))
           mids   <- (lower + upper) / 2
           
-          # 3) evaluate the palette at the midpoints -> one color per label
+          # evaluate the palette at the midpoints: one color per label
           pal_colors <- pal(mids)
           print(length(pal_colors))
           print(length(pal_labs))
