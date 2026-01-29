@@ -402,11 +402,26 @@ nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV]
                  "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are [PFAS and ways to reduce your exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)?"
                  )
 
-built_md <- markdown("
-                     - Walkability: learn about the [health benefits of walking](https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise)
-                     - Pesticide use: learn about ways to [reduce pesticide exposure from foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and [while using pesticides](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)
-                     - Green space: learn more about the [health benefits of green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)
-                     ")
+built_noise_key <- list(noise = "- **Noise**: What is [noise](https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise) that comes from the environment? What are [health effects of noise](https://doh.wa.gov/community-and-environment/noise)?")
+
+built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [walkability](https://usafacts.org/articles/what-is-walkability-what-does-the-government-spend-on-it/)? What are [health benefits of walking](https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise)?",
+                      "Pesticide.Exposure" = "- **Agricultural pesticide use**: What are [pesticides](https://doh.wa.gov/community-and-environment/contaminants/pesticides)? What are ways to reduce pesticide exposure from [foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and during [usage](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)?",
+                      "Green.Space" = "- **Green space**: What is [green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)? What are [health benefits of green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)?",
+                      "bluespace" = "- **Blue space**: [Blue space](https://pubmed.ncbi.nlm.nih.gov/32971082/) is any water body such as ponds, lakes, rivers, and oceans. What are [health benefits of blue space](https://www.apa.org/monitor/2020/04/nurtured-nature)?",
+                      "Nighttime.Radiance" = "- **Outdoor light at night**: What is [outdoor light at night](), which is also known as light pollution? What are [health effects of outdoor light at night](https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.)?",
+                      "N.Noise.More.than.LAeq.45.to.50.db" = "noise",
+                      "N.Noise.More.than.LAeq.50.to.60.db" = "noise",
+                      "N.Noise.More.than.LAeq.60.to.70.db" = "noise",
+                      "N.Noise.More.than.LAeq.70.to.80.db" = "noise",
+                      "N.Noise.More.than.LAeq.80.to.90.db" = "noise",
+                      "N.Noise.More.than.LAeq.90.db" = "noise",
+                      "Pct.Noise.More.than.LAeq.45.to.50.db" = "noise",
+                      "Pct.Noise.More.than.LAeq.50.to.60.db" = "noise",
+                      "Pct.Noise.More.than.LAeq.60.to.70.db" = "noise",
+                      "Pct.Noise.More.than.LAeq.70.to.80.db" = "noise",
+                      "Pct.Noise.More.than.LAeq.80.to.90.db" = "noise",
+                      "Pct.Noise.More.than.LAeq.90.db" = "noise"
+                      )
 
 food_env_md <- markdown("
                         - Food environment/healthy food: search for [nearby local foods](https://www.usdalocalfoodportal.com/) such as farmers markets
@@ -503,9 +518,10 @@ categories <- accordion(
     "Built Environment", icon = bs_icon("buildings"),
     selectInput('builtenv', htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
-                                         built_md,
+                                         "Select one or more built environment measures to see tips.",
                                          title = "Tips",
-                                         placement = "right")), builtenv, selectize = TRUE, multiple = TRUE),
+                                         placement = "right",
+                                         id = "builtenvpopover")), builtenv, selectize = TRUE, multiple = TRUE),
     input_switch('transit', "Transit stops", value = FALSE),
     input_switch('alc', "Alcohol retailers", value = FALSE),
     input_switch('parks', "Parks", value = FALSE),
@@ -666,6 +682,30 @@ server <- function(input, output, session) {
     paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
   })
   
+  built_md <- reactive({
+    if (is.null(input$builtenv) || length(input$builtenv) == 0) {
+      return("Select one or more built environment measures to see tips.")
+    }
+    
+    raw <- built_md_list[input$builtenv]
+    
+    is_key <- raw %in% names(built_noise_key) # split into already markdown vs keys
+    
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+    
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(built_noise_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected air pollutants.")
+    }
+    
+    paste(all_text, collapse = "\n")
+  })
+  
   nat_md <- reactive({
     if((is.null(input$naturalenv) || length(input$naturalenv) == 0) && isFALSE(input$microplastics)) {
       return("Select one or more natural environment measures to see tips.")
@@ -736,6 +776,13 @@ server <- function(input, output, session) {
     update_popover(
       "natenvpopover",
       content = markdown(nat_popover_md())
+    )
+  })
+  
+  observeEvent(input$builtenv, {
+    update_popover(
+      "builtenvpopover",
+      content = markdown(built_md())
     )
   })
   # output$outcomes_icon <- renderUI({
