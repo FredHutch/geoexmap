@@ -1,8 +1,6 @@
-# MC :)
+# Geoexmap: map-based visualization tool for all things health and environment
 
-#TODO ELEMENTS:
-## modal for intro/welcome message
-## add table features
+# MC :)
 
 library(shiny)
 library(shinyjs)
@@ -402,7 +400,8 @@ nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV]
                  "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are [PFAS and ways to reduce your exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)?"
                  )
 
-built_noise_key <- list(noise = "- **Noise**: What is [noise](https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise) that comes from the environment? What are [health effects of noise](https://doh.wa.gov/community-and-environment/noise)?")
+built_noise_key <- list(noise = "- **Noise**: What is [noise](https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise) that comes from the environment? What are [health effects of noise](https://doh.wa.gov/community-and-environment/noise)?",
+                        land = "- **Land use and land cover**: What is [land use and land cover](https://oceanservice.noaa.gov/facts/lclu.html)?")
 
 built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [walkability](https://usafacts.org/articles/what-is-walkability-what-does-the-government-spend-on-it/)? What are [health benefits of walking](https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise)?",
                       "Pesticide.Exposure" = "- **Agricultural pesticide use**: What are [pesticides](https://doh.wa.gov/community-and-environment/contaminants/pesticides)? What are ways to reduce pesticide exposure from [foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and during [usage](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)?",
@@ -420,11 +419,29 @@ built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [
                       "Pct.Noise.More.than.LAeq.60.to.70.db" = "noise",
                       "Pct.Noise.More.than.LAeq.70.to.80.db" = "noise",
                       "Pct.Noise.More.than.LAeq.80.to.90.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.90.db" = "noise"
+                      "Pct.Noise.More.than.LAeq.90.db" = "noise",
+                      "pct_Open_Water" = "land",
+                      "pct_Developed_Open" = "land",
+                      "pct_Developed_Low" = "land",
+                      "pct_Developed_Medium" = "land",
+                      "pct_Developed_High" = "land",
+                      "pct_Barren" = "land",
+                      "pct_Evergreen_Forest" = "land",
+                      "pct_Shrub" = "land",
+                      "pct_Grassland" = "land",
+                      "pct_Pasture" = "land",
+                      "pct_Crops" = "land",
+                      "pct_Woody_Wetlands" = "land",
+                      "pct_Crops" = "land",
+                      "pct_Woody_Wetlands" = "land",
+                      "pct_Herbaceous_Wetlands" = "land",
+                      "pct_Deciduous_Forest" = "land",
+                      "pct_Mixed_Forest" = "land",
+                      "pct_Perennial_Ice" = "land"
                       )
 
 food_env_md <- markdown("
-                        - Food environment/healthy food: search for [nearby local foods](https://www.usdalocalfoodportal.com/) such as farmers markets
+                        - **Food environment/healthy food**: How can you find [local healthy foods](https://www.usdalocalfoodportal.com/) in your area such as farmers markets?
                         ")
 
 soc_md <- markdown("
@@ -682,8 +699,11 @@ server <- function(input, output, session) {
     paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
   })
   
+  #built_switch_list <- reactive({list(input$transit, input$superfund, input$parks)})
+  
   built_md <- reactive({
-    if (is.null(input$builtenv) || length(input$builtenv) == 0) {
+    
+    if (is.null(input$builtenv) || length(input$builtenv) == 0) { # condition for if all switches are false
       return("Select one or more built environment measures to see tips.")
     }
     
@@ -704,6 +724,44 @@ server <- function(input, output, session) {
     }
     
     paste(all_text, collapse = "\n")
+  })
+  
+  # get switch markdowns
+  built_switch_md <- reactive({
+    switch_md <- character(0)
+    if (input$transit) {
+      switch_md <- c(switch_md, "- **Transit access**: How can you find [transit access](https://watransitaccessmap.org/) in your area?")
+    } 
+    
+    if (input$superfund) {
+      switch_md <- c(switch_md, "- **Superfund sites**: What are [Superfund sites](https://education.nationalgeographic.org/resource/superfund/)?")
+    } 
+    
+    if (input$parks) {
+      switch_md <- c(switch_md, "- **Parks**: How can you find [parks](https://parks.wa.gov/) and [trails](https://doh.wa.gov/you-and-your-family/nutrition-and-physical-activity/active-living/resources/trails) in your area?")
+      
+    } 
+    
+    if (input$alc) {
+      switch_md <- c(switch_md, "- **Alcohol retailers**: Higher density of [alcohol retailers](https://pubmed.ncbi.nlm.nih.gov/31264024/) has been associated with greater neighborhood disadvantage, alcohol misuse, and other issues. What are [health effects of alcohol](https://www.cdc.gov/drink-less-be-your-best/facts-about-excessive-drinking/index.html)?")
+    }
+    
+    if (length(switch_md) == 0) {return(NULL)}
+    
+    paste(switch_md, collapse = "\n")
+  })
+  
+  built_popover_md <- reactive({
+    base <- built_md()
+    switches <- built_switch_md()
+    
+    if (!is.null(switches) && grepl("^Select one or more", base)) { # drop default text when any switch is turned on
+      return(switches)
+    }
+    
+    txts <- c(built_md(), built_switch_md())
+    txts <- txts[!vapply(txts, is.null, logical(1))]
+    paste(unique(txts), collapse = "\n")
   })
   
   nat_md <- reactive({
@@ -731,7 +789,7 @@ server <- function(input, output, session) {
   })
   
   nat_switch_md <- reactive({
-    if (isTRUE(input$microplastics)) {
+    if (input$microplastics) {
       "- **Microplastics**: What are [microplastics](https://www.unep.org/news-and-stories/story/everything-you-should-know-about-microplastics)?"
     } else {
       NULL
@@ -779,10 +837,10 @@ server <- function(input, output, session) {
     )
   })
   
-  observeEvent(input$builtenv, {
+  observeEvent(list(input$builtenv, input$transit, input$superfund, input$parks), {
     update_popover(
       "builtenvpopover",
-      content = markdown(built_md())
+      content = markdown(built_popover_md())
     )
   })
   # output$outcomes_icon <- renderUI({
