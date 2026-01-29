@@ -371,12 +371,36 @@ airpol_md_list <- list("Particulate.Matter.2.5" = "- **Particulate matter <2.5 m
                        "Wildfire.smoke" = "- **Wildfire smoke**: What is [wildfire smoke](https://ecology.wa.gov/air-climate/air-quality/smoke-fire/wildfire-smoke)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels? How can you learn about the current [wildfire smoke forecast](https://airqualitymap.ecology.wa.gov/?view=forecast) in your area (select <u>**Smoke Forecast**</u> from the View menu)? How can you [prepare for wildfires](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/wildfires)?"
                        )
 
-nat_md <- markdown("
-                   - Air pollutants: learn about ways to [protect yourself from air pollution](http://www.breatheasy.tips)
-                   - Ultraviolet radiation (UV): learn about [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)
-                   - Radon: learn about ways to [test for radon in your home](https://doh.wa.gov/community-and-environment/contaminants/radon)
-                   - PFAS in drinking water: learn about ways to [reduce exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)
-                   ")
+# all natural disaster events have same key--use to avoid redundancy and repeated same tip
+nat_dis_key <- list(nat_disaster = "- **Extreme weather events and natural disasters**: What can you do before, during, and after an [extreme weather event or natural disaster](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters)?",
+                    temperature = "- **Temperature**: What are ways to help with [heat waves](https://www.cdc.gov/heat-health/about/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fextreme-heat%2Fabout%2Findex.html)? How can you find [extreme heat cooling centers](https://search.wa211.org/search?location=&query=TH-2600.1900-180&query_type=taxonomy&query_label=Extreme+Heat+Cooling+Centers) in your area? What are ways to help with [cold spells](https://www.cdc.gov/winter-weather/safety/stay-safe-during-after-a-winter-storm-safety.html)?")
+
+nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV](https://www.cdc.gov/radiation-health/data-research/facts-stats/ultraviolet-radiation.html)? What are ways to help with [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)?",
+                 "Avalanche.Risk.Score" = "nat_disaster", # use key mappings
+                 "Coastal.Flooding.Risk.Score" = "nat_disaster",
+                 "Cold.Wave.Risk.Score" = "nat_disaster",
+                 "Drought.Risk.Score" = "nat_disaster",
+                 "Earthquake.Risk.Score" = "nat_disaster",
+                 "Hail.Risk.Score" = "nat_disaster",
+                 "Heat.Wave.Risk.Score" = "nat_disaster",
+                 "Hurricane.Risk.Score" = "nat_disaster",
+                 "Ice.Storm.Risk.Score" = "nat_disaster",
+                 "Landslide.Risk.Score" = "nat_disaster",
+                 "Lightning.Risk.Score" = "nat_disaster",
+                 "Riverine.Flooding.Risk.Score" = "nat_disaster",
+                 "Strong.Wind.Risk.Score" = "nat_disaster",
+                 "Tornado.Risk.Score" = "nat_disaster",
+                 "Tsunami.Risk.Score" = "nat_disaster",
+                 "Volcanic.Activity.Risk.Score" = "nat_disaster",
+                 "Wildfire.Risk.Score" = "nat_disaster",
+                 "Winter.Weather.Risk.Score" = "nat_disaster",
+                 "Maximum.temperature" = "temperature",
+                 "Minimum.temperature" = "temperature",
+                 "Average.temperature" = "temperature",
+                 "Precipitation" = "- **Precipitation**: What to do before, during, and after a [flood](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/floods)?",
+                 "Radon" = "- **Radon**: What is [radon and ways to test for radon in your home](https://doh.wa.gov/community-and-environment/contaminants/radon)?",
+                 "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are [PFAS and ways to reduce your exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)?"
+                 )
 
 built_md <- markdown("
                      - Walkability: learn about the [health benefits of walking](https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise)
@@ -461,9 +485,10 @@ categories <- accordion(
     "Natural Environment", icon = bs_icon("sun"),
     selectInput('naturalenv', htmltools::span("Select variables", 
                                               popover(bs_icon("lightbulb"),
-                                                      nat_md,
+                                                      "Select one or more natural environment measures to see tips.",
                                                       title = "Tips",
-                                                      placement = "right")), naturalenv, selectize = TRUE, multiple = TRUE),
+                                                      placement = "right",
+                                                      id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
     input_switch('microplastics', "Microplastics", value = FALSE),
     div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
@@ -641,6 +666,44 @@ server <- function(input, output, session) {
     paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
   })
   
+  nat_md <- reactive({
+    if((is.null(input$naturalenv) || length(input$naturalenv) == 0) && isFALSE(input$microplastics)) {
+      return("Select one or more natural environment measures to see tips.")
+    }
+    
+    raw <- nat_md_list[input$naturalenv]
+    
+    is_key <- raw %in% names(nat_dis_key) # split into already markdown vs keys
+    
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+    
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(nat_dis_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0 && isFALSE(input$microplastics)) {
+      return("No tips available for selected natural environment measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
+  })
+  
+  nat_switch_md <- reactive({
+    if (isTRUE(input$microplastics)) {
+      "- **Microplastics**: What are [microplastics](https://www.unep.org/news-and-stories/story/everything-you-should-know-about-microplastics)?"
+    } else {
+      NULL
+    }
+  })
+  
+  nat_popover_md <- reactive({
+    txts <- c(nat_md(), nat_switch_md())
+    txts <- txts[!vapply(txts, is.null, logical(1))]
+    paste(unique(txts), collapse = "\n")
+  })
+  
   observeEvent(input$outcomes, {
     update_popover(
       "outcome_popover",
@@ -666,6 +729,13 @@ server <- function(input, output, session) {
     update_popover(
       "airpopover",
       content = markdown(airpol_md())
+    )
+  })
+  
+  observeEvent(list(input$naturalenv, input$microplastics), {
+    update_popover(
+      "natenvpopover",
+      content = markdown(nat_popover_md())
     )
   })
   # output$outcomes_icon <- renderUI({
