@@ -636,7 +636,10 @@ ui <- page_navbar(
                                 width = "400px"),
               accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download")),
                               accordion_panel("2010 Census Tracts")),
-              accordion_panel("County Data", accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download"))),
+              accordion_panel("County Data", 
+                              accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download")),
+                              accordion_panel("Cancer Incidence"),
+                              accordion_panel("Cancer Mortality")),
               accordion_panel("Standalone Data")
               
             )),
