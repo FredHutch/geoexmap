@@ -439,11 +439,19 @@ food_env_md <- markdown("
                         - **Food environment/healthy food**: How can you find [local healthy foods](https://www.usdalocalfoodportal.com/) in your area such as farmers markets?
                         ")
 
-soc_md <- markdown("
-                   - Food insecurity: call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [WA statewide helpline](https://wa211.org/). Call 1-866-HUNGRY for assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest [food bank or meal program from Feeding Washington](https://feedingwashington.org/find-food/).
-                   - Housing insecurity: learn about [housing resources](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) including emergency housing. Call 2-1-1 or text '211WAOD' to 898211 for other housing resources from the [WA statewide helpline](https://wa211.org/)
-                   - Lack of reliable transportation: call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [WA statewide helpline](https://wa211.org/)
-                   ")
+# soc_md <- markdown("
+#                    - Food insecurity: call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [WA statewide helpline](https://wa211.org/). Call 1-866-HUNGRY for assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest [food bank or meal program from Feeding Washington](https://feedingwashington.org/find-food/).
+#                    - Housing insecurity: learn about [housing resources](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) including emergency housing. Call 2-1-1 or text '211WAOD' to 898211 for other housing resources from the [WA statewide helpline](https://wa211.org/)
+#                    - Lack of reliable transportation: call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [WA statewide helpline](https://wa211.org/)
+#                    ")
+
+soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [Washington helpline](https://search.wa211.org/). Call 1-866-HUNGRY for food assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest food bank or meal program from [Feeding Washington](https://feedingwashington.org/find-food/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
+               "Housing.Insecurity" = "- **Housing insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the [Washington helpline](https://search.wa211.org/). Find other available resources, including emergency housing, from the [Washington State Department of Social and Health Services](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
+               "Utility.Services.Threat" = "- **Utility services threat**: Call 2-1-1 or text '211WAOD' to 898211 for help with utilities from the [Washington helpline](https://search.wa211.org/). Find other available resources, including energy assistance programs, from the [Washington Utilities and Transportation Commission](https://www.utc.wa.gov/consumers/energy/energy-assistance-programs) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
+               "Lacking.Reliable.Transportation" = "- **Lack of reliable transportation**: Call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
+               "No.broadband.internet" = "- **No internet**: Call 2-1-1 or text '211WAOD' to 898211 for help with getting internet from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
+               "Crowding" = "- **Household crowding**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the [Washington helpline](https://search.wa211.org/). Find other available resources, including emergency housing, from the [Washington State Department of Social and Health Services](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go)."
+               )
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
@@ -551,9 +559,10 @@ categories <- accordion(
     "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
     selectInput('socialenv', htmltools::span("Select variables", 
                                           popover(bs_icon("lightbulb"),
-                                                  soc_md,
+                                                  "Select one or more social environment measures to see tips.",
                                                   title = "Tips",
-                                                  placement = "right")), socialenv, selectize = TRUE,  multiple = TRUE),
+                                                  placement = "right",
+                                                  id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
     accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
                     selectInput('crime', NULL, crimeenv, selectize = TRUE, multiple = TRUE))
   ),
@@ -791,6 +800,21 @@ server <- function(input, output, session) {
     }
   })
   
+  soc_md <- reactive({
+    if (is.null(input$socialenv) || length(input$socialenv) == 0) {
+      return("Select one or more health outcomes to see tips.")
+    }
+    
+    has_tip <- input$socialenv %in% names(soc_md_list) # create vector for inputs that have corresponding tips
+    sel_with_tip <- input$socialenv[has_tip] # subset
+    
+    if (length(sel_with_tip) == 0) {
+      return("No tips available for selected outcomes.")
+    }
+    
+    paste(unlist(soc_md_list[input$socialenv]), collapse = "\n")
+  })
+  
   nat_popover_md <- reactive({
     txts <- c(nat_md(), nat_switch_md())
     txts <- txts[!vapply(txts, is.null, logical(1))]
@@ -836,6 +860,13 @@ server <- function(input, output, session) {
     update_popover(
       "builtenvpopover",
       content = markdown(built_popover_md())
+    )
+  })
+  
+  observeEvent(input$socialenv, {
+    update_popover(
+      "socenvpopover",
+      content = markdown(soc_md())
     )
   })
   # output$outcomes_icon <- renderUI({
