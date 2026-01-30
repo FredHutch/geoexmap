@@ -703,8 +703,6 @@ server <- function(input, output, session) {
     paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
   })
   
-  #built_switch_list <- reactive({list(input$transit, input$superfund, input$parks)})
-  
   built_md <- reactive({
     
     if (is.null(input$builtenv) || length(input$builtenv) == 0) { # condition for if all switches are false
@@ -1742,7 +1740,8 @@ server <- function(input, output, session) {
                       popup = ~SITE_NAME,
                       group = "superfund",
                       stroke = TRUE, weight = 0.9, color = "blue",
-                      fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+                      fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+          addLegend(colors = c("blue"), labels = "Superfund sites")
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "superfund")
@@ -1754,7 +1753,8 @@ server <- function(input, output, session) {
                       popup = ~NAME,
                       group = "parks",
                       stroke = TRUE, weight = 0.9, color = "green",
-                      fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE))
+                      fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+          addLegend(colors = c("green"), labels = "Parks")
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "parks")
