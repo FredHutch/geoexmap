@@ -439,11 +439,9 @@ food_env_md <- markdown("
                         - **Food environment/healthy food**: How can you find [local healthy foods](https://www.usdalocalfoodportal.com/) in your area such as farmers markets?
                         ")
 
-# soc_md <- markdown("
-#                    - Food insecurity: call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [WA statewide helpline](https://wa211.org/). Call 1-866-HUNGRY for assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest [food bank or meal program from Feeding Washington](https://feedingwashington.org/find-food/).
-#                    - Housing insecurity: learn about [housing resources](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) including emergency housing. Call 2-1-1 or text '211WAOD' to 898211 for other housing resources from the [WA statewide helpline](https://wa211.org/)
-#                    - Lack of reliable transportation: call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [WA statewide helpline](https://wa211.org/)
-#                    ")
+crime_md <- markdown("
+                     - **Crime**: Where can you learn more information about [crimes in Washington state](https://nibrs.fbi.gov/2024/) from the Federal Bureau of Investigation?
+                     ")
 
 soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [Washington helpline](https://search.wa211.org/). Call 1-866-HUNGRY for food assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest food bank or meal program from [Feeding Washington](https://feedingwashington.org/find-food/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
                "Housing.Insecurity" = "- **Housing insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the [Washington helpline](https://search.wa211.org/). Find other available resources, including emergency housing, from the [Washington State Department of Social and Health Services](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
@@ -457,8 +455,16 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
                "Single.parent.households" = "- Single parent households: Find resources for families, including childcare, from the [Washington State Department of Children, Youth, and Families](https://dcyf.wa.gov/services/housing-basic-needs) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
                "Unemployment" = "- **Unemployment**: Call 2-1-1 or text '211WAOD' to 898211 for employment resources from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
                "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)*: What is the [Environmental Justice Index](https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html)?",
-               "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the [Social Vulnerability Index](https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html)"
+               "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the [Social Vulnerability Index](https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html)",
+               "Median.HH.Income" = "- **Median household income**: What does a [median household income](https://usafacts.org/answers/what-is-the-income-of-a-us-household/country/united-states/) mean?",
+               "HT_Index" = "- **Housing and Transportation (H + T) Affordability Index**: Why is it important to consider [transportation costs with affordability](https://cnt.org/tools/housing-and-transportation-affordability-index)?",
+               "Racial.Residential.Segregation" = "- **Residential segregation**: What is the [Dissimilarity Index](https://www.khanacademy.org/test-prep/mcat/social-inequality/social-class/v/residential-segregation), which is a measure of residential segregation?",
+               "Historic.Redlining.Score" = "- **Redlining**: What is [redlining](https://education.nationalgeographic.org/resource/mapmaker-redlining-united-states/)?",
+               "social_capital" = "- **Social capital**: What is [social capital](https://aspe.hhs.gov/sites/default/files/private/pdf/263491/What-is-social-capital.pdf)?",
+               "Population.density" = "- **Urbanicity/rurality**: What are resources to improve health and healthcare in [rural communities](https://doh.wa.gov/public-health-provider-resources/rural-health)?"
                )
+
+#health_access_list <- list()
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
@@ -515,10 +521,16 @@ categories <- accordion(
   ),
   accordion_panel(
     "Healthcare Access", icon = bs_icon("building-add"),
+    h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
+            "Switch on one or more healthcare access features to see tips.",
+            title = "Tips",
+            placement = "right",
+            id = "healthaccpopover"))),
     input_switch('cancer', "Cancer Programs", value = FALSE),
     input_switch('clinics', "Clinics", value = FALSE), 
     input_switch('ems', "Emergency Medical Stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
+    input_switch('pharmacies', "Pharmacies", value = FALSE),
     input_switch('wic_clinics', "WIC Clinics", value = FALSE),
     input_switch('wic_retailers', "WIC Retailers", value = FALSE),
     input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
@@ -571,7 +583,11 @@ categories <- accordion(
                                                   placement = "right",
                                                   id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
     accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
-                    selectInput('crime', NULL, crimeenv, selectize = TRUE, multiple = TRUE))
+                    selectInput('crime', htmltools::span("Select variables",
+                                                         popover(bs_icon("lightbulb"),
+                                                                 crime_md,
+                                                                 title = "Tips",
+                                                                 placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
     "Options", icon = bs_icon("gear"),
@@ -826,6 +842,47 @@ server <- function(input, output, session) {
     paste(unique(txts), collapse = "\n")
   })
   
+  # get switch markdowns
+  h_access_switch_md <- reactive({
+    switch_md <- character(0)
+    if (input$clinics) {
+      switch_md <- c(switch_md, "- **Clinics**: How can you find [free and low cost clinics](https://www.wahealthcareaccessalliance.org/search-for-clinics)?")
+    } 
+    
+    if (input$ems) {
+      switch_md <- c(switch_md, "- **Emergency Medical Services (EMS) Stations**: Where can you find [EMS stations and trauma care](https://wadoh.maps.arcgis.com/apps/instant/basic/index.html?appid=c7e3f2249bb34175a20849c2d02fc06a) in your area?")
+    } 
+    
+    if (input$hospitals) {
+      switch_md <- c(switch_md, "- **Hospitals**: Where can you find [hospitals](https://geo.wa.gov/datasets/WADOH::hospitals/explore) in your area?")
+      
+    } 
+    
+    if (input$pharmacies) {
+      switch_md <- c(switch_md, "- **Pharmacies**: Where can you find [pharmacy services](https://www.wsparx.org/page/PharMap) in your area?")
+    }
+    
+    if (input$wic_clinics) {
+      switch_md <- c(switch_md, "- **Women, Infants, and Children (WIC) Clinics**: What is the [WIC Nutrition Program](https://doh.wa.gov/you-and-your-family/wic)?")
+    }
+    
+    if (input$wic_retailers) {
+      switch_md <- c(switch_md, "- **Women, Infants, and Children (WIC) Retailers**: What is the [WIC Nutrition Program](https://doh.wa.gov/you-and-your-family/wic)?")
+    }
+    
+    if (input$cancer) {
+      switch_md <- c(switch_md, "- **Commision on Cancer (CoC)-accredited programs**: How can you find [programs accredited by the CoC](https://www.facs.org/find-a-hospital/?nearMe=off&companyType=CoC)?")
+    }
+    
+    if (input$fqhc) {
+      switch_md <- c(switch_md, "- **Federally Qualified Health Centers (FQHCs)**: What are [FQHCs](https://www.wacommunityhealth.org/community-health-centers-1)?")
+    }
+    
+    if (length(switch_md) == 0) {return("Select one or more healthcare access features to see tips.")}
+    
+    paste(switch_md, collapse = "\n")
+  })
+  
   observeEvent(input$outcomes, {
     update_popover(
       "outcome_popover",
@@ -865,6 +922,13 @@ server <- function(input, output, session) {
     update_popover(
       "builtenvpopover",
       content = markdown(built_popover_md())
+    )
+  })
+  
+  observeEvent(list(input$clinics, input$hospitals, input$ems, input$pharmacies, input$wic_clinics, input$wic_retailers, input$cancer, input$fqhc), {
+    update_popover(
+      "healthaccpopover",
+      content = markdown(h_access_switch_md())
     )
   })
   
@@ -1697,7 +1761,7 @@ server <- function(input, output, session) {
             lng = ~stop_lon,
             lat = ~stop_lat,
             group = "transit_markers",
-            popup = ~paste("Stop:", stop_name),
+            popup = ~paste("Stop:", stop_name, ),
             icon = makeIcon("/bus-front.svg"),
             clusterOptions = clusterOptions
           ) %>% 
@@ -1808,6 +1872,18 @@ server <- function(input, output, session) {
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "hospitals")
+      }
+      
+      if (input$pharmacies) {
+        html_legend <- 'Pharmacies <br/>'
+        proxy <- proxy %>% 
+          addMarkers(data = pharmacies,
+                     popup = ~inFacility,
+                     group = "pharmacies") %>% 
+          addControl(html = html_legend, position = "topright")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup(group = "pharmacies")
       }
       
       if (input$wic_clinics) {
