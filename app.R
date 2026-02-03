@@ -601,7 +601,143 @@ categories <- accordion(
   
 )
 
-table.cats <- categories
+table.cats <- accordion(
+  open = FALSE,
+  accordion_panel(
+    "Sociodemographics", icon = bs_icon("person-vcard"),
+    selectInput('sociodemo_tab', "Select variables",
+                sociodemographics,
+                selectize = TRUE, multiple = TRUE),
+    accordion_panel("Race and Ethnicity", selectInput('race_tab', NULL, racev, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Sex", selectInput('sex_tab', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Age", selectInput('age_tab', NULL, agev, selectize = TRUE, multiple = TRUE))
+    
+  ),
+  accordion_panel(
+    "Health Outcomes", icon = bs_icon("heart-pulse"),
+    selectInput('outcomes_tab', 
+                htmltools::span("Select variables",
+                                popover(bs_icon("lightbulb"),
+                                        "Select one or more health outcomes to see tips.",
+                                        title = "Tips",
+                                        placement = "right",
+                                        id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
+    # options to filter by cancer site, stage at diagnosis, gender
+    accordion_panel("Cancer Incidence",
+                    selectInput('incsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('incstage_tab', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
+                    selectInput('incsex_tab', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
+                    actionButton('incbutton_tab', "Reset filters")),
+    accordion_panel("Cancer Mortality",
+                    selectInput('mortsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('mortsex_tab', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
+                    actionButton('mortbutton_tab', "Reset filters"))
+  ),
+  accordion_panel(
+    "Health Behaviors", icon = bs_icon("person-walking"),
+    selectInput('behaviors_tab', htmltools::span("Select variables", 
+                                             popover(bs_icon("lightbulb"),
+                                                     "Select one or more health behaviors to see tips.",
+                                                     title = "Tips",
+                                                     placement = "right",
+                                                     id = "behavior_popover")), behaviors,
+                multiple = TRUE, selectize = TRUE)
+  ),
+  accordion_panel(
+    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    selectInput('prevention_tab', htmltools::span("Select variables", 
+                                              popover(bs_icon("lightbulb"),
+                                                      # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
+                                                      "Select one or more prevention measures to see tips.",
+                                                      title = "Tips",
+                                                      placement = "right",
+                                                      id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
+  ),
+  # accordion_panel(
+  #   "Healthcare Access", icon = bs_icon("building-add"),
+  #   h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
+  #                                                 "Switch on one or more healthcare access features to see tips.",
+  #                                                 title = "Tips",
+  #                                                 placement = "right",
+  #                                                 id = "healthaccpopover"))),
+  #   input_switch('cancer', "Cancer Programs", value = FALSE),
+  #   input_switch('clinics', "Clinics", value = FALSE), 
+  #   input_switch('ems', "Emergency Medical Stations", value = FALSE),
+  #   input_switch('hospitals', "Hospitals", value = FALSE),
+  #   input_switch('pharmacies', "Pharmacies", value = FALSE),
+  #   input_switch('wic_clinics', "WIC Clinics", value = FALSE),
+  #   input_switch('wic_retailers', "WIC Retailers", value = FALSE),
+  #   input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
+  # ),
+  accordion_panel(
+    "Natural Environment", icon = bs_icon("sun"),
+    selectInput('naturalenv_tab', htmltools::span("Select variables", 
+                                              popover(bs_icon("lightbulb"),
+                                                      "Select one or more natural environment measures to see tips.",
+                                                      title = "Tips",
+                                                      placement = "right",
+                                                      id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
+    #input_switch('microplastics', "Microplastics", value = FALSE),
+    #div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
+                    selectInput('airpol_tab', htmltools::span("Select variables",
+                                                          popover(bs_icon("question-circle"),
+                                                                  "Select one or more air pollutants to see tips.",
+                                                                  title = "Tips",
+                                                                  placement = "right",
+                                                                  id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
+  ),
+  accordion_panel(
+    "Built Environment", icon = bs_icon("buildings"),
+    selectInput('builtenv_tab', htmltools::span("Select variables", 
+                                            popover(bs_icon("lightbulb"),
+                                                    "Select one or more built environment measures to see tips.",
+                                                    title = "Tips",
+                                                    placement = "right",
+                                                    id = "builtenvpopover")), builtenv, selectize = TRUE, multiple = TRUE),
+    # input_switch('transit', "Transit stops", value = FALSE),
+    # input_switch('alc', "Alcohol retailers", value = FALSE),
+    # input_switch('parks', "Parks", value = FALSE),
+    # input_switch('superfund', "Superfund sites", value = FALSE),
+    accordion_panel(
+      "Food Environment", icon = bs_icon("basket"),
+      selectInput('foodenv', label = htmltools::span("Select variables", 
+                                                     popover(bs_icon("lightbulb"),
+                                                             food_env_md,
+                                                             title = "Tips",
+                                                             placement = "right")), foodenv, selectize = TRUE, multiple = TRUE)
+    )
+  ),
+  accordion_panel(
+    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    selectInput('socialenv', htmltools::span("Select variables", 
+                                             popover(bs_icon("lightbulb"),
+                                                     "Select one or more social environment measures to see tips.",
+                                                     title = "Tips",
+                                                     placement = "right",
+                                                     id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
+    accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
+                    selectInput('crime', htmltools::span("Select variables",
+                                                         popover(bs_icon("lightbulb"),
+                                                                 crime_md,
+                                                                 title = "Tips",
+                                                                 placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
+  )
+)
+
+standalone_tab <- c("Choose dataset" = "",
+                    "Commission on Cancer (CoC)-Accredited Programs" = "cancer.progs",
+                    "Clinics" = "clinics",
+                    "Emergency Medical Stations" = "ems",
+                    "Federally Qualified Health Centers" = "fqhc",
+                    "Hospitals" = "hospitals",
+                    "Pharmacies" = "pharmacies",
+                    "WIC clinics" = "wic.clinics",
+                    "WIC retailers" = "wic.retailers",
+                    "Microplastics" = "microplastics",
+                    "Transit stops" = "transit",
+                    "Parks" = "parks",
+                    "Superfund sites" = "superfund") 
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
@@ -640,7 +776,7 @@ ui <- page_navbar(
                               accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                               accordion_panel("Cancer Incidence"),
                               accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
-              accordion_panel("Standalone Data")
+              accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
               
             )),
   nav_panel("Documentation",
@@ -1336,6 +1472,63 @@ server <- function(input, output, session) {
     df[, c(input$crime)]
   })
   
+  # census tract table
+  ct_table_cols <- reactive({
+    og.data[, 1] %>% 
+      st_drop_geometry() %>% 
+      merge(tract.bounds, by = "GEOID") %>% 
+      cbind(map_cols()) %>% 
+      dplyr::select(-contains("geom")) %>% 
+      st_drop_geometry()
+  })
+  
+  #ct_food_table_cols <- reactive({})
+  
+  # county tables
+  cnty_crime_table_cols <- reactive({
+    selected_crime <- crime_cols() %>%  # selected columns from crime
+      st_drop_geometry()
+    
+    crime_df <- crime %>%  
+      dplyr::select(-contains("geom"))
+    
+    selected_col_names <- names(selected_crime) # selected column names
+    
+    all_cols <- names(crime_df) # vector of column names
+    
+    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)) # find if p1 is in any column names
+    
+    if (is_p1) {
+      p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
+      selected_idx <- which(all_cols == p1_col)
+      crime_df[, all_cols[1:selected_idx]] %>% 
+        dplyr::select(-contains("geom")) %>% 
+        st_drop_geometry()
+    } else {
+      p2_col <- selected_col_names[grepl("_p2$|^p2_", selected_col_names, ignore.case = TRUE)]
+      
+      p1_index <- which(all_cols == "p1_rate")  
+      selected_idx <- which(all_cols == p2_col)
+      
+      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%
+        dplyr::select(-contains("geom")) %>% 
+        st_drop_geometry()
+    }
+  })
+  
+  # cnty_wscr_table_cols <- reactive({
+  #   
+  # })
+  
+  # point tables
+  tab_point_data <- reactive({
+    switch(input$standalone,
+           "cancer.progs" = cancer.progs,
+           "clinics" = clinics, "ems" = ems, "fqhc" = fqhc, "hospitals" = hospitals,
+           "pharmacies" = pharmacies, "wic.clinics" = wic.clinics, "wic.retailers" = wic.retailers,
+           "microplastics" = microplastics, "transit" = transit, "parks" = parks, "superfund" = superfund)
+  })
+  
   #### OBSERVERS FOR WSCR DATA ####
   filtered.inc <- reactive({
     req(input$incsite != "", input$incstage != "", input$incsex != "")
@@ -1458,56 +1651,7 @@ server <- function(input, output, session) {
     active_variables = character(0)
   )
   
-  # census tract table
-  ct_table_cols <- reactive({
-    og.data[, 1] %>% 
-      st_drop_geometry() %>% 
-      merge(tract.bounds, by = "GEOID") %>% 
-      cbind(map_cols()) %>% 
-      dplyr::select(-contains("geom")) %>% 
-      st_drop_geometry()
-    })
   
-  #ct_food_table_cols <- reactive({})
-  
-  # county tables
-  cnty_crime_table_cols <- reactive({
-    selected_crime <- crime_cols() %>%  # selected columns from crime
-      st_drop_geometry()
-    
-    crime_df <- crime %>%  
-      dplyr::select(-contains("geom"))
-    
-    selected_col_names <- names(selected_crime) # selected column names
-    
-    all_cols <- names(crime_df) # vector of column names
-    
-    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)) # find if p1 is in any column names
-    
-    if (is_p1) {
-      p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
-      selected_idx <- which(all_cols == p1_col)
-      crime_df[, all_cols[1:selected_idx]] %>% 
-         dplyr::select(-contains("geom")) %>% 
-         st_drop_geometry()
-    } else {
-      p2_col <- selected_col_names[grepl("_p2$|^p2_", selected_col_names, ignore.case = TRUE)]
-      
-      p1_index <- which(all_cols == "p1_rate")  
-      selected_idx <- which(all_cols == p2_col)
-      
-      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%
-         dplyr::select(-contains("geom")) %>% 
-         st_drop_geometry()
-    }
-  })
-  
-  # cnty_wscr_table_cols <- reactive({
-  #   
-  # })
-  
-  # point tables
-  # ...
   
   #### DOWNLOAD HANDLER ####
   output$download <- downloadHandler(
@@ -1711,6 +1855,11 @@ server <- function(input, output, session) {
   output$cnty_mort_table <- renderReactable({
     validate(need(base::nrow(filtered.mort()) > 1, "Please select variables for cancer mortality."))
     reactable(filtered.mort())
+  })
+  
+  output$standalone_table <- renderReactable({
+    req(tab_point_data())
+    reactable(tab_point_data())
   })
   
   #### MAIN OBSERVER LOGIC ####
