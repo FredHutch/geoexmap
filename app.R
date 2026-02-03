@@ -595,7 +595,7 @@ categories <- accordion(
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
-    fileInput("upload", "Upload a shapefile")#,
+    fileInput("upload", "Upload a shapefile", accept = ".shp")#,
     #downloadButton("download", "Download data")
   )
   
@@ -634,12 +634,12 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download")),
+              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
                               accordion_panel("2010 Census Tracts")),
               accordion_panel("County Data", 
-                              accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download")),
+                              accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                               accordion_panel("Cancer Incidence"),
-                              accordion_panel("Cancer Mortality")),
+                              accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
               accordion_panel("Standalone Data")
               
             )),
@@ -1706,6 +1706,11 @@ server <- function(input, output, session) {
     validate(need(base::ncol(crime_cols()) > 1, "Please select a variable."))
     
     reactable(cnty_crime_table_cols())
+  })
+  
+  output$cnty_mort_table <- renderReactable({
+    validate(need(base::nrow(filtered.mort()) > 1, "Please select variables for cancer mortality."))
+    reactable(filtered.mort())
   })
   
   #### MAIN OBSERVER LOGIC ####
