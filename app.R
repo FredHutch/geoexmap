@@ -653,22 +653,6 @@ table.cats <- accordion(
                                                       placement = "right",
                                                       id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
   ),
-  # accordion_panel(
-  #   "Healthcare Access", icon = bs_icon("building-add"),
-  #   h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
-  #                                                 "Switch on one or more healthcare access features to see tips.",
-  #                                                 title = "Tips",
-  #                                                 placement = "right",
-  #                                                 id = "healthaccpopover"))),
-  #   input_switch('cancer', "Cancer Programs", value = FALSE),
-  #   input_switch('clinics', "Clinics", value = FALSE), 
-  #   input_switch('ems', "Emergency Medical Stations", value = FALSE),
-  #   input_switch('hospitals', "Hospitals", value = FALSE),
-  #   input_switch('pharmacies', "Pharmacies", value = FALSE),
-  #   input_switch('wic_clinics', "WIC Clinics", value = FALSE),
-  #   input_switch('wic_retailers', "WIC Retailers", value = FALSE),
-  #   input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
-  # ),
   accordion_panel(
     "Natural Environment", icon = bs_icon("sun"),
     selectInput('naturalenv_tab', htmltools::span("Select variables", 
@@ -677,8 +661,6 @@ table.cats <- accordion(
                                                       title = "Tips",
                                                       placement = "right",
                                                       id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
-    #input_switch('microplastics', "Microplastics", value = FALSE),
-    #div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
     accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
                     selectInput('airpol_tab', htmltools::span("Select variables",
                                                           popover(bs_icon("question-circle"),
@@ -695,13 +677,9 @@ table.cats <- accordion(
                                                     title = "Tips",
                                                     placement = "right",
                                                     id = "builtenvpopover")), builtenv, selectize = TRUE, multiple = TRUE),
-    # input_switch('transit', "Transit stops", value = FALSE),
-    # input_switch('alc', "Alcohol retailers", value = FALSE),
-    # input_switch('parks', "Parks", value = FALSE),
-    # input_switch('superfund', "Superfund sites", value = FALSE),
-    accordion_panel(
+   accordion_panel(
       "Food Environment", icon = bs_icon("basket"),
-      selectInput('foodenv', label = htmltools::span("Select variables", 
+      selectInput('foodenv_tab', label = htmltools::span("Select variables", 
                                                      popover(bs_icon("lightbulb"),
                                                              food_env_md,
                                                              title = "Tips",
@@ -717,7 +695,7 @@ table.cats <- accordion(
                                                      placement = "right",
                                                      id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
     accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
-                    selectInput('crime', htmltools::span("Select variables",
+                    selectInput('crime_tab', htmltools::span("Select variables",
                                                          popover(bs_icon("lightbulb"),
                                                                  crime_md,
                                                                  title = "Tips",
@@ -771,7 +749,7 @@ ui <- page_navbar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
               accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
-                              accordion_panel("2010 Census Tracts")),
+                              accordion_panel("2010 Census Tracts", reactableOutput("food_table"))),
               accordion_panel("County Data", 
                               accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                               accordion_panel("Cancer Incidence"),
@@ -1462,9 +1440,20 @@ server <- function(input, output, session) {
   }) %>% 
     bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
   
+  tab_cols <- reactive({
+    df <- og.data
+    
+    df[, c(input$outcomes_tab, input$sociodemo_tab, input$age_tab, input$sex_tab, input$race_tab, input$socialenv_tab, input$prevention_tab, input$behaviors_tab, input$naturalenv_tab, input$airpol_tab, input$builtenv_tab)]
+  })
+  
   food_env_cols <- reactive({
     cbind(food_env) %>% 
       dplyr::select(!!!input$foodenv)
+  })
+  
+  food_env_cols_tab <- reactive({
+    cbind(food_env) %>% 
+      dplyr::select(!!!input$foodenv_tab)
   })
   
   crime_cols <- reactive({
@@ -1472,12 +1461,17 @@ server <- function(input, output, session) {
     df[, c(input$crime)]
   })
   
+  crime_cols_tab <- reactive({
+    df <- crime
+    df[, c(input$crime_tab)]
+  })
+  
   # census tract table
   ct_table_cols <- reactive({
     og.data[, 1] %>% 
       st_drop_geometry() %>% 
       merge(tract.bounds, by = "GEOID") %>% 
-      cbind(map_cols()) %>% 
+      cbind(tab_cols()) %>% 
       dplyr::select(-contains("geom")) %>% 
       st_drop_geometry()
   })
@@ -1486,7 +1480,7 @@ server <- function(input, output, session) {
   
   # county tables
   cnty_crime_table_cols <- reactive({
-    selected_crime <- crime_cols() %>%  # selected columns from crime
+    selected_crime <- crime_cols_tab() %>%  # selected columns from crime
       st_drop_geometry()
     
     crime_df <- crime %>%  
@@ -1653,7 +1647,7 @@ server <- function(input, output, session) {
   
   
   
-  #### DOWNLOAD HANDLER ####
+  #### DOWNLOAD HANDLERS ####
   output$download <- downloadHandler(
     filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
     content = function(file) {
@@ -1671,7 +1665,7 @@ server <- function(input, output, session) {
   output$downloadcntycrime <- downloadHandler(
     filename = function() {paste0(Sys.Date(), "geoexmap_county_crime_download.csv")},
     content = function(file) {
-      st_write(crime_cols(), file)
+      st_write(crime_cols_tab(), file)
     }
   )
   
@@ -1846,8 +1840,14 @@ server <- function(input, output, session) {
               ))
     })
   
+  output$food_table <- renderReactable({
+    validate(need(base::ncol(food_env_cols_tab()) > 1, "Please select a food environment variable."))
+    
+    reactable(food_env_cols_tab())
+  })
+  
   output$cnty_crime_table <- renderReactable({
-    validate(need(base::ncol(crime_cols()) > 1, "Please select a variable."))
+    validate(need(base::ncol(crime_cols_tab()) > 1, "Please select a crime variable."))
     
     reactable(cnty_crime_table_cols())
   })
