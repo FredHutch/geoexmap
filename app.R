@@ -1699,24 +1699,57 @@ server <- function(input, output, session) {
   )
   
   #### DOWNLOAD HANDLERS ####
-  output$download <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
-    content = function(file) {
-      st_write(map_cols(), file)
-    }
-  )
+  # output$download <- downloadHandler(
+  #   filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
+  #   content = function(file) {
+  #     st_write(map_cols(), file)
+  #   }
+  # )
   
   output$downloadcttab <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_2020_tract_download.csv")},
+    filename = function() {"geoexmap_2020_tract_download.zip"},
     content = function(file) {
-      st_write(ct_table_cols(), file)
-    }
+      tmpdir <- tempdir()
+      
+      data <- ct_table_cols()
+      layer_name <- "geoexmap_2020_tract_download"
+      
+      shp_path <- file.path(tmpdir, paste0(layer_name, ".shp"))
+      
+      st_write(obj = data, dsn = shp_path, driver = "ESRI Shapefile", delete_dsn = TRUE)
+      
+      shp_files <- list.files(tmpdir, pattern = paste0("^", layer_name, "\\."), full.names = TRUE)
+      
+      old_wd <- getwd()
+      on.exit(setwd(old_wd), add = TRUE)
+      setwd(tmpdir)
+      
+      zipfile_tmp <- "geoexmap_2020_tract_download.zip"
+      zip(zipfile_tmp, files = basename(shp_files))
+      
+      file.copy(file.path(tmpdir, zipfile_tmp), file, overwrite = TRUE)
+    },
+    contentType = "application/zip"
   )
   
   output$downloadcntycrime <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_county_crime_download.csv")},
+    filename = function() {paste0(Sys.Date(), "_geoexmap_county_crime_download.csv")},
     content = function(file) {
       st_write(crime_cols_tab(), file)
+    }
+  )
+  
+  output$downloadcntyinc <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "_geoexmap_county_cancer_inc_download.csv")},
+    content = function(file) {
+      st_write(cnty_wscr_table_inc(), file)
+    }
+  )
+  
+  output$downloadcntymort <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "_geoexmap_county_cancer_mort_download.csv")},
+    content = function(file) {
+      st_write(cnty_wscr_table_mort(), file)
     }
   )
   
