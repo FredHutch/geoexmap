@@ -752,7 +752,7 @@ ui <- page_navbar(
                               accordion_panel("2010 Census Tracts", reactableOutput("food_table"))),
               accordion_panel("County Data", 
                               accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
-                              accordion_panel("Cancer Incidence"),
+                              accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
                               accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
               accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
               
@@ -1452,8 +1452,9 @@ server <- function(input, output, session) {
   })
   
   food_env_cols_tab <- reactive({
-    cbind(food_env) %>% 
-      dplyr::select(!!!input$foodenv_tab)
+    df <- food
+    
+    df[, c(input$foodenv_tab)]
   })
   
   crime_cols <- reactive({
@@ -1476,7 +1477,13 @@ server <- function(input, output, session) {
       st_drop_geometry()
   })
   
-  #ct_food_table_cols <- reactive({})
+  ct_food_table_cols <- reactive({
+    food[, 1] %>% 
+      st_drop_geometry() %>% 
+      cbind(food_env_cols_tab()) %>% 
+      dplyr::select(-contains('geom')) %>% 
+      st_drop_geometry()
+  })
   
   # county tables
   cnty_crime_table_cols <- reactive({
@@ -1510,9 +1517,60 @@ server <- function(input, output, session) {
     }
   })
   
-  # cnty_wscr_table_cols <- reactive({
-  #   
-  # })
+  cnty_wscr_table_inc <- reactive({
+    req(input$incsite_tab != "", input$incstage_tab != "", input$incsex_tab != "")
+    wscr.inc %>% 
+      filter(Cancer.Site == input$incsite_tab,
+             Stage.At.Diagnosis == input$incstage_tab,
+             Gender == input$incsex_tab)
+  })
+  
+  # Helper: no filter if input is "All" or NULL, filter otherwise
+  filter_if_needed <- function(df, col, val) {
+    if (is.null(val) || val == "All" || val == "") df else df[df[[col]] == val, , drop = FALSE]
+  }
+  
+  # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage_tab)
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
+    # Instead of filtering by mortsex, select all sites available for either sex (or All)
+    if (!is.null(input$incsex_tab) && input$incsex_tab != "All") {
+      df <- df[df$Gender %in% c("All", input$incsex_tab), , drop = FALSE]
+    }
+    sites <- sort(unique(df$Cancer.Site))
+    updateSelectInput(session, "incsite_tab", choices = c("Please choose a site" = "", sites),
+                      selected = isolate(input$incsite_tab))
+  })
+  
+  # On mortsite or mortsex change, update stages 
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
+    if (!is.null(input$incsex_tab) && input$incsex_tab != "All") {
+      df <- df[df$Gender %in% c("All", input$incsex_tab), , drop = FALSE]
+    }
+    stages <- sort(unique(df$Stage.At.Diagnosis))
+    updateSelectInput(session, "incstage_tab", choices = c("Please choose a stage" = "", stages),
+                      selected = isolate(input$incstage_tab))
+  })
+  
+  # On mortsite or mortstage change, update sexes
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage_tab)
+    genders <- sort(unique(df$Gender))
+    updateSelectInput(session, "incsex_tab", choices = c("Please choose a sex" = "", genders),
+                      selected = isolate(input$incsex_tab))
+  })
+  
+  observeEvent(input$incbutton_tab, {
+    updateSelectInput(session, "incsite_tab", selected = "")
+    updateSelectInput(session, "incstage_tab", selected = "")
+    updateSelectInput(session, "incsex_tab", selected = "")
+  })
   
   # point tables
   tab_point_data <- reactive({
@@ -1531,11 +1589,6 @@ server <- function(input, output, session) {
              Stage.At.Diagnosis == input$incstage,
              Gender == input$incsex) 
   })
-  
-  # Helper: no filter if input is "All" or NULL, filter otherwise
-  filter_if_needed <- function(df, col, val) {
-    if (is.null(val) || val == "All" || val == "") df else df[df[[col]] == val, , drop = FALSE]
-  }
   
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
   observe({
@@ -1644,8 +1697,6 @@ server <- function(input, output, session) {
   values <- reactiveValues(
     active_variables = character(0)
   )
-  
-  
   
   #### DOWNLOAD HANDLERS ####
   output$download <- downloadHandler(
@@ -1857,6 +1908,11 @@ server <- function(input, output, session) {
     reactable(filtered.mort())
   })
   
+  output$cnty_inc_table <- renderReactable({
+    validate(need(base::nrow(cnty_wscr_table_inc()) > 1, "Please select variables for cancer incidence."))
+    reactable(cnty_wscr_table_inc())
+  })
+  
   output$standalone_table <- renderReactable({
     req(tab_point_data())
     reactable(tab_point_data())
@@ -1864,7 +1920,7 @@ server <- function(input, output, session) {
   
   #### MAIN OBSERVER LOGIC ####
   observe({
-    # if (ncol(map_cols()) == 4) {
+    # if (ncol(map_cols()) > 3) {
     #   print("Disabling select inputs...")
     #   shinyjs::disable("outcomes")
     #   shinyjs::disable("sociodemo")
@@ -1918,7 +1974,7 @@ server <- function(input, output, session) {
             lng = ~stop_lon,
             lat = ~stop_lat,
             group = "transit_markers",
-            popup = ~paste("Stop:", stop_name, ),
+            popup = ~paste("Stop:", stop_name),
             icon = makeIcon("/bus-front.svg"),
             clusterOptions = clusterOptions
           ) %>% 
