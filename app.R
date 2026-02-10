@@ -1420,6 +1420,8 @@ server <- function(input, output, session) {
     updateSelectInput(session, "mortsex", selected = "")
     updateSelectInput(session, "foodenv", selected = character(0))
     
+    updateSelectInput(session, "crime", selected = character(0))
+    
     # TODO: UPDATE ALL SWITCHES
     # reset switches if needed
     update_switch("transit", value = FALSE)
