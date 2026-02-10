@@ -1764,7 +1764,7 @@ server <- function(input, output, session) {
             lng = ~stop_lon,
             lat = ~stop_lat,
             group = "transit_markers",
-            popup = ~paste("Stop:", stop_name, ),
+            popup = ~paste("Stop:", stop_name),
             icon = makeIcon("/bus-front.svg"),
             clusterOptions = clusterOptions
           ) %>% 
