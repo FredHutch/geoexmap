@@ -1525,6 +1525,14 @@ server <- function(input, output, session) {
              Gender == input$incsex_tab)
   })
   
+  cnty_wscr_table_mort <- reactive({
+    req(input$mortsite_tab != "", input$mortstage_tab != "", input$mortsex_tab != "")
+    wscr.mort %>% 
+      filter(Cancer.Site == input$mortsite_tab,
+             Stage.At.Diagnosis == input$mortstage_tab,
+             Gender == input$mortsex_tab)
+  })
+  
   # Helper: no filter if input is "All" or NULL, filter otherwise
   filter_if_needed <- function(df, col, val) {
     if (is.null(val) || val == "All" || val == "") df else df[df[[col]] == val, , drop = FALSE]
@@ -1570,6 +1578,32 @@ server <- function(input, output, session) {
     updateSelectInput(session, "incsite_tab", selected = "")
     updateSelectInput(session, "incstage_tab", selected = "")
     updateSelectInput(session, "incsex_tab", selected = "")
+  })
+  
+  # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
+  observe({
+    df <- wscr.mort
+    # Instead of filtering by mortsex, select all sites available for either sex (or All)
+    if (!is.null(input$mortsex_tab) && input$mortsex_tab != "" && input$mortsex_tab != "All") {
+      df <- df[df$Gender %in% c("All", input$mortsex_tab), , drop = FALSE]
+    }
+    sites <- sort(unique(df$Cancer.Site))
+    updateSelectInput(session, "mortsite_tab", choices = c("Please choose a site" = "", sites),
+                      selected = isolate(input$mortsite_tab))
+  })
+  
+  # On mortsite or mortstage change, update sexes
+  observe({
+    df <- wscr.mort
+    df <- filter_if_needed(df, "Cancer.Site", input$mortsite_tab)
+    genders <- sort(unique(df$Gender))
+    updateSelectInput(session, "mortsex_tab", choices = c("Please choose a sex" = "", genders),
+                      selected = isolate(input$mortsex_tab))
+  })
+  
+  observeEvent(input$mortbutton_tab, {
+    updateSelectInput(session, "mortsite_tab", selected = "")
+    updateSelectInput(session, "mortsex_tab", selected = "")
   })
   
   # point tables
@@ -1937,8 +1971,8 @@ server <- function(input, output, session) {
   })
   
   output$cnty_mort_table <- renderReactable({
-    validate(need(base::nrow(filtered.mort()) > 1, "Please select variables for cancer mortality."))
-    reactable(filtered.mort())
+    validate(need(base::nrow(cnty_wscr_table_mort()) > 1, "Please select variables for cancer mortality."))
+    reactable(cnty_wscr_table_mort())
   })
   
   output$cnty_inc_table <- renderReactable({
