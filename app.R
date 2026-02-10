@@ -1395,6 +1395,12 @@ server <- function(input, output, session) {
     if(col == "pct_Deciduous_Forest") return("Deciduous forest (%)")
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
+    
+    if(col == "total_p1") return("Total Part I Offenses")
+    if(col == "p1_rate") return("Part I Offense Rate (Per 1,000 Population)")
+    
+    if(col == "total_p2") return("Total Part II Offenses")
+    if(col == "p2_rate") return("Part II Offense Rate (Per 1,000 Population)")
       
   }
   
@@ -2313,15 +2319,18 @@ server <- function(input, output, session) {
       
       ##### map (crime) #####
       for (c in colnames(crime_cols())) {
-        print(c)
         pal <- geoex.palette(c)
         
         if (!is.null(pal)){
+          x <- crime_cols()[[c]]
+          pal_colors <- unique(pal(sort(x)))
+          pal_labs <- get_pal_labs(x, c)
+          
           proxy <- proxy %>% 
             addPolygons(data = crime_cols(), fillColor = ~pal(crime_cols()[[c]]), weight = 0.75, color = "black",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                        label = c) %>% 
-            addLegend(pal = pal, values = ~crime_cols()[[c]], title = legend.titles(c)) 
+                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c))
+            #addLegend(pal = pal, values = ~crime_cols()[[c]], title = legend.titles(c)) 
         }
       }
       
