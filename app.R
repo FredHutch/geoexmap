@@ -1789,11 +1789,8 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage)
-    df <- filter_if_needed(df, "Cancer.Site", input$incsite)
-    # Instead of filtering by mortsex, select all sites available for either sex (or All)
-    if (!is.null(input$incsex) && input$incsex != "All") {
-      df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
-    }
+    df <- filter_if_needed(df, "Gender", input$incsex)
+
     sites <- sort(unique(df$Cancer.Site))
     updateSelectInput(session, "incsite", choices = c("Please choose a site" = "", sites),
                       selected = isolate(input$incsite))
@@ -1803,9 +1800,8 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Cancer.Site", input$incsite)
-    if (!is.null(input$incsex) && input$incsex != "All") {
-      df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
-    }
+    df <- filter_if_needed(df, "Gender", input$incsex)
+
     stages <- sort(unique(df$Stage.At.Diagnosis))
     updateSelectInput(session, "incstage", choices = c("Please choose a stage" = "", stages),
                       selected = isolate(input$incstage))
