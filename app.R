@@ -507,7 +507,7 @@ categories <- accordion(
                                           title = "Tips",
                                           placement = "right",
                                           id = "behavior_popover")), behaviors,
-                 multiple = TRUE, selectize = TRUE)
+                 multiple = TRUE, selectize = TRUE, selected = "")
   ),
   accordion_panel(
     "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
@@ -1035,7 +1035,7 @@ server <- function(input, output, session) {
     )
   })
   
-  observeEvent(list(input$builtenv, input$transit, input$superfund, input$parks), {
+  observeEvent(list(input$builtenv, input$transit, input$superfund, input$parks, input$alc), {
     update_popover(
       "builtenvpopover",
       content = markdown(built_popover_md())
@@ -1124,7 +1124,6 @@ server <- function(input, output, session) {
     tryCatch({
       # skip geometry column to avoid error
       if (var == "geometry" || inherits(df_vars[[var]], "sfc") || var == "GEOID") {
-        message("Skipping geometry column...")
         return(NULL)
       }
       
@@ -1428,7 +1427,6 @@ server <- function(input, output, session) {
     
     updateSelectInput(session, "crime", selected = character(0))
     
-    # TODO: UPDATE ALL SWITCHES
     # reset switches if needed
     update_switch("transit", value = FALSE)
     update_switch("showcounties", value = FALSE)
@@ -1450,7 +1448,150 @@ server <- function(input, output, session) {
       clearShapes()
   })
   
-  #### REACTIVE VALUES ####  
+  #### REACTIVE VALUES #### 
+  # layer ids for inputs to control number of layers 
+  layer_ids <- c("outcomes", "sociodemo", "age", "sex", "race", "socialenv", "prevention", "behaviors", "naturalenv",
+                 "airpol", "builtenv", "incsite", "incstage", "incsex", "mortsite", "mortsex", "foodenv", "crime")
+  
+  # track all layers
+  prev <- reactiveValues() # previous selected values
+  prev_total <- reactiveVal(0)
+  
+  last_changed <- reactiveVal(character(0)) # one value for last changed
+  
+  done_init <- reactiveVal(FALSE)
+  
+  # helper functions <- define if incidence and mortality is "ready" to be counted as a layer
+  inc.ready <- reactive({
+    site <- input$incsite
+    stage <- input$incstage
+    sex <- input$incsex
+    
+    all(!is.null(site),
+        !is.null(stage),
+        !is.null(sex),
+        nzchar(site %||% ""),
+        nzchar(stage %||% ""),
+        nzchar(sex %||% ""))
+  })
+  
+  mort.ready <- reactive({
+    site <- input$mortsite
+    sex <- input$mortsex
+    
+    all(!is.null(site),
+        !is.null(sex),
+        nzchar(site %||% ""),
+        nzchar(sex %||% ""))
+  })
+  
+  total_cols <- reactive({
+    tot <- 0
+    n_map <- if (is.null(map_cols())) 0 else max(ncol(map_cols()) - 1, 0)
+    n_food <- if (is.null(food_env_cols())) 0 else max(ncol(food_env_cols()) - 1, 0)
+    n_crime <- if (is.null(crime_cols())) 0 else max(ncol(crime_cols()) - 1, 0)
+    
+    if (mort.ready()) {
+      tot <- tot + 1
+    }
+    
+    if (inc.ready()) {
+      tot <- tot + 1
+    }
+    
+    tot <- tot + n_map + n_food + n_crime
+    tot
+  })
+  
+  # track last changed input
+  observeEvent(input$socialenv, {last_changed("socialenv")})
+  observeEvent(input$outcomes,  {last_changed("outcomes")})
+  observeEvent(input$sociodemo,  {last_changed("sociodemo")})
+  observeEvent(input$age,  {last_changed("age")})
+  observeEvent(input$sex,  {last_changed("sex")})
+  observeEvent(input$race,  {last_changed("race")})
+  observeEvent(input$prevention,  {last_changed("prevention")})
+  observeEvent(input$behaviors,  {last_changed("behaviors")})
+  observeEvent(input$naturalenv,  {last_changed("naturalenv")})
+  observeEvent(input$airpol,  {last_changed("airpol")})
+  observeEvent(input$builtenv,  {last_changed("builtenv")})
+  observeEvent(input$incsite,  {last_changed("incsite")})
+  observeEvent(input$incstage,  {last_changed("incstage")})
+  observeEvent(input$incsex,  {last_changed("incsex")})
+  observeEvent(input$mortsite,  {last_changed("mortsite")})
+  observeEvent(input$mortsex,  {last_changed("mortsex")})
+  
+  # enforce 3 max layers
+  observeEvent(total_cols(), {
+                 tot <- total_cols()
+                 ptot <- prev_total()
+                 cat("Total cols:", tot, "\n")
+                 cat("Previous total cols:", ptot, "\n")
+                 
+                 if (ptot <= 3 && tot > 3) {
+                   print("entered if prev <= 3 && tot > 3\n")
+                   exceed <- last_changed()
+                   print(exceed)
+                   
+                   if (exceed %in% c("incsite", "incstage", "incsex") && !inc.ready()) {
+                     return(NULL)
+                   }
+                   
+                   if (exceed %in% c("mortsite", "mortsex") && !mort.ready()) {
+                     return(NULL)
+                   }
+                   
+                   if (!is.null(exceed)) {
+                     cur_vals  <- input[[exceed]]
+                     if (is.null(cur_vals)) cur_vals <- character(0) else cur_vals <- as.character(cur_vals)
+                     old_vals  <- prev[[exceed]]
+                     print(paste("Current vals:", cur_vals))
+                     print(paste("Old vals:", old_vals))
+                     
+                     # values newly added (in cur but not in old)
+                     added <- setdiff(cur_vals, old_vals)
+                     
+                     # if there is a newly added value, drop it
+                     if (length(added) > 0) {
+                       keep <- setdiff(cur_vals, added[1])
+                       
+                       updateSelectInput(
+                         session,
+                         inputId  = exceed,
+                         selected = keep
+                       )
+                     } else {
+                       # fallback: revert entirely
+                       updateSelectInput(
+                         session,
+                         inputId  = exceed,
+                         selected = old_vals
+                       )
+                     }
+                   }
+                   
+                   showNotification("You can only display up to 3 tract or county layers.",
+                                    type = "warning",
+                                    duration = 5)
+                 } else {
+                   print("entered else statement\n")
+                   for (id in layer_ids) {
+                     vals <- input[[id]]
+                     cat("length", id, length(vals), "\n")
+                     cat(id, ":", vals, "\n")
+                     
+                     if (is.null(vals) || length(vals) == 0) vals <- ""
+                     print(paste("length prev before assignment", length(prev[[id]])))
+                     prev[[id]] <- vals
+                     print(paste("length prev after assignment", length(prev[[id]])))
+                     #print(prev[[id]])
+                   }
+                   print("---------------")
+                   prev_total(tot)
+                 }
+               })
+  
+  ## main map (census tract) columns
   map_cols <- reactive({
     df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env)
     
@@ -1464,6 +1605,7 @@ server <- function(input, output, session) {
     df[, c(input$outcomes_tab, input$sociodemo_tab, input$age_tab, input$sex_tab, input$race_tab, input$socialenv_tab, input$prevention_tab, input$behaviors_tab, input$naturalenv_tab, input$airpol_tab, input$builtenv_tab)]
   })
   
+  # food env
   food_env_cols <- reactive({
     cbind(food_env) %>% 
       dplyr::select(!!!input$foodenv)
@@ -1475,6 +1617,7 @@ server <- function(input, output, session) {
     df[, c(input$foodenv_tab)]
   })
   
+  # county crime
   crime_cols <- reactive({
     df <- crime
     df[, c(input$crime)]
@@ -2044,8 +2187,6 @@ server <- function(input, output, session) {
       
       ##### point control flow #####
       if (input$transit) {
-        print("Adding points")
-        
         html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bus-front" viewBox="0 0 16 16">
   <path d="M5 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0m8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-6-1a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2zm1-6c-1.876 0-3.426.109-4.552.226A.5.5 0 0 0 3 4.723v3.554a.5.5 0 0 0 .448.497C4.574 8.891 6.124 9 8 9s3.426-.109 4.552-.226A.5.5 0 0 0 13 8.277V4.723a.5.5 0 0 0-.448-.497A44 44 0 0 0 8 4m0-1c-1.837 0-3.353.107-4.448.22a.5.5 0 1 1-.104-.994A44 44 0 0 1 8 2c1.876 0 3.426.109 4.552.226a.5.5 0 1 1-.104.994A43 43 0 0 0 8 3"/>
   <path d="M15 8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1V2.64c0-1.188-.845-2.232-2.064-2.372A44 44 0 0 0 8 0C5.9 0 4.208.136 3.064.268 1.845.408 1 1.452 1 2.64V4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v3.5c0 .818.393 1.544 1 2v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14h6v1.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2c.607-.456 1-1.182 1-2zM8 1c2.056 0 3.71.134 4.822.261.676.078 1.178.66 1.178 1.379v8.86a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5V2.64c0-.72.502-1.301 1.178-1.379A43 43 0 0 1 8 1"/>
@@ -2257,7 +2398,6 @@ server <- function(input, output, session) {
       get_pal_labs <- function(x, col) {
         # first check if percentage--overrides others
         if (col %in% percent.vars) {
-          print("percentage")
           if (col != "Percent.Male" & col != "Percent.Female") {
             # pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
             # return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
@@ -2281,7 +2421,6 @@ server <- function(input, output, session) {
       }
       
       for (c in colnames(map_cols())) {
-        print(c)
         pal <- geoex.palette(c)
         
         if (!is.null(pal)){
@@ -2290,7 +2429,6 @@ server <- function(input, output, session) {
           
           # get labels from function
           pal_labs <- get_pal_labs(x, c)
-          print(pal_labs)
           
           # reconstruct breaks from labels
           if (is.numeric(x)) {
@@ -2301,8 +2439,6 @@ server <- function(input, output, session) {
             
             # evaluate the palette at the midpoints: one color per label
             pal_colors <- pal(mids)
-            print(length(pal_colors))
-            print(length(pal_labs))
           } else {
             pal_colors <- c("#780000", "#fdf0d5")
           }
@@ -2329,8 +2465,7 @@ server <- function(input, output, session) {
           proxy <- proxy %>% 
             addPolygons(data = crime_cols(), fillColor = ~pal(crime_cols()[[c]]), weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c))
-            #addLegend(pal = pal, values = ~crime_cols()[[c]], title = legend.titles(c)) 
+            addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
         }
       }
       
@@ -2403,7 +2538,7 @@ server <- function(input, output, session) {
     })  
   }) %>% 
     bindEvent(list(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$micro, input$builtenv, input$transit, input$alc, input$superfund,
-                   input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
+                   input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$pharmacies, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
                    input$upload, input$foodenv))
 }
 
