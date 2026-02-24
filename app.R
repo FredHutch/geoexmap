@@ -1064,10 +1064,6 @@ server <- function(input, output, session) {
   #   )
   # })
   
-  # dynamic_md <- reactive({
-  #   if
-  # })
-  
   #### PALETTE ####
   # define categories for palettes
   # "good", "bad", "neutral"
@@ -1532,11 +1528,22 @@ server <- function(input, output, session) {
                    exceed <- last_changed()
                    print(exceed)
                    
-                   if (exceed %in% c("incsite", "incstage", "incsex") && !inc.ready()) {
+                   if (exceed %in% c("incsite", "incstage", "incsex") && inc.ready()) {
+                     shinyjs::click("incbutton")
+                     # set each incidence select back to default
+                     # updateSelectInput(session, "incsite",  selected = "")  
+                     # updateSelectInput(session, "incstage", selected = "")
+                     # updateSelectInput(session, "incsex",   selected = "")
+                     #incbutton(session)
+                     showNotification("You can only display up to 3 tract or county layers. Cancer incidence selections cleared.")
                      return(NULL)
                    }
                    
-                   if (exceed %in% c("mortsite", "mortsex") && !mort.ready()) {
+                   if (exceed %in% c("mortsite", "mortsex") && mort.ready()) {
+                     shinyjs::click("mortbutton")
+                     # updateSelectInput(session, "mortsite",  selected = "")
+                     # updateSelectInput(session, "mortsex",   selected = "")
+                     showNotification("You can only display up to 3 tract or county layers. Cancer mortality selections cleared.")
                      return(NULL)
                    }
                    
@@ -1815,6 +1822,18 @@ server <- function(input, output, session) {
     updateSelectInput(session, "incsex", choices = c("Please choose a sex" = "", genders),
                       selected = isolate(input$incsex))
   })
+  
+  # make function for use when layers > 3
+  # incbutton <- function(session) {
+  #   updateSelectInput(session, "incsite", selected = "")
+  #   updateSelectInput(session, "incstage", selected = "")
+  #   updateSelectInput(session, "incsex", selected = "")
+  # }
+  # 
+  # mortbutton <- function(session) {
+  #   updateSelectInput(session, "mortsite", selected = "")
+  #   updateSelectInput(session, "mortsex",  selected = "")
+  # }
   
   observeEvent(input$incbutton, {
     updateSelectInput(session, "incsite", selected = "")
