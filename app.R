@@ -1115,13 +1115,27 @@ server <- function(input, output, session) {
          "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
          "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice")
   
+  # define palette by layer number
+  layer_base_palette <- function(layer_index) {
+    switch(
+      as.character(layer_index),
+      "1" = colorRampPalette(c("#FFFFFF", "#008B8B"))(5),
+      "2" = colorRampPalette(c("#FFFFFF", "#8B008B"))(5),
+      "3" = colorRampPalette(c("#FFFFFF", "#B8860B"))(5),
+      "4" = gray.colors(5)
+    )
+  }
+  
   # define palette by variable
-  geoex.palette <- function(var) {
+  geoex.palette <- function(var, layer_index) {
     tryCatch({
       # skip geometry column to avoid error
       if (var == "geometry" || inherits(df_vars[[var]], "sfc") || var == "GEOID") {
         return(NULL)
       }
+      
+      # base ramp
+      base_ramp <- layer_base_palette(layer_index)
       
       domain <- df_vars[[var]]
       pct.breaks <- c(0, 20, 40, 60, 80, 100)
@@ -1129,8 +1143,9 @@ server <- function(input, output, session) {
       
       # first check if percentage--overrides
       if (var %in% percent.vars) {
-        if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
-        else if (var %in% b) return(colorBin(palette = "YlOrRd", domain = domain, na.color = "transparent", bins = pct.breaks))
+        pal_fun <- base_ramp
+        if (var %in% g) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
+        else if (var %in% b) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
         # otherwise var in n
         else return(colorBin(palette = "Purples", domain = domain, na.color = "transparent", bins = pct.breaks))
       }
@@ -1530,19 +1545,12 @@ server <- function(input, output, session) {
                    
                    if (exceed %in% c("incsite", "incstage", "incsex") && inc.ready()) {
                      shinyjs::click("incbutton")
-                     # set each incidence select back to default
-                     # updateSelectInput(session, "incsite",  selected = "")  
-                     # updateSelectInput(session, "incstage", selected = "")
-                     # updateSelectInput(session, "incsex",   selected = "")
-                     #incbutton(session)
                      showNotification("You can only display up to 3 tract or county layers. Cancer incidence selections cleared.")
                      return(NULL)
                    }
                    
                    if (exceed %in% c("mortsite", "mortsex") && mort.ready()) {
                      shinyjs::click("mortbutton")
-                     # updateSelectInput(session, "mortsite",  selected = "")
-                     # updateSelectInput(session, "mortsex",   selected = "")
                      showNotification("You can only display up to 3 tract or county layers. Cancer mortality selections cleared.")
                      return(NULL)
                    }
@@ -2179,7 +2187,6 @@ server <- function(input, output, session) {
       # update the variable panel
       if (length(current_vars) > 0) {
         panel_html <- create_variable_panel(current_vars)
-        custom_attribution <- "My data citation &copy; Me, 2025"
         proxy <- proxy %>% addControl(
             html = panel_html,
             position = "bottomright",
@@ -2424,15 +2431,17 @@ server <- function(input, output, session) {
         }
       }
       
-      for (c in colnames(map_cols())) {
-        pal <- geoex.palette(c)
+      for (i in seq_along(colnames(map_cols()))) {
+        c_name <- colnames(map_cols())[i]
+        x <- map_cols()[[c_name]]
+        pal <- geoex.palette(c_name, layer_index = i)
         
         if (!is.null(pal)){
-          x <- map_cols()[[c]]
-          pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
+          # x <- map_cols()[[c]]
+          pal_colors <- unique(pal(sort(x))) # hex codes
           
           # get labels from function
-          pal_labs <- get_pal_labs(x, c)
+          pal_labs <- get_pal_labs(x, c_name)
           
           # reconstruct breaks from labels
           if (is.numeric(x)) {
@@ -2452,7 +2461,7 @@ server <- function(input, output, session) {
             addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.75, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                         label = "") %>% 
-            addLegend(colors = pal_colors, labels = get_pal_labs(x, c), title = legend.titles(c))
+            addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
             #addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
         }
       }
