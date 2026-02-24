@@ -1218,11 +1218,11 @@ server <- function(input, output, session) {
     if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol in 2023 (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease in 2023 (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease in 2023 (%)")
-    if(col == "Depression.among.Adults") return("Depression (%)")
-    if(col == "Diagnosed.Diabetes.among.Adults") return("Diabetes (%)")
-    if(col == "Obesity.among.Adults") return("Obesity (%)")
-    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("All teeth lost (%)")
-    if(col == "Stroke.among.Adults") return("Stroke (%)")
+    if(col == "Depression.among.Adults") return("Depression in 2023 (%)")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Diabetes in 2023 (%)")
+    if(col == "Obesity.among.Adults") return("Obesity in 2023 (%)")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("All teeth lost in 2023 (%)")
+    if(col == "Stroke.among.Adults") return("Stroke in 2023 (%)")
     
     if(col == "Total.Population") return("Population (total)")
     if(col == "Hispanic.or.Latino") return("Hispanic or Latino (total)")
@@ -1823,7 +1823,7 @@ server <- function(input, output, session) {
     
     leafletProxy("geoexmap") %>% 
       clearGroup("cancerincidence") %>% 
-      clearControls()
+      removeControl("cancerincidence")
   })
   
   filtered.mort <- reactive({
@@ -1866,7 +1866,7 @@ server <- function(input, output, session) {
     
     leafletProxy("geoexmap") %>% 
       clearGroup("cancermortality") %>% 
-      clearControls()
+      removeControl("cancermortality")
   })
   
   # if microplastics switch is true, then show filtering criteria for microplastics
@@ -2143,16 +2143,6 @@ server <- function(input, output, session) {
   
   #### MAIN OBSERVER LOGIC ####
   observe({
-    # if (ncol(map_cols()) > 3) {
-    #   print("Disabling select inputs...")
-    #   shinyjs::disable("outcomes")
-    #   shinyjs::disable("sociodemo")
-    #   shinyjs::disable("socialenv")
-    #   shinyjs::disable("behaviors")
-    #   shinyjs::disable("prevention")
-    #   shinyjs::disable("naturalenv")
-    #   shinyjs::disable("builtenv")
-    # }
     
     withProgress(message = "Plotting...", 
     {plotlyProxy("chart")
@@ -2478,16 +2468,16 @@ server <- function(input, output, session) {
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                           group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:"))
+              addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
           }
           
         } else {
           proxy <- proxy %>%
-            clearGroup("cancerincidence")
+            clearGroup("cancerincidence") 
         }
       })
       
-      ##### map (WSCR incidence) #####
+      ##### map (WSCR mortality) #####
       observe({
         if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
           geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
@@ -2501,7 +2491,7 @@ server <- function(input, output, session) {
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                           group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
+              addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
           }
           
         } else {
