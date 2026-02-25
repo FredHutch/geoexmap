@@ -1115,7 +1115,7 @@ server <- function(input, output, session) {
          "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
          "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice")
   
-  # define palette by layer number
+  # define palette by layer number and 
   layer_base_palette <- function(layer_index) {
     switch(
       as.character(layer_index),
@@ -1138,59 +1138,57 @@ server <- function(input, output, session) {
       base_ramp <- layer_base_palette(layer_index)
       
       domain <- df_vars[[var]]
-      pct.breaks <- c(0, 20, 40, 60, 80, 100)
-      m_f_breaks <- c(0, 50, 100)
+      #pct.breaks <- c(0, 20, 40, 60, 80, 100)
+      #m_f_breaks <- c(0, 50, 100)
       
-      # first check if percentage--overrides
-      if (var %in% percent.vars) {
-        pal_fun <- base_ramp
-        if (var %in% g) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
-        else if (var %in% b) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
-        # otherwise var in n
-        else return(colorBin(palette = "Purples", domain = domain, na.color = "transparent", bins = pct.breaks))
-      }
-
-      else if (var %in% g) {
-        return(colorQuantile(
-          palette = "YlGn", domain = domain,
-          na.color = "transparent", n = 5
-        ))
-      } else if (var %in% n) {
-        # TODO: have multiple colors for this, one for each neutral variable
-        # for now, use blue
-        if (var == "Nighttime.Radiance") {
-          return(colorQuantile(
-            palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
-            na.color="transparent", n = 5
-          ))
-        }  else return(colorQuantile(
-              palette = "Blues", domain = domain,
-              na.color = "transparent", n = 5
-        ))
-        # else return(colorBin(
-        #   palette = "Blues", domain = domain,
-        #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
-        #   na.color = "transparent", bins = breaks
-        # ))
-
-      } else if (var == "PFAS_dw") {
+      if (var == "PFAS_dw") {
         return(colorFactor(
           palette = c("#780000", "#fdf0d5"), domain = domain,
           levels = c(FALSE, TRUE)
         ))
       }
-      # otherwise, var is in "bad"
-      else {
-        # return(colorBin(
-        #   palette = "YlOrRd", domain = domain,
-        #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
-        #   na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
+      
+      return(colorNumeric(palette = base_ramp, domain = domain, na.color = "red"))
+      
+      # first check if percentage--overrides
+      # if (var %in% percent.vars) {
+      #   pal_fun <- base_ramp
+      #   # if (var %in% g) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
+      #   # else if (var %in% b) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
+      #   # # otherwise var in n
+      #   # else return(colorBin(palette = "Purples", domain = domain, na.color = "transparent", bins = pct.breaks))
+      #   return(colorNumeric(pal_fun, domain, na.color = "#808080"))
+      # }
+
+      # else if (var %in% g) {
+      #   return(colorQuantile(
+      #     palette = "YlGn", domain = domain,
+      #     na.color = "transparent", n = 5
+      #   ))
+      # } else if (var %in% n) {
+        # # TODO: have multiple colors for this, one for each neutral variable
+        # # for now, use blue
+        # if (var == "Nighttime.Radiance") {
+        #   return(colorQuantile(
+        #     palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
+        #     na.color="transparent", n = 5
+        #   ))
+        # }  else return(colorQuantile(
+        #       palette = "Blues", domain = domain,
+        #       na.color = "transparent", n = 5
         # ))
-        return(colorQuantile(
-          palette = "YlOrRd", domain = domain,
-          na.color = "transparent", n = 5
-        ))
-      }
+        # 
+
+      # } 
+      
+      
+      # otherwise, var is in "bad"
+      # else {
+      #   return(colorQuantile(
+      #     palette = "YlOrRd", domain = domain,
+      #     na.color = "transparent", n = 5
+      #   ))
+      # }
     },
     
     error = function(e) {
@@ -1471,7 +1469,7 @@ server <- function(input, output, session) {
   
   done_init <- reactiveVal(FALSE)
   
-  # helper functions <- define if incidence and mortality is "ready" to be counted as a layer
+  # helpers <- define if incidence and mortality is "ready" to be counted as a layer
   inc.ready <- reactive({
     site <- input$incsite
     stage <- input$incstage
@@ -1494,6 +1492,8 @@ server <- function(input, output, session) {
         nzchar(site %||% ""),
         nzchar(sex %||% ""))
   })
+  
+  layer_counter <- reactiveVal(0) # global layer counter for color schemes
   
   total_cols <- reactive({
     tot <- 0
@@ -1533,6 +1533,7 @@ server <- function(input, output, session) {
   
   # enforce 3 max layers
   observeEvent(total_cols(), {
+    layer_counter(0)
                  tot <- total_cols()
                  ptot <- prev_total()
                  cat("Total cols:", tot, "\n")
@@ -2392,14 +2393,23 @@ server <- function(input, output, session) {
       }
       
       ##### map (food environment) #####
-      for (c in colnames(food_env_cols())) {
-        pal <- geoex.palette(c)
+      for (i in seq_along(colnames(food_env_cols()))) {
+        c_name <- colnames(food_env_cols())[i]
+        
+        if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          k <- layer_counter() + 1
+          layer_counter(k) # set the new layer count
+          print(paste("LAYER COUNTER", layer_counter()))
+        }
+         
+        x <- food_env_cols()[[c_name]]
+        pal <- geoex.palette(c_name, layer_index = layer_counter())
         
         if (!is.null(pal)) {
           proxy <- proxy %>% 
-            addPolygons(data = food_env_cols(), fillColor = ~pal(food_env_cols()[[c]]), stroke = TRUE, weight = 0.9, color = "blue",
+            addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(pal = pal, values = ~food_env_cols()[[c]], title = legend.titles(c))
+            addLegend(pal = pal, values = x, title = legend.titles(c_name))
         }
       }
       
@@ -2434,51 +2444,73 @@ server <- function(input, output, session) {
       for (i in seq_along(colnames(map_cols()))) {
         c_name <- colnames(map_cols())[i]
         x <- map_cols()[[c_name]]
+        
+        if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          k <- layer_counter() + 1
+          layer_counter(k) # set the new layer count
+          print(paste("LAYER COUNTER", layer_counter()))
+        }
+        
         pal <- geoex.palette(c_name, layer_index = i)
+        
         
         if (!is.null(pal)){
           # x <- map_cols()[[c]]
           pal_colors <- unique(pal(sort(x))) # hex codes
+          #k <- layer_counter() + 1
+          #layer_counter(k) # set the new layer count
+          #print(paste("LAYER COUNTER", layer_counter()))
+          #pal <- geoex.palette(c_name, layer_index = i)
           
           # get labels from function
-          pal_labs <- get_pal_labs(x, c_name)
+          #pal_labs <- get_pal_labs(x, c_name)
+          
+          opacity <- if (i == 1) 0.1 else 0.2
           
           # reconstruct breaks from labels
-          if (is.numeric(x)) {
-            parts  <- strsplit(pal_labs, " - ", fixed = TRUE)
-            lower  <- as.numeric(vapply(parts, `[[`, character(1L), 1L))
-            upper  <- as.numeric(vapply(parts, `[[`, character(1L), 2L))
-            mids   <- (lower + upper) / 2
-            
-            # evaluate the palette at the midpoints: one color per label
-            pal_colors <- pal(mids)
-          } else {
-            pal_colors <- c("#780000", "#fdf0d5")
-          }
-          
+          # if (is.numeric(x)) {
+          #   parts  <- strsplit(pal_labs, " - ", fixed = TRUE)
+          #   lower  <- as.numeric(vapply(parts, `[[`, character(1L), 1L))
+          #   upper  <- as.numeric(vapply(parts, `[[`, character(1L), 2L))
+          #   mids   <- (lower + upper) / 2
+          #   
+          #   # evaluate the palette at the midpoints: one color per label
+          #   pal_colors <- pal(mids)
+          # } else {
+          #   pal_colors <- c("#780000", "#fdf0d5")
+          # }
 
           proxy <- proxy %>% 
-            addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.75, color = "black",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                        label = "") %>% 
-            addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
-            #addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
+            addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.25, color = "black",
+                        fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                        group = ~c_name, label = "") %>% 
+            #addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
+            addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA")
         }
       }
       
       ##### map (crime) #####
-      for (c in colnames(crime_cols())) {
-        pal <- geoex.palette(c)
+      for (i in seq_along(colnames(crime_cols()))) {
+        c_name <- colnames(crime_cols())[i]
+        x <- crime_cols()[[c_name]]
+        
+        if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          k <- layer_counter() + 1
+          layer_counter(k) # set the new layer count
+          print(paste("LAYER COUNTER", layer_counter()))
+        }
+                
+        pal <- geoex.palette(c_name, layer_index = layer_counter())
         
         if (!is.null(pal)){
-          x <- crime_cols()[[c]]
           pal_colors <- unique(pal(sort(x)))
-          pal_labs <- get_pal_labs(x, c)
+          # pal_labs <- get_pal_labs(x, c_name)
           
           proxy <- proxy %>% 
-            addPolygons(data = crime_cols(), fillColor = ~pal(crime_cols()[[c]]), weight = 0.75, color = "black",
+            addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black",
                         fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
+            #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
+            addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
         }
       }
       
@@ -2488,14 +2520,17 @@ server <- function(input, output, session) {
           geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
             mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
           print(geo.inc)
+          k <- layer_counter() + 1
+          layer_counter(k)
           if (nrow(geo.inc) > 0) {
-            pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
+            pal <- geoex.palette(geo.inc$Age.Adj..Rate.per.100.000, layer_counter())
+            #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
             val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
             proxy <- proxy %>%
               addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                          group = "cancerincidence", weight = 0.5, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
           }
           
@@ -2518,7 +2553,7 @@ server <- function(input, output, session) {
               addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                          group = "cancermortality", weight = 0.5, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
           }
           
