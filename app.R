@@ -469,7 +469,7 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
 categories <- accordion(
   open = FALSE,
   accordion_panel(
-    "Sociodemographics", icon = bs_icon("person-vcard"),
+    HTML("<b>Sociodemographics</b>"), icon = bs_icon("person-vcard"),
     selectInput('sociodemo', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
@@ -479,7 +479,7 @@ categories <- accordion(
     
   ),
   accordion_panel(
-    "Health Outcomes", icon = bs_icon("heart-pulse"),
+    HTML("<b>Health Outcomes</b>"), icon = bs_icon("heart-pulse"),
     selectInput('outcomes', 
                 htmltools::span("Select variables",
                      popover(bs_icon("lightbulb"),
@@ -500,7 +500,7 @@ categories <- accordion(
                     actionButton('mortbutton', "Reset filters"))
   ),
   accordion_panel(
-    "Health Behaviors", icon = bs_icon("person-walking"),
+    HTML("<b>Health Behaviors</b>"), icon = bs_icon("person-walking"),
     selectInput('behaviors', htmltools::span("Select variables", 
                                   popover(bs_icon("lightbulb"),
                                           "Select one or more health behaviors to see tips.",
@@ -510,7 +510,7 @@ categories <- accordion(
                  multiple = TRUE, selectize = TRUE, selected = "")
   ),
   accordion_panel(
-    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Prevention</b>"), icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
     selectInput('prevention', htmltools::span("Select variables", 
                                       popover(bs_icon("lightbulb"),
                                               # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
@@ -520,7 +520,7 @@ categories <- accordion(
                                               id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
-    "Healthcare Access", icon = bs_icon("building-add"),
+    HTML("<b>Healthcare Access</b>"), icon = bs_icon("building-add"),
     h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
             "Switch on one or more healthcare access features to see tips.",
             title = "Tips",
@@ -536,7 +536,7 @@ categories <- accordion(
     input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
   ),
   accordion_panel(
-    "Natural Environment", icon = bs_icon("sun"),
+    HTML("<b>Natural Environment</b>"), icon = bs_icon("sun"),
     selectInput('naturalenv', htmltools::span("Select variables", 
                                               popover(bs_icon("lightbulb"),
                                                       "Select one or more natural environment measures to see tips.",
@@ -554,7 +554,7 @@ categories <- accordion(
                                                                  id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
-    "Built Environment", icon = bs_icon("buildings"),
+    HTML("<b>Built Environment</b>"), icon = bs_icon("buildings"),
     selectInput('builtenv', htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          "Select one or more built environment measures to see tips.",
@@ -575,7 +575,7 @@ categories <- accordion(
     )
   ),
   accordion_panel(
-    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Social Environment</b>"), icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
     selectInput('socialenv', htmltools::span("Select variables", 
                                           popover(bs_icon("lightbulb"),
                                                   "Select one or more social environment measures to see tips.",
@@ -590,7 +590,7 @@ categories <- accordion(
                                                                  placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
-    "Options", icon = bs_icon("gear"),
+    HTML("<b>Options</b>"), icon = bs_icon("gear"),
     input_switch("showbounds", "Show tract boundaries", value = TRUE),
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
@@ -1900,7 +1900,7 @@ server <- function(input, output, session) {
                             zaxis = list(title = gsub("\\.", " ", names(plotly.dat)[3])))) %>% 
         config()
     } else {
-      
+      #TODO: add to render UI to choose at least 1 variable
     }
 
   })
@@ -2377,7 +2377,7 @@ server <- function(input, output, session) {
       
       ##### map (WSCR incidence) #####
       #observe({
-      if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
+      if (inc.ready()) {
         geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
           mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
         
@@ -2408,9 +2408,10 @@ server <- function(input, output, session) {
       
       ##### map (WSCR mortality) #####
       #observe({
-      if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
+      if (mort.ready()) {
         geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
           mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+        print(geo.mort)
         
         if (nrow(geo.mort) > 0) {
           k <- layer_counter() + 1
@@ -2426,7 +2427,7 @@ server <- function(input, output, session) {
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancermortality", weight = 0.5, stroke = input$showcounties, weight = 0.5, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                        group = "cancermortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
             addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
         }
         
@@ -2442,7 +2443,7 @@ server <- function(input, output, session) {
         proxy %>% 
           removeControl(layerId = "variable_panel")
       }
-      
+      ##### shapefile bounds #####
       if (input$showcounties) {
         html_legend = ''
         proxy <- proxy %>% 
