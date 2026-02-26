@@ -1418,21 +1418,16 @@ server <- function(input, output, session) {
   })
   
   # track data layer selection
-  # layer_selection_state <- reactive({
-  #   list(main = list(outcomes = input$outcomes, sociodemographics = input$sociodemo, age = input$age, 
-  #                    sex = input$sex, race = input$race, airpollution = input$airpol, socialenvironment = input$socialenv,
-  #                    behaviors = input$behaviors, prevention = input$prevention, naturalenvironment = input$naturalenv, 
-  #                    builtenvironment = input$builtenv),
-  #        crime = input$crime,
-  #        food = input$foodenv,
-  #        cancer = list(incidence = c(input$incsite, input$incstage, input$incsex),
-  #                      mortality = c(input$mortsite, input$mortsex)))
-  # })
-  # 
-  # observe({
-  #   layer_counter(0)
-  # }) %>% 
-  #   bindEvent(layer_selection_state())
+  layer_selection_state <- reactive({
+    list(main = list(outcomes = input$outcomes, sociodemographics = input$sociodemo, age = input$age,
+                     sex = input$sex, race = input$race, airpollution = input$airpol, socialenvironment = input$socialenv,
+                     behaviors = input$behaviors, prevention = input$prevention, naturalenvironment = input$naturalenv,
+                     builtenvironment = input$builtenv),
+         crime = input$crime,
+         food = input$foodenv,
+         cancer = list(incidence = c(input$incsite, input$incstage, input$incsex),
+                       mortality = c(input$mortsite, input$mortsex)))
+  })
   
   # track last changed input
   observeEvent(input$socialenv, {last_changed("socialenv")})
@@ -2075,6 +2070,7 @@ server <- function(input, output, session) {
   #### MAIN OBSERVER LOGIC ####
   observe({
     layer_counter(0)
+    cat("RESET LAYER COUNTER TO 0\n")
     withProgress(message = "Working...", 
     {plotlyProxy("chart")
       
@@ -2297,7 +2293,7 @@ server <- function(input, output, session) {
       }
       
       ##### map (food environment) #####
-      observe({
+      #observe({
         for (i in seq_along(colnames(food_env_cols()))) {
           c_name <- colnames(food_env_cols())[i]
           x <- food_env_cols()[[c_name]]
@@ -2316,8 +2312,8 @@ server <- function(input, output, session) {
                           fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               addLegend(pal = pal, values = x, title = legend.titles(c_name))
           }
-        }}) %>% 
-        bindEvent(input$foodenv)
+        }#}) %>% 
+        #bindEvent(input$foodenv)
       
       ##### map (main data) #####
       # x - data vector
@@ -2347,7 +2343,7 @@ server <- function(input, output, session) {
       #   }
       # }
       
-      observe({
+      #observe({
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
           x <- map_cols()[[c_name]]
@@ -2376,18 +2372,18 @@ server <- function(input, output, session) {
             opacity <- if (k == 1) 0.5 else 0.2
             
             proxy <- proxy %>% 
-              addPolygons(., fillColor = ~pal(x), stroke = FALSE, weight = 0.25, color = "black",
+              addPolygons(., fillColor = ~pal(x), stroke = FALSE,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           group = ~c_name, label = "") %>% 
               #addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
               addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA")
           }
-        }}) %>% 
-        bindEvent(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv,
-                  input$behaviors, input$prevention, input$naturalenv, input$builtenv)
+        }#}) %>% 
+        # bindEvent(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv,
+        #           input$behaviors, input$prevention, input$naturalenv, input$builtenv)
       
       ##### map (crime) #####
-      observe({
+      #observe({
         for (i in seq_along(colnames(crime_cols()))) {
           c_name <- colnames(crime_cols())[i]
           x <- crime_cols()[[c_name]]
@@ -2410,66 +2406,70 @@ server <- function(input, output, session) {
               #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
               addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
           }
-        }}) %>% 
-        bindEvent(input$crime)
+        }#}) %>% 
+        #bindEvent(input$crime)
       
       ##### map (WSCR incidence) #####
-      observe({
-        if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
-          geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
-            mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-
-          if (nrow(geo.inc) > 0) {
-            k <- layer_counter() + 1
-            layer_counter(k)
-            print(paste("LAYER COUNTER", layer_counter()))
-            
-            pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.inc, layer_index = layer_counter())
-            #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
-            val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
-            proxy <- proxy %>%
-              addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                         "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancerincidence", weight = 0.5, color = "black", fillOpacity = 0.2, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
-          }
+      #observe({
+      if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
+        geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
+          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+        
+        if (nrow(geo.inc) > 0) {
+          k <- layer_counter() + 1
+          layer_counter(k)
+          print(paste("LAYER COUNTER", layer_counter()))
           
-        } else {
+          opacity <- if (k == 1) 0.5 else 0.2
+          
+          pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.inc, layer_index = layer_counter())
+          #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
+          val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
           proxy <- proxy %>%
-            clearGroup("cancerincidence") 
+            addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                        popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        group = "cancerincidence", weight = 0.5, stroke = FALSE, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
         }
-      }) %>% 
-        bindEvent(input$incsite, input$incstage, input$incsex)
+        
+      } else {
+        proxy <- proxy %>%
+          clearGroup("cancerincidence") 
+      }
+      #}) %>% 
+       # bindEvent(input$incsite, input$incstage, input$incsex)
       
       ##### map (WSCR mortality) #####
-      observe({
-        if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
-          geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
-            mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+      #observe({
+      if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
+        geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
+          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+        
+        if (nrow(geo.mort) > 0) {
+          k <- layer_counter() + 1
+          layer_counter(k)
+          print(paste("LAYER COUNTER", layer_counter()))
           
-          if (nrow(geo.mort) > 0) {
-            k <- layer_counter() + 1
-            layer_counter(k)
-            print(paste("LAYER COUNTER", layer_counter()))
-            
-            pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.mort, layer_index = layer_counter())
-            #pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
-            val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
-            proxy <- proxy %>%
-              addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                         "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancermortality", weight = 0.5, color = "black", fillOpacity = 0.2, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
-          }
+          opacity <- if (k == 1) 0.5 else 0.2
           
-        } else {
+          pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.mort, layer_index = layer_counter())
+          #pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
+          val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
           proxy <- proxy %>%
-            clearGroup("cancermortality")
+            addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                        popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        group = "cancermortality", weight = 0.5, stroke = FALSE, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
         }
-      }) %>% 
-        bindEvent(input$mortsite, input$mortsex)
+        
+      } else {
+        proxy <- proxy %>%
+          clearGroup("cancermortality")
+      }
+      #}) %>% 
+       # bindEvent(input$mortsite, input$mortsex)
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
@@ -2498,9 +2498,9 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$transit, input$alc, input$superfund, input$parks, input$cancer, input$clinics, input$ems, input$hospitals, 
+    bindEvent(c(layer_selection_state(), input$transit, input$alc, input$superfund, input$parks, input$micro, input$cancer, input$clinics, input$ems, input$hospitals, 
                    input$pharmacies, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
-                   input$upload))
+                   input$upload)) 
 }
 
 # -------- CREATE SHINY APP --------
