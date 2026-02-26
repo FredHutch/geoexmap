@@ -1417,6 +1417,23 @@ server <- function(input, output, session) {
     tot
   })
   
+  # track data layer selection
+  # layer_selection_state <- reactive({
+  #   list(main = list(outcomes = input$outcomes, sociodemographics = input$sociodemo, age = input$age, 
+  #                    sex = input$sex, race = input$race, airpollution = input$airpol, socialenvironment = input$socialenv,
+  #                    behaviors = input$behaviors, prevention = input$prevention, naturalenvironment = input$naturalenv, 
+  #                    builtenvironment = input$builtenv),
+  #        crime = input$crime,
+  #        food = input$foodenv,
+  #        cancer = list(incidence = c(input$incsite, input$incstage, input$incsex),
+  #                      mortality = c(input$mortsite, input$mortsex)))
+  # })
+  # 
+  # observe({
+  #   layer_counter(0)
+  # }) %>% 
+  #   bindEvent(layer_selection_state())
+  
   # track last changed input
   observeEvent(input$socialenv, {last_changed("socialenv")})
   observeEvent(input$crime, {last_changed("crime")})
@@ -1430,6 +1447,7 @@ server <- function(input, output, session) {
   observeEvent(input$naturalenv,  {last_changed("naturalenv")})
   observeEvent(input$airpol,  {last_changed("airpol")})
   observeEvent(input$builtenv,  {last_changed("builtenv")})
+  observeEvent(input$foodenv, {last_changed("foodenv")})
   observeEvent(input$incsite,  {last_changed("incsite")})
   observeEvent(input$incstage,  {last_changed("incstage")})
   observeEvent(input$incsex,  {last_changed("incsex")})
@@ -1438,17 +1456,14 @@ server <- function(input, output, session) {
   
   
   # enforce 3 max layers
-  observeEvent(total_cols(), {
+  observe({
     layer_counter(0)
     tot <- total_cols()
     ptot <- prev_total()
-    cat("Total cols:", tot, "\n")
-    cat("Previous total cols:", ptot, "\n")
     
     if (ptot <= 3 && tot > 3) {
       print("entered if prev <= 3 && tot > 3\n")
       exceed <- last_changed()
-      print(exceed)
       
       if (exceed %in% c("incsite", "incstage", "incsex") && inc.ready()) {
         shinyjs::click("incbutton")
@@ -1466,8 +1481,6 @@ server <- function(input, output, session) {
         cur_vals  <- input[[exceed]]
         if (is.null(cur_vals)) cur_vals <- character(0) else cur_vals <- as.character(cur_vals)
         old_vals  <- prev[[exceed]]
-        print(paste("Current vals:", cur_vals))
-        print(paste("Old vals:", old_vals))
         
         # values newly added (in cur but not in old)
         added <- setdiff(cur_vals, old_vals)
@@ -1495,22 +1508,17 @@ server <- function(input, output, session) {
                        type = "warning",
                        duration = 5)
     } else {
-      print("entered else statement\n")
       for (id in layer_ids) {
         vals <- input[[id]]
-        cat("length", id, length(vals), "\n")
-        cat(id, ":", vals, "\n")
         
         if (is.null(vals) || length(vals) == 0) vals <- ""
-        print(paste("length prev before assignment", length(prev[[id]])))
         prev[[id]] <- vals
-        print(paste("length prev after assignment", length(prev[[id]])))
-        #print(prev[[id]])
+        
       }
-      print("---------------")
       prev_total(tot)
     }
-  })
+  }) %>% 
+    bindEvent(total_cols())
   
   ## main map (census tract) columns
   map_cols <- reactive({
@@ -1738,18 +1746,6 @@ server <- function(input, output, session) {
     updateSelectInput(session, "incsex", choices = c("Please choose a sex" = "", genders),
                       selected = isolate(input$incsex))
   })
-  
-  # make function for use when layers > 3
-  # incbutton <- function(session) {
-  #   updateSelectInput(session, "incsite", selected = "")
-  #   updateSelectInput(session, "incstage", selected = "")
-  #   updateSelectInput(session, "incsex", selected = "")
-  # }
-  # 
-  # mortbutton <- function(session) {
-  #   updateSelectInput(session, "mortsite", selected = "")
-  #   updateSelectInput(session, "mortsex",  selected = "")
-  # }
   
   observeEvent(input$incbutton, {
     updateSelectInput(session, "incsite", selected = "")
@@ -2078,7 +2074,7 @@ server <- function(input, output, session) {
   
   #### MAIN OBSERVER LOGIC ####
   observe({
-    
+    layer_counter(0)
     withProgress(message = "Working...", 
     {plotlyProxy("chart")
       
@@ -2301,25 +2297,27 @@ server <- function(input, output, session) {
       }
       
       ##### map (food environment) #####
-      for (i in seq_along(colnames(food_env_cols()))) {
-        c_name <- colnames(food_env_cols())[i]
-        x <- food_env_cols()[[c_name]]
-        
-        if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
-          k <- layer_counter() + 1
-          layer_counter(k) # set the new layer count
-          print(paste("LAYER COUNTER", layer_counter()))
-        }
-        
-        pal <- geoex.palette(c_name, food, layer_index = layer_counter())
-        
-        if (!is.null(pal)) {
-          proxy <- proxy %>% 
-            addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(pal = pal, values = x, title = legend.titles(c_name))
-        }
-      }
+      observe({
+        for (i in seq_along(colnames(food_env_cols()))) {
+          c_name <- colnames(food_env_cols())[i]
+          x <- food_env_cols()[[c_name]]
+          
+          if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+            k <- isolate(layer_counter()) + 1
+            layer_counter(k) # set the new layer count
+            print(paste("LAYER COUNTER", layer_counter()))
+          }
+          
+          pal <- geoex.palette(c_name, food, layer_index = layer_counter())
+          
+          if (!is.null(pal)) {
+            proxy <- proxy %>% 
+              addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue",
+                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+              addLegend(pal = pal, values = x, title = legend.titles(c_name))
+          }
+        }}) %>% 
+        bindEvent(input$foodenv)
       
       ##### map (main data) #####
       # x - data vector
@@ -2349,78 +2347,71 @@ server <- function(input, output, session) {
       #   }
       # }
       
-      for (i in seq_along(colnames(map_cols()))) {
-        c_name <- colnames(map_cols())[i]
-        x <- map_cols()[[c_name]]
-        
-        if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
-          k <- layer_counter() + 1
-          layer_counter(k) # set the new layer count
-          print(paste("LAYER COUNTER", layer_counter()))
-        }
-        
-        pal <- geoex.palette(c_name, df_vars, layer_index = layer_counter())
-        
-        
-        if (!is.null(pal)){
-          # x <- map_cols()[[c]]
-          pal_colors <- unique(pal(sort(x))) # hex codes
-          #k <- layer_counter() + 1
-          #layer_counter(k) # set the new layer count
-          #print(paste("LAYER COUNTER", layer_counter()))
-          #pal <- geoex.palette(c_name, layer_index = i)
+      observe({
+        for (i in seq_along(colnames(map_cols()))) {
+          c_name <- colnames(map_cols())[i]
+          x <- map_cols()[[c_name]]
+          k <- NULL
           
-          # get labels from function
-          #pal_labs <- get_pal_labs(x, c_name)
+          if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+            k <- isolate(layer_counter()) + 1
+            layer_counter(k) # set the new layer count
+            print(paste("LAYER COUNTER", layer_counter()))
+          }
           
-          opacity <- if (i == 1) 0.1 else 0.2
+          pal <- geoex.palette(c_name, df_vars, layer_index = layer_counter())
           
-          # reconstruct breaks from labels
-          # if (is.numeric(x)) {
-          #   parts  <- strsplit(pal_labs, " - ", fixed = TRUE)
-          #   lower  <- as.numeric(vapply(parts, `[[`, character(1L), 1L))
-          #   upper  <- as.numeric(vapply(parts, `[[`, character(1L), 2L))
-          #   mids   <- (lower + upper) / 2
-          #   
-          #   # evaluate the palette at the midpoints: one color per label
-          #   pal_colors <- pal(mids)
-          # } else {
-          #   pal_colors <- c("#780000", "#fdf0d5")
-          # }
-
-          proxy <- proxy %>% 
-            addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.25, color = "black",
-                        fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                        group = ~c_name, label = "") %>% 
-            #addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
-            addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA")
-        }
-      }
+          
+          if (!is.null(pal)){
+            # x <- map_cols()[[c]]
+            pal_colors <- unique(pal(sort(x))) # hex codes
+            #k <- layer_counter() + 1
+            #layer_counter(k) # set the new layer count
+            #print(paste("LAYER COUNTER", layer_counter()))
+            #pal <- geoex.palette(c_name, layer_index = i)
+            
+            # get labels from function
+            #pal_labs <- get_pal_labs(x, c_name)
+            
+            opacity <- if (k == 1) 0.5 else 0.2
+            
+            proxy <- proxy %>% 
+              addPolygons(., fillColor = ~pal(x), stroke = FALSE, weight = 0.25, color = "black",
+                          fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                          group = ~c_name, label = "") %>% 
+              #addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
+              addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA")
+          }
+        }}) %>% 
+        bindEvent(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv,
+                  input$behaviors, input$prevention, input$naturalenv, input$builtenv)
       
       ##### map (crime) #####
-      for (i in seq_along(colnames(crime_cols()))) {
-        c_name <- colnames(crime_cols())[i]
-        x <- crime_cols()[[c_name]]
-        
-        if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
-          k <- layer_counter() + 1
-          layer_counter(k) # set the new layer count
-          print(paste("LAYER COUNTER", layer_counter()))
-        }
-                
-        pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
-        
-        if (!is.null(pal)){
-          pal_colors <- unique(pal(sort(x)))
-          # pal_labs <- get_pal_labs(x, c_name)
+      observe({
+        for (i in seq_along(colnames(crime_cols()))) {
+          c_name <- colnames(crime_cols())[i]
+          x <- crime_cols()[[c_name]]
           
-          proxy <- proxy %>% 
-            addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
-            addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
-        }
-      }
+          if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+            k <- layer_counter() + 1
+            layer_counter(k) # set the new layer count
+            print(paste("LAYER COUNTER", layer_counter()))
+          }
+          
+          pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
+          
+          if (!is.null(pal)){
+            pal_colors <- unique(pal(sort(x)))
+            # pal_labs <- get_pal_labs(x, c_name)
+            
+            proxy <- proxy %>% 
+              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black",
+                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+              #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
+              addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
+          }
+        }}) %>% 
+        bindEvent(input$crime)
       
       ##### map (WSCR incidence) #####
       observe({
@@ -2489,12 +2480,17 @@ server <- function(input, output, session) {
       if (input$showcounties) {
         html_legend = ''
         proxy <- proxy %>% 
-          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#85BDBF", fill = FALSE) 
+          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#0f4c5c", fill = FALSE) 
       }
       
       if (input$showcities) {
         proxy <- proxy %>% 
-          addPolygons(data = city.bounds, stroke = TRUE, weight = 2, color = "#57737A", fill = FALSE)
+          addPolygons(data = city.bounds, stroke = TRUE, weight = 2, color = "#e36414", fill = FALSE)
+      }
+      
+      if (input$showbounds) {
+        proxy <- proxy %>% 
+          addPolygons(data = tract.bounds, stroke = TRUE, weight = 1, color = "black", fill = FALSE)
       }
       
       proxy <- proxy %>% 
@@ -2502,9 +2498,9 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$micro, input$builtenv, input$transit, input$alc, input$superfund,
-                   input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$pharmacies, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
-                   input$upload, input$foodenv))
+    bindEvent(list(input$transit, input$alc, input$superfund, input$parks, input$cancer, input$clinics, input$ems, input$hospitals, 
+                   input$pharmacies, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
+                   input$upload))
 }
 
 # -------- CREATE SHINY APP --------
