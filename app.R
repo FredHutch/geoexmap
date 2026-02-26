@@ -34,7 +34,7 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
 # polygon data tied to census tracts or counties
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data")
 
-og.data <- data # keep original data for data download
+og.data <- data # keep original data for data download/tables
 
 # change here so that mapped values are NA if 0--to map transparently on the map
 data <- data %>% 
@@ -80,8 +80,6 @@ data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisur
 data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
 df_vars <- data
-
-#df_collection <- list(tracts2020 = df_vars, tracts2010 = food, crime = crime, )
 
 sociodemographics <- c("Population (total)" = "Total.Population")
 
@@ -245,6 +243,7 @@ crimeenv <- c("Part I Offenses (Count)" = "total_p1",
               "Part II Offenses (Count)" = "total_p2",
               "Part II Offenses (Rate)" = "p2_rate")
 
+# TODO: take out variables according to feedback
 foodenv <- c("Population (2010)" = "Pop2010",
              "Occupied Housing Units (2010)" = "OHU2010",
              "Population > 1 mile from supermarket (total)" = "lapop1",
@@ -466,8 +465,6 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
                "Population.density" = "- **Urbanicity/rurality**: What are resources to improve health and healthcare in [rural communities](https://doh.wa.gov/public-health-provider-resources/rural-health)?"
                )
 
-#health_access_list <- list()
-
 # -------- UI ELEMENTS --------
 categories <- accordion(
   open = FALSE,
@@ -496,6 +493,7 @@ categories <- accordion(
                     selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
                     selectInput('incsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
                     actionButton('incbutton', "Reset filters")),
+    # options to filter by cancer site, gender
     accordion_panel("Cancer Mortality",
                     selectInput('mortsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('mortsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
@@ -603,6 +601,7 @@ categories <- accordion(
   
 )
 
+# define table categories
 table.cats <- accordion(
   open = FALSE,
   accordion_panel(
@@ -800,7 +799,6 @@ server <- function(input, output, session) {
   })
   
   behaviors_md <- reactive({
-    #req(input$behaviors)
     if (is.null(input$behaviors) || length(input$behaviors) == 0) {
       return("Select one or more health outcomes to see tips.")
     }
@@ -1057,67 +1055,10 @@ server <- function(input, output, session) {
       content = markdown(soc_md())
     )
   })
-  # output$outcomes_icon <- renderUI({
-  #   popover(
-  #     bs_icon("question-circle"),
-  #     title = "Tips",
-  #     content = markdown(outcomes_md()),
-  #     placement = "right"
-  #   )
-  # })
   
   #### PALETTE ####
-  # define categories for palettes
-  # "good", "bad", "neutral"
-  # percent variables for legend breaks
-  percent.vars <- c("Food.Stamps", "Food.Insecurity", "Housing.Insecurity", "Utility.Services.Threat",
-                    "Lacking.Reliable.Transportation", "Lack.of.Social.and.Emotional.Support", "Lack.of.Health.Insurance",
-                    "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Taking.Medicine.to.Control.High.Blood.Pressure",
-                    "Cholesterol.Screening", "Mammography.Use.among.Women.50.to.74", "Colorectal.Cancer.Screening.among.Adults.45.to.75",
-                    "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults", "No.Leisure.time.Physical.Activity.among.Adults", 
-                    "Short.Sleep.Duration", "Arthritis.among.Adults", "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "Cancer.or.Melanoma.among.Adults",
-                    "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults", "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults",
-                    "Diagnosed.Diabetes.among.Adults", "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.Older", "Stroke.among.Adults", "Percent.Hispanic.or.Latino",
-                    "Percent.White.NonHispanic", "Percent.Black.NonHispanic", "Percent.American.Indian.Alaska.Native.NonHispanic", "Percent.Asian.NonHispanic", "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic", 
-                    "Percent.Other.Race.NonHispanic", "Percent.Two.or.More.Races.NonHispanic", "Percent.White.Hispanic.or.Latino", "Percent.Black.Hispanic.or.Latino", "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino", 
-                    "Percent.Asian.Hispanic.or.Latino", "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Percent.Other.Race.Hispanic.or.Latino", "Percent.Two.or.More.Races.Hispanic.or.Latino", "Percent.Male", "Percent.Female", 
-                    "Percent.0.to.4.years", "Percent.5.to.9.years", "Percent.10.to.14.years", "Percent.15.to.19.years", "Percent.20.to.24.years", "Percent.25.to.29.years", "Percent.30.to.34.years", "Percent.35.to.39.years", 
-                    "Percent.40.to.44.years", "Percent.45.to.49.years", "Percent.50.to.54.years", "Percent.55.to.59.years", "Percent.60.to.64.years", "Percent.65.to.69.years", "Percent.70.to.74.years", "Percent.75.to.79.years", "Percent.80.to.84.years",
-                    "Percent.85.and.older", "Pct.Noise.More.than.LAeq.45.to.50.db", "Pct.Noise.More.than.LAeq.50.to.60.db", "Pct.Noise.More.than.LAeq.60.to.70.db", "Pct.Noise.More.than.LAeq.70.to.80.db", 
-                    "Pct.Noise.More.than.LAeq.80.to.90.db", "Pct.Noise.More.than.LAeq.90.db", "Unemployment", "No.broadband.internet", "No.high.school.diploma", "Single.parent.households", "Crowding", "Poverty", "Housing.cost.burden", "pct_Open_Water",
-                    "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "pct_Barren", "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
-                    "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice"
-                    )
   
-  g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Cholesterol.Screening",
-         "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
-         "Colorectal.Cancer.Screening.among.Adults.45.to.75", "Walkability", "social_capital", "Median.HH.Income", "HT_Index")
-  b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults", 
-         "Food.Stamps", "Food.Insecurity",
-         "Housing.Insecurity", "Utility.Services.Threat", "Lacking.Reliable.Transportation", 
-         "Lack.Of.Health.Insurance", "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults",
-         "No.Leisure.time.Physical.Activity.among.Adults", "Short.Sleep.Duration",
-         "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
-         "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
-         "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
-         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults",
-         "Radon", "Pesticide.Exposure", "Racial.Residential.Segregation", "N.Noise.More.than.LAeq.45.to.50.db",
-         "N.Noise.More.than.LAeq.50.to.60.db", "N.Noise.More.than.LAeq.60.to.70.db", "N.Noise.More.than.LAeq.70.to.80.db", 
-         "N.Noise.More.than.LAeq.80.to.90.db", "N.Noise.More.than.LAeq.90.db", "Pct.Noise.More.than.LAeq.45.to.50.db",
-         "Pct.Noise.More.than.LAeq.50.to.60.db", "Pct.Noise.More.than.LAeq.60.to.70.db", "Pct.Noise.More.than.LAeq.70.to.80.db", 
-         "Pct.Noise.More.than.LAeq.80.to.90.db", "Pct.Noise.More.than.LAeq.90.db", "Unemployment", "No.broadband.internet",
-         "No.high.school.diploma", "Single.parent.households", "Crowding", "Poverty", "Housing.cost.burden", "Maximum.temperature",
-         "Minimum.temperature", "Average.temperature", "Wildfire.smoke", "Nitrogen.dioxide", "Sulfur.dioxide", "Carbon.monoxide",
-         "Ozone", "Avalanche.Risk.Score", "Coastal.Flooding.Risk.Score", "Cold.Wave.Risk.Score", "Drought.Risk.Score", "Earthquake.Risk.Score",
-         "Hail.Risk.Score", "Heat.Wave.Risk.Score", "Hurricane.Risk.Score", "Ice.Storm.Risk.Score", "Landslide.Risk.Score", "Lightning.Risk.Score", "Riverine.Flooding.Risk.Score",
-         "Strong.Wind.Risk.Score", "Tornado.Risk.Score", "Tsunami.Risk.Score", "Volcanic.Activity.Risk.Score", "Wildfire.Risk.Score", "Winter.Weather.Risk.Score",
-         "Historic.Redlining.Score") 
-  n <- c("Nighttime.Radiance", "Percent.Hispanic.or.Latino",  names(sociodemo), names(sex), names(race), names(age), "Precipitation", "Population.density", "bluespace",
-         "pct_Open_Water", "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "Pct_Barren",
-         "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
-         "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice")
-  
-  # define palette by layer number and 
+  # define palette by layer number 
   layer_base_palette <- function(layer_index) {
     switch(
       as.character(layer_index),
@@ -1140,57 +1081,15 @@ server <- function(input, output, session) {
       base_ramp <- layer_base_palette(layer_index)
       
       domain <- df[[var]] 
-      #pct.breaks <- c(0, 20, 40, 60, 80, 100)
-      #m_f_breaks <- c(0, 50, 100)
       
       if (var == "PFAS_dw") {
         return(colorFactor(
           palette = c("#780000", "#fdf0d5"), domain = domain,
-          levels = c(FALSE, TRUE)
+          levels = c(TRUE, FALSE)
         ))
       }
       
-      return(colorNumeric(palette = base_ramp, domain = domain, na.color = "red"))
-      
-      # first check if percentage--overrides
-      # if (var %in% percent.vars) {
-      #   pal_fun <- base_ramp
-      #   # if (var %in% g) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
-      #   # else if (var %in% b) return(colorBin(palette = pal_fun, domain = domain, na.color = "darkgrey", bins = pct.breaks))
-      #   # # otherwise var in n
-      #   # else return(colorBin(palette = "Purples", domain = domain, na.color = "transparent", bins = pct.breaks))
-      #   return(colorNumeric(pal_fun, domain, na.color = "#808080"))
-      # }
-
-      # else if (var %in% g) {
-      #   return(colorQuantile(
-      #     palette = "YlGn", domain = domain,
-      #     na.color = "transparent", n = 5
-      #   ))
-      # } else if (var %in% n) {
-        # # TODO: have multiple colors for this, one for each neutral variable
-        # # for now, use blue
-        # if (var == "Nighttime.Radiance") {
-        #   return(colorQuantile(
-        #     palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
-        #     na.color="transparent", n = 5
-        #   ))
-        # }  else return(colorQuantile(
-        #       palette = "Blues", domain = domain,
-        #       na.color = "transparent", n = 5
-        # ))
-        # 
-
-      # } 
-      
-      
-      # otherwise, var is in "bad"
-      # else {
-      #   return(colorQuantile(
-      #     palette = "YlOrRd", domain = domain,
-      #     na.color = "transparent", n = 5
-      #   ))
-      # }
+      return(colorNumeric(palette = base_ramp, domain = domain, na.color = "transparent"))
     },
     
     error = function(e) {
@@ -1410,6 +1309,8 @@ server <- function(input, output, session) {
     
     if(col == "total_p2") return("Total Part II Offenses")
     if(col == "p2_rate") return("Part II Offense Rate (Per 1,000 Population)")
+    
+    # TODO: add legend titles for food environment columns
       
   }
   
@@ -1497,6 +1398,7 @@ server <- function(input, output, session) {
   
   layer_counter <- reactiveVal(0) # global layer counter for color schemes
   
+  # keep track of total layers
   total_cols <- reactive({
     tot <- 0
     n_map <- if (is.null(map_cols())) 0 else max(ncol(map_cols()) - 1, 0)
@@ -1517,6 +1419,7 @@ server <- function(input, output, session) {
   
   # track last changed input
   observeEvent(input$socialenv, {last_changed("socialenv")})
+  observeEvent(input$crime, {last_changed("crime")})
   observeEvent(input$outcomes,  {last_changed("outcomes")})
   observeEvent(input$sociodemo,  {last_changed("sociodemo")})
   observeEvent(input$age,  {last_changed("age")})
@@ -1533,80 +1436,81 @@ server <- function(input, output, session) {
   observeEvent(input$mortsite,  {last_changed("mortsite")})
   observeEvent(input$mortsex,  {last_changed("mortsex")})
   
+  
   # enforce 3 max layers
   observeEvent(total_cols(), {
     layer_counter(0)
-                 tot <- total_cols()
-                 ptot <- prev_total()
-                 cat("Total cols:", tot, "\n")
-                 cat("Previous total cols:", ptot, "\n")
-                 
-                 if (ptot <= 3 && tot > 3) {
-                   print("entered if prev <= 3 && tot > 3\n")
-                   exceed <- last_changed()
-                   print(exceed)
-                   
-                   if (exceed %in% c("incsite", "incstage", "incsex") && inc.ready()) {
-                     shinyjs::click("incbutton")
-                     showNotification("You can only display up to 3 tract or county layers. Cancer incidence selections cleared.")
-                     return(NULL)
-                   }
-                   
-                   if (exceed %in% c("mortsite", "mortsex") && mort.ready()) {
-                     shinyjs::click("mortbutton")
-                     showNotification("You can only display up to 3 tract or county layers. Cancer mortality selections cleared.")
-                     return(NULL)
-                   }
-                   
-                   if (!is.null(exceed)) {
-                     cur_vals  <- input[[exceed]]
-                     if (is.null(cur_vals)) cur_vals <- character(0) else cur_vals <- as.character(cur_vals)
-                     old_vals  <- prev[[exceed]]
-                     print(paste("Current vals:", cur_vals))
-                     print(paste("Old vals:", old_vals))
-                     
-                     # values newly added (in cur but not in old)
-                     added <- setdiff(cur_vals, old_vals)
-                     
-                     # if there is a newly added value, drop it
-                     if (length(added) > 0) {
-                       keep <- setdiff(cur_vals, added[1])
-                       
-                       updateSelectInput(
-                         session,
-                         inputId  = exceed,
-                         selected = keep
-                       )
-                     } else {
-                       # fallback: revert entirely
-                       updateSelectInput(
-                         session,
-                         inputId  = exceed,
-                         selected = old_vals
-                       )
-                     }
-                   }
-                   
-                   showNotification("You can only display up to 3 tract or county layers.",
-                                    type = "warning",
-                                    duration = 5)
-                 } else {
-                   print("entered else statement\n")
-                   for (id in layer_ids) {
-                     vals <- input[[id]]
-                     cat("length", id, length(vals), "\n")
-                     cat(id, ":", vals, "\n")
-                     
-                     if (is.null(vals) || length(vals) == 0) vals <- ""
-                     print(paste("length prev before assignment", length(prev[[id]])))
-                     prev[[id]] <- vals
-                     print(paste("length prev after assignment", length(prev[[id]])))
-                     #print(prev[[id]])
-                   }
-                   print("---------------")
-                   prev_total(tot)
-                 }
-               })
+    tot <- total_cols()
+    ptot <- prev_total()
+    cat("Total cols:", tot, "\n")
+    cat("Previous total cols:", ptot, "\n")
+    
+    if (ptot <= 3 && tot > 3) {
+      print("entered if prev <= 3 && tot > 3\n")
+      exceed <- last_changed()
+      print(exceed)
+      
+      if (exceed %in% c("incsite", "incstage", "incsex") && inc.ready()) {
+        shinyjs::click("incbutton")
+        showNotification("You can only display up to 3 tract or county layers. Cancer incidence selections cleared.", type = "warning", duration = 5)
+        return(NULL)
+      }
+      
+      if (exceed %in% c("mortsite", "mortsex") && mort.ready()) {
+        shinyjs::click("mortbutton")
+        showNotification("You can only display up to 3 tract or county layers. Cancer mortality selections cleared.", type = "warning", duration = 5)
+        return(NULL)
+      }
+      
+      if (!is.null(exceed)) {
+        cur_vals  <- input[[exceed]]
+        if (is.null(cur_vals)) cur_vals <- character(0) else cur_vals <- as.character(cur_vals)
+        old_vals  <- prev[[exceed]]
+        print(paste("Current vals:", cur_vals))
+        print(paste("Old vals:", old_vals))
+        
+        # values newly added (in cur but not in old)
+        added <- setdiff(cur_vals, old_vals)
+        
+        # if there is a newly added value, drop it
+        if (length(added) > 0) {
+          keep <- setdiff(cur_vals, added[1])
+          
+          updateSelectInput(
+            session,
+            inputId  = exceed,
+            selected = keep
+          )
+        } else {
+          # fallback: revert entirely
+          updateSelectInput(
+            session,
+            inputId  = exceed,
+            selected = old_vals
+          )
+        }
+      }
+      
+      showNotification("You can only display up to 3 tract or county layers.",
+                       type = "warning",
+                       duration = 5)
+    } else {
+      print("entered else statement\n")
+      for (id in layer_ids) {
+        vals <- input[[id]]
+        cat("length", id, length(vals), "\n")
+        cat(id, ":", vals, "\n")
+        
+        if (is.null(vals) || length(vals) == 0) vals <- ""
+        print(paste("length prev before assignment", length(prev[[id]])))
+        prev[[id]] <- vals
+        print(paste("length prev after assignment", length(prev[[id]])))
+        #print(prev[[id]])
+      }
+      print("---------------")
+      prev_total(tot)
+    }
+  })
   
   ## main map (census tract) columns
   map_cols <- reactive({
@@ -1730,7 +1634,8 @@ server <- function(input, output, session) {
                       selected = isolate(input$incsite_tab))
   })
   
-  # On mortsite or mortsex change, update stages 
+  # On mortsite or mortsex change, update stages
+  # TODO: CHANGE FUNCTIONALITY TO MATCH THOSE OF MAP
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
@@ -2174,9 +2079,10 @@ server <- function(input, output, session) {
   #### MAIN OBSERVER LOGIC ####
   observe({
     
-    withProgress(message = "Plotting...", 
+    withProgress(message = "Working...", 
     {plotlyProxy("chart")
       
+      # TODO: change to accommodate all variables, not just main map cols
       current_vars <- colnames(map_cols())
       current_vars <- current_vars[!current_vars %in% c("geom")]
       values$active_variables <- current_vars
@@ -2196,7 +2102,7 @@ server <- function(input, output, session) {
             layerId = "variable_panel"
           ) 
       }
-      # for each chosen column, define the palette, and add polygons
+      # TODO: dynamic labels for tracts
       label = ""
       
       ##### point control flow #####
