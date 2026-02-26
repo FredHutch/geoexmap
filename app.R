@@ -81,6 +81,8 @@ data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
 df_vars <- data
 
+#df_collection <- list(tracts2020 = df_vars, tracts2010 = food, crime = crime, )
+
 sociodemographics <- c("Population (total)" = "Total.Population")
 
 racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
@@ -1127,17 +1129,17 @@ server <- function(input, output, session) {
   }
   
   # define palette by variable
-  geoex.palette <- function(var, layer_index) {
+  geoex.palette <- function(var, df, layer_index) {
     tryCatch({
       # skip geometry column to avoid error
-      if (var == "geometry" || inherits(df_vars[[var]], "sfc") || var == "GEOID") {
+      if (var == "geometry" || inherits(df[[var]], "sfc") || var == "GEOID") {
         return(NULL)
       }
       
       # base ramp
       base_ramp <- layer_base_palette(layer_index)
       
-      domain <- df_vars[[var]]
+      domain <- df[[var]] 
       #pct.breaks <- c(0, 20, 40, 60, 80, 100)
       #m_f_breaks <- c(0, 50, 100)
       
@@ -2395,15 +2397,15 @@ server <- function(input, output, session) {
       ##### map (food environment) #####
       for (i in seq_along(colnames(food_env_cols()))) {
         c_name <- colnames(food_env_cols())[i]
+        x <- food_env_cols()[[c_name]]
         
         if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
           k <- layer_counter() + 1
           layer_counter(k) # set the new layer count
           print(paste("LAYER COUNTER", layer_counter()))
         }
-         
-        x <- food_env_cols()[[c_name]]
-        pal <- geoex.palette(c_name, layer_index = layer_counter())
+        
+        pal <- geoex.palette(c_name, food, layer_index = layer_counter())
         
         if (!is.null(pal)) {
           proxy <- proxy %>% 
@@ -2416,30 +2418,30 @@ server <- function(input, output, session) {
       ##### map (main data) #####
       # x - data vector
       # col - column name
-      get_pal_labs <- function(x, col) {
-        # first check if percentage--overrides others
-        if (col %in% percent.vars) {
-          if (col != "Percent.Male" & col != "Percent.Female") {
-            # pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
-            # return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-            pal_labs <- c(0, 20, 40, 60, 80, 100)
-            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1]) # first lag is NA
-          } else {
-            pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
-            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-          }
-          
-        }
-        
-        # get around PFAS label
-        else if (!is.logical(x)) {
-          pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # will need to change for some vars
-          return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-          
-        } else {
-          return(c(TRUE, FALSE))
-        }
-      }
+      # get_pal_labs <- function(x, col) {
+      #   # first check if percentage--overrides others
+      #   if (col %in% percent.vars) {
+      #     if (col != "Percent.Male" & col != "Percent.Female") {
+      #       # pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
+      #       # return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+      #       pal_labs <- c(0, 20, 40, 60, 80, 100)
+      #       return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1]) # first lag is NA
+      #     } else {
+      #       pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
+      #       return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+      #     }
+      #     
+      #   }
+      #   
+      #   # get around PFAS label
+      #   else if (!is.logical(x)) {
+      #     pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # will need to change for some vars
+      #     return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+      #     
+      #   } else {
+      #     return(c(TRUE, FALSE))
+      #   }
+      # }
       
       for (i in seq_along(colnames(map_cols()))) {
         c_name <- colnames(map_cols())[i]
@@ -2451,7 +2453,7 @@ server <- function(input, output, session) {
           print(paste("LAYER COUNTER", layer_counter()))
         }
         
-        pal <- geoex.palette(c_name, layer_index = i)
+        pal <- geoex.palette(c_name, df_vars, layer_index = layer_counter())
         
         
         if (!is.null(pal)){
@@ -2500,7 +2502,7 @@ server <- function(input, output, session) {
           print(paste("LAYER COUNTER", layer_counter()))
         }
                 
-        pal <- geoex.palette(c_name, layer_index = layer_counter())
+        pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
         
         if (!is.null(pal)){
           pal_colors <- unique(pal(sort(x)))
@@ -2519,18 +2521,20 @@ server <- function(input, output, session) {
         if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
           geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
             mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-          print(geo.inc)
-          k <- layer_counter() + 1
-          layer_counter(k)
+
           if (nrow(geo.inc) > 0) {
-            pal <- geoex.palette(geo.inc$Age.Adj..Rate.per.100.000, layer_counter())
+            k <- layer_counter() + 1
+            layer_counter(k)
+            print(paste("LAYER COUNTER", layer_counter()))
+            
+            pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.inc, layer_index = layer_counter())
             #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
             val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
             proxy <- proxy %>%
               addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancerincidence", weight = 0.5, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                          group = "cancerincidence", weight = 0.5, color = "black", fillOpacity = 0.2, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
           }
           
@@ -2538,22 +2542,28 @@ server <- function(input, output, session) {
           proxy <- proxy %>%
             clearGroup("cancerincidence") 
         }
-      })
+      }) %>% 
+        bindEvent(input$incsite, input$incstage, input$incsex)
       
       ##### map (WSCR mortality) #####
       observe({
         if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
           geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
             mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-          print(geo.mort)
+          
           if (nrow(geo.mort) > 0) {
-            pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
+            k <- layer_counter() + 1
+            layer_counter(k)
+            print(paste("LAYER COUNTER", layer_counter()))
+            
+            pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.mort, layer_index = layer_counter())
+            #pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
             val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
             proxy <- proxy %>%
               addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                           popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                          "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancermortality", weight = 0.5, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                          group = "cancermortality", weight = 0.5, color = "black", fillOpacity = 0.2, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
           }
           
@@ -2561,7 +2571,8 @@ server <- function(input, output, session) {
           proxy <- proxy %>%
             clearGroup("cancermortality")
         }
-      })
+      }) %>% 
+        bindEvent(input$mortsite, input$mortsex)
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
