@@ -988,7 +988,7 @@ server <- function(input, output, session) {
     }
     
     if (input$cancer) {
-      switch_md <- c(switch_md, "- **Commision on Cancer (CoC)-accredited programs**: How can you find [programs accredited by the CoC](https://www.facs.org/find-a-hospital/?nearMe=off&companyType=CoC)?")
+      switch_md <- c(switch_md, "- **Commission on Cancer (CoC)-accredited programs**: How can you find [programs accredited by the CoC](https://www.facs.org/find-a-hospital/?nearMe=off&companyType=CoC)?")
     }
     
     if (input$fqhc) {
@@ -2403,15 +2403,12 @@ server <- function(input, output, session) {
         proxy <- proxy %>%
           clearGroup("cancerincidence") 
       }
-      #}) %>% 
-       # bindEvent(input$incsite, input$incstage, input$incsex)
       
       ##### map (WSCR mortality) #####
       #observe({
       if (mort.ready()) {
         geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
           mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-        print(geo.mort)
         
         if (nrow(geo.mort) > 0) {
           k <- layer_counter() + 1
@@ -2421,7 +2418,6 @@ server <- function(input, output, session) {
           opacity <- if (k == 1) 0.5 else 0.2
           
           pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.mort, layer_index = layer_counter())
-          #pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
           val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
           proxy <- proxy %>%
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
@@ -2435,8 +2431,6 @@ server <- function(input, output, session) {
         proxy <- proxy %>%
           clearGroup("cancermortality")
       }
-      #}) %>% 
-       # bindEvent(input$mortsite, input$mortsex)
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
