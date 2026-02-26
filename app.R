@@ -2316,33 +2316,6 @@ server <- function(input, output, session) {
         #bindEvent(input$foodenv)
       
       ##### map (main data) #####
-      # x - data vector
-      # col - column name
-      # get_pal_labs <- function(x, col) {
-      #   # first check if percentage--overrides others
-      #   if (col %in% percent.vars) {
-      #     if (col != "Percent.Male" & col != "Percent.Female") {
-      #       # pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
-      #       # return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-      #       pal_labs <- c(0, 20, 40, 60, 80, 100)
-      #       return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1]) # first lag is NA
-      #     } else {
-      #       pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
-      #       return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-      #     }
-      #     
-      #   }
-      #   
-      #   # get around PFAS label
-      #   else if (!is.logical(x)) {
-      #     pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # will need to change for some vars
-      #     return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-      #     
-      #   } else {
-      #     return(c(TRUE, FALSE))
-      #   }
-      # }
-      
       #observe({
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
@@ -2361,18 +2334,11 @@ server <- function(input, output, session) {
           if (!is.null(pal)){
             # x <- map_cols()[[c]]
             pal_colors <- unique(pal(sort(x))) # hex codes
-            #k <- layer_counter() + 1
-            #layer_counter(k) # set the new layer count
-            #print(paste("LAYER COUNTER", layer_counter()))
-            #pal <- geoex.palette(c_name, layer_index = i)
-            
-            # get labels from function
-            #pal_labs <- get_pal_labs(x, c_name)
             
             opacity <- if (k == 1) 0.5 else 0.2
             
             proxy <- proxy %>% 
-              addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+              addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.2,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           group = ~c_name, label = "") %>% 
               #addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
@@ -2402,7 +2368,7 @@ server <- function(input, output, session) {
             
             proxy <- proxy %>% 
               addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black",
-                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                          fillOpacity = 0.3, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
               addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
           }
@@ -2429,7 +2395,7 @@ server <- function(input, output, session) {
             addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancerincidence", weight = 0.5, stroke = FALSE, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                        group = "cancerincidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
             addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
         }
         
@@ -2460,7 +2426,7 @@ server <- function(input, output, session) {
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancermortality", weight = 0.5, stroke = FALSE, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                        group = "cancermortality", weight = 0.5, stroke = input$showcounties, weight = 0.5, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
             addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
         }
         
@@ -2480,17 +2446,29 @@ server <- function(input, output, session) {
       if (input$showcounties) {
         html_legend = ''
         proxy <- proxy %>% 
-          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#0f4c5c", fill = FALSE) 
+          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#0f4c5c", fill = FALSE,
+                      group = "countybounds") 
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("countybounds")
       }
       
       if (input$showcities) {
         proxy <- proxy %>% 
-          addPolygons(data = city.bounds, stroke = TRUE, weight = 2, color = "#e36414", fill = FALSE)
+          addPolygons(data = city.bounds, stroke = TRUE, weight = 2, color = "#e36414", fill = FALSE,
+                      group = "citybounds")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("citybounds")
       }
       
       if (input$showbounds) {
         proxy <- proxy %>% 
-          addPolygons(data = tract.bounds, stroke = TRUE, weight = 1, color = "black", fill = FALSE)
+          addPolygons(data = tract.bounds, stroke = TRUE, weight = 1, color = "black", fill = FALSE,
+                      group = "tractbounds")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("tractbounds")
       }
       
       proxy <- proxy %>% 
@@ -2498,9 +2476,9 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(c(layer_selection_state(), input$transit, input$alc, input$superfund, input$parks, input$micro, input$cancer, input$clinics, input$ems, input$hospitals, 
+    bindEvent(layer_selection_state(), input$transit, input$alc, input$superfund, input$parks, input$micro, input$cancer, input$clinics, input$ems, input$hospitals, 
                    input$pharmacies, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
-                   input$upload)) 
+                   input$upload) 
 }
 
 # -------- CREATE SHINY APP --------
