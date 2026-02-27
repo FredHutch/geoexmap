@@ -15,6 +15,7 @@ library(markdown)
 library(leaflet)
 library(leaflet.extras)
 library(leaflet.extras2)
+library(leaflegend)
 library(plotly)
 
 library(RColorBrewer)
@@ -1057,7 +1058,6 @@ server <- function(input, output, session) {
   })
   
   #### PALETTE ####
-  
   # define palette by layer number 
   layer_base_palette <- function(layer_index) {
     switch(
@@ -2067,6 +2067,58 @@ server <- function(input, output, session) {
     reactable(tab_point_data())
   })
   
+  #### LEGEND CREATION ####
+  # legend <- function(values, var, df, layer_index, palette, title, left_label, right_label, bins = 5) {
+  #   # validate args
+  #   stopifnot(!is.null(values))
+  #   stopifnot(!is.null(palette))
+  #   stopifnot(!is.null(title))
+  #   stopifnot(!is.null(left_label))
+  #   stopifnot(!is.null(right_label))
+  #   
+  #   pal <- geoex.palette(var, df, layer_index)
+  #   # accommodate different bin arguments--may be needed?
+  #   cuts <- if (length(bins) == 1) pretty(values, n = bins) else bins
+  #   n <- length(cuts)
+  #   r <- range(values, na.rm = TRUE)
+  #   # pretty cut points may be out of the range of `values`
+  #   cuts <- cuts[cuts >= r[1] & cuts <= r[2]]
+  #   colors <- pal(c(r[1], cuts, r[2]))
+  #   
+  #   # generate html list object using colors
+  #   legend <- tags$ul(class = "legend")
+  #   legend$children <- lapply(seq_len(length(colors)), function(color) {
+  #     tags$li(
+  #       class = "legend-item legend-color",
+  #       style = paste0(
+  #         "background-color:", colors[color]
+  #       ),
+  #     )
+  #   })
+  #   
+  #   # add labels to list
+  #   legend$children <- tagList(
+  #     tags$li(
+  #       class = "legend-item legend-label left-label",
+  #       as.character(left_label)
+  #     ),
+  #     legend$children,
+  #     tags$li(
+  #       class = "legend-item legend-label right-label",
+  #       as.character(right_label)
+  #     )
+  #   )
+  #   
+  #   # render legend with title
+  #   return(
+  #     tagList(
+  #       tags$span(class = "legend-title", as.character(title)),
+  #       legend
+  #     )
+  #   )
+  #   # TODO: consider other legends (PFAS)
+  # }
+  
   #### MAIN OBSERVER LOGIC ####
   observe({
     layer_counter(0)
@@ -2285,8 +2337,8 @@ server <- function(input, output, session) {
         pal <- colorFactor("OrRd", domain = levels(micro_data_conc), ordered = TRUE)
         proxy <- proxy %>% 
           addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text),
-                           radius = 4,
-                           fillOpacity = 0.8) %>% 
+                           radius = 4, fillOpacity = 0.8, popup = ~paste("<b>Region:</b>", Region, "<b><br>Sampling method:</b>", Sampling.Method,
+                                                                         "<b><br>Date of collection:</b>", Date..MM.DD.YYYY.)) %>% 
           addLegend(pal = pal,
                     values = ~micro_data$Concentration.class.text,
                     title = "Microplastics Concentration")
@@ -2341,8 +2393,13 @@ server <- function(input, output, session) {
               addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.2,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           group = ~c_name, label = "") %>% 
-              #addLegend(colors = pal_colors, labels = get_pal_labs(x, c_name), title = legend.titles(c_name))
-              addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA")
+              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+                               orientation = "horizontal", shape = "stadium", 
+                               width = 120,   # wider bar
+                               height      = 18,
+                               title = legend.titles(c_name), bins = 5)
+              # addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA",
+              #           position = "bottomright", className = "horiz-legend")
           }
         }#}) %>% 
         # bindEvent(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv,
