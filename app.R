@@ -722,6 +722,22 @@ standalone_tab <- c("Choose dataset" = "",
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
+  tags$head(
+    tags$style(HTML("
+    .leaflet-control.my-centered-num-legend {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px 6px;
+    }
+
+    /* Keep label centering without touching fill colors */
+    .leaflet-control.my-centered-num-legend text {
+      text-anchor: middle;
+      fill: #333;              /* text color */
+    }
+  "))
+  ),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
   nav_panel("Map",
@@ -2396,8 +2412,14 @@ server <- function(input, output, session) {
               addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                orientation = "horizontal", shape = "stadium", 
                                width = 120,   # wider bar
-                               height      = 18,
-                               title = legend.titles(c_name), bins = 5)
+                               height = 18, bins = 5,
+                               title = htmltools::tags$div(
+                                 legend.titles(c_name),
+                                 style = "text-align: center; width: 100%; font-weight: bold;"
+                               ),
+                               labelStyle = "text-align: center; font-weight: bold;",
+                               className  = "my-centered-num-legend",
+                               position   = "bottomright")
               # addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA",
               #           position = "bottomright", className = "horiz-legend")
           }
