@@ -2716,17 +2716,32 @@ server <- function(input, output, session) {
           pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.inc, layer_index = layer_counter())
           #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
           val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
+          groups <- append(groups, "Cancer incidence")
           proxy <- proxy %>%
             addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancerincidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
+                        group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 120,   # wider bar
+                             height = 18, bins = 5,
+                             title = htmltools::tags$div(
+                               paste(unique(geo.inc$Cancer.Site), "Cancer incidence rate per 100,000:"),
+                               style = "text-align: center; width: 100%; font-weight: bold;"
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups,
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+            #addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
         }
         
       } else {
         proxy <- proxy %>%
-          clearGroup("cancerincidence") 
+          clearGroup("Cancer incidence") 
       }
       
       ##### map (WSCR mortality) #####
@@ -2744,12 +2759,27 @@ server <- function(input, output, session) {
           
           pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.mort, layer_index = layer_counter())
           val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
+          groups <- append(groups, "Cancer mortality")
           proxy <- proxy %>%
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancermortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
+                        group = "cancermortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>%
+            addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 120,   # wider bar
+                             height = 18, bins = 5,
+                             title = htmltools::tags$div(
+                               paste(unique(geo.mort$Cancer.Site), "Cancer mortality rate per 100,000:"),
+                               style = "text-align: center; width: 100%; font-weight: bold;"
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups,
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+            #addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
         }
         
       } else {
