@@ -1116,6 +1116,7 @@ server <- function(input, output, session) {
   
   #### LEGEND TITLES ####
   # defines legend titles based on defined column
+  #TODO: fix title sub and superscripts to work with leaflegend
   legend.titles <- function(col) {
     if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI) in July 2024")
@@ -2360,29 +2361,6 @@ server <- function(input, output, session) {
                     title = "Microplastics Concentration")
       }
       
-      ##### map (food environment) #####
-      #observe({
-        for (i in seq_along(colnames(food_env_cols()))) {
-          c_name <- colnames(food_env_cols())[i]
-          x <- food_env_cols()[[c_name]]
-          
-          if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
-            k <- isolate(layer_counter()) + 1
-            layer_counter(k) # set the new layer count
-            print(paste("LAYER COUNTER", layer_counter()))
-          }
-          
-          pal <- geoex.palette(c_name, food, layer_index = layer_counter())
-          
-          if (!is.null(pal)) {
-            proxy <- proxy %>% 
-              addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue",
-                          fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(pal = pal, values = x, title = legend.titles(c_name))
-          }
-        }#}) %>% 
-        #bindEvent(input$foodenv)
-      
       ##### map (main data) #####
         groups <- character(0)
       
@@ -2390,7 +2368,6 @@ server <- function(input, output, session) {
           c_name <- colnames(map_cols())[i]
           x <- map_cols()[[c_name]]
           k <- NULL
-
           
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
@@ -2433,11 +2410,50 @@ server <- function(input, output, session) {
           }
         }
       
+      ##### map (food environment) #####
+      for (i in seq_along(colnames(food_env_cols()))) {
+        c_name <- colnames(food_env_cols())[i]
+        x <- food_env_cols()[[c_name]]
+        k <- NULL
+        
+        if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          k <- isolate(layer_counter()) + 1
+          layer_counter(k) # set the new layer count
+          print(paste("LAYER COUNTER", layer_counter()))
+        }
+
+        pal <- geoex.palette(c_name, food, layer_index = layer_counter())
+        
+        if (!is.null(pal)) {
+          groups <- append(groups, c_name)
+          opacity <- if (k == 1) 0.5 else 0.2
+          proxy <- proxy %>% 
+            addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue", group = ~c_name,
+                        fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 120,   # wider bar
+                             height = 18, bins = 5,
+                             title = htmltools::tags$div(
+                               legend.titles(c_name),
+                               style = "text-align: center; width: 100%; font-weight: bold;"
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+          #addLegend(pal = pal, values = x, title = legend.titles(c_name))
+        }
+      }
+      
       ##### map (crime) #####
       #observe({
         for (i in seq_along(colnames(crime_cols()))) {
           c_name <- colnames(crime_cols())[i]
           x <- crime_cols()[[c_name]]
+          k <- NULL
           
           if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- layer_counter() + 1
@@ -2448,14 +2464,28 @@ server <- function(input, output, session) {
           pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
           
           if (!is.null(pal)){
-            pal_colors <- unique(pal(sort(x)))
-            # pal_labs <- get_pal_labs(x, c_name)
+            groups <- append(groups, c_name)
+            opacity <- if (k == 1) 0.5 else 0.2
             
             proxy <- proxy %>% 
-              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black",
-                          fillOpacity = 0.3, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = ~c_name,
+                          fillOpacity = opacity, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
-              addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
+              #addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
+              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+                               orientation = "horizontal", shape = "stadium", 
+                               width = 120,   # wider bar
+                               height = 18, bins = 5,
+                               title = htmltools::tags$div(
+                                 legend.titles(c_name),
+                                 style = "text-align: center; width: 100%; font-weight: bold;"
+                               ),
+                               labelStyle = "text-align: center; font-weight: bold;",
+                               className  = "my-centered-num-legend",
+                               position   = "bottomright") %>% 
+              addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
+                               position = "topright",
+                               options = layersControlOptions(collapsed = FALSE))
           }
         }#}) %>% 
         #bindEvent(input$crime)
