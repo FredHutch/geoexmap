@@ -1331,6 +1331,220 @@ server <- function(input, output, session) {
       
   }
   
+  layer.titles <- function(col) {
+    if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
+    if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI)")
+    if(col == "Nighttime.Radiance") return("Light at Night (nW/cm<sup>2</sup>/sr)")
+    if(col == "Food.Stamps") return("SNAP benefits  (%)")
+    if(col == "Food.Insecurity") return("Food insecurity (%)")
+    if(col == "Housing.Insecurity") return("Housing insecurity (%)")
+    if(col == "Utility.Services.Threat") return("Utility services threat (%)")
+    if(col == "Lacking.Reliable.Transportation") return("Lack of reliable transportation (%)")
+    if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support (%)")
+    if(col == "Lack.of.Health.Insurance") return("No health insurance (%)")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in past year (%)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in past year (%)")
+    if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Taking blood pressure medication (%)")
+    if(col == "Cholesterol.Screening") return("Cholesterol screening (%)")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer  (%)")
+    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Colorectal cancer screening (%)")
+    if(col == "Binge.Drinking.among.Adults") return("Binge drinking (%)")
+    if(col == "Cigarette.Smoking.among.Adults") return("Cigarette smoking (%)")
+    if(col == "No.Leisure.time.Physical.Activity.among.Adults") return("No physical activity (%)")
+    if(col == "Short.Sleep.Duration") return("Short sleep duration (%)")
+    if(col == "Arthritis.among.Adults") return("Arthritis (%)")
+    if(col == "Asthma.among.Adults") return("Asthma (%)")
+    if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer or melanoma among adults (%)")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol (%)")
+    if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease (%)")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease (%)")
+    if(col == "Depression.among.Adults") return("Depression (%)")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Diabetes (%)")
+    if(col == "Obesity.among.Adults") return("Obesity (%)")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("All teeth lost (%)")
+    if(col == "Stroke.among.Adults") return("Stroke (%)")
+    
+    if(col == "Total.Population") return("Population (total)")
+    if(col == "Hispanic.or.Latino") return("Hispanic or Latino population (total)")
+    if(col == "Percent.Hispanic.or.Latino") return("Hispanic or Latino population (%)")
+    if(col == "White.NonHispanic") return("Non-Hispanic White population (total)")
+    if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population (%)")
+    if(col == "Black.NonHispanic") return("Non-Hispanic Black population (total)")
+    if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population (%)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population (%)")
+    if(col == "Asian.NonHispanic") return("Non-Hispanic Asian population (total)")
+    if(col == "Percent.Asian.NonHispanic") return("Non-Hispanic Asian population (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population (%)")
+    if(col == "Other.Race.NonHispanic") return("Non-Hispanic other race population (total)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic other race population (%)")
+    if(col == "Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population (total)")
+    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population (%)")
+    
+    # hispanic or latino subcats
+    if(col == "White.Hispanic.or.Latino") return("Hispanic or Latino White (total)")
+    if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White (%)")
+    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black(total)")
+    if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black (%)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (%)")
+    if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (total)")
+    if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (%)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (total)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (%)")
+    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino (total)")
+    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races (%)")
+    
+    # sex
+    if(col == "Total.Male.Population") return("Male (total)")
+    if(col == "Total.Female.Population") return("Female (total)")
+    if(col == "Percent.Male") return("Male (%)")
+    if(col == "Percent.Female") return("Female (%)")
+    
+    # age
+    if(col == "Total.0.to.4.years") return("0-4 years (total)")
+    if(col == "Percent.0.to.4.years") return("0-4 years (%)")
+    if(col == "Total.5.to.9.years") return("5-9 years (total)")
+    if(col == "Percent.5.to.9.years") return("5-9 years (%)")
+    if(col == "Total.10.to.14.years") return("10-14 years (total)")
+    if(col == "Percent.10.to.14.years") return("10-14 years (%)")
+    if(col == "Total.15.to.19.years") return("15-19 years (total)")
+    if(col == "Percent.15.to.19.years") return("15-19 years (%)")
+    if(col == "Total.20.to.24.years") return("20-24 years (total)")
+    if(col == "Percent.20.to.24.years") return("20-24 years (%)")
+    if(col == "Total.25.to.29.years") return("25-29 years (total)")
+    if(col == "Percent.25.to.29.years") return("25-29 years (%)")
+    if(col == "Total.30.to.34.years") return("30-34 years (total)")
+    if(col == "Percent.30.to.34.years") return("30-34 years (%)")
+    if(col == "Total.35.to.39.years") return("35-39 years (total)")
+    if(col == "Percent.35.to.39.years") return("35-39 years (%)")
+    if(col == "Total.40.to.44.years") return("40-44 years (total)")
+    if(col == "Percent.40.to.44.years") return("40-44 years (%)")
+    if(col == "Total.45.to.49.years") return("45-49 years (total)")
+    if(col == "Percent.45.to.49.years") return("45-49 years (%)")
+    if(col == "Total.50.to.54.years") return("50-54 years (total)")
+    if(col == "Percent.50.to.54.years") return("50-54 years (%)")
+    if(col == "Total.55.to.59.years") return("55-59 years (total)")
+    if(col == "Percent.55.to.59.years") return("55-59 years (%)")
+    if(col == "Total.60.to.64.years") return("60-64 years (total)")
+    if(col == "Percent.60.to.64.years") return("60-64 years (%)")
+    if(col == "Total.65.to.69.years") return("65-69 years (total)")
+    if(col == "Percent.65.to.69.years") return("65-69 years (%)")
+    if(col == "Total.70.to.74.years") return("70-74 years (total)")
+    if(col == "Percent.70.to.74.years") return("70-74 years (%)")
+    if(col == "Total.75.to.79.years") return("75-79 years (total)")
+    if(col == "Percent.75.to.79.years") return("75-79 years (%)")
+    if(col == "Total.80.to.84.years") return("80-84 years (total)")
+    if(col == "Percent.80.to.84.years") return("80-84 years (%)")
+    if(col == "Total.85.and.older") return("85+ years (total)")
+    if(col == "Percent.85.and.older") return("85+ years (%)")
+    
+    if(col == "Social.Vulnerability.Index") return("Social vulnerability index (SVI)")
+    if(col == "Environmental.Justice.Index") return("Environmental justice index (EJI)")
+    if(col == "Unemployment") return("Unemployment (%)")
+    
+    if(col == "UV.Index") return("UV index (UVI)")
+    
+    if(col == "Radon") return("Radon gas concentration (Bq/m<sup>3</sup>)")
+    
+    if(col == "Pesticide.Exposure") return("Pesticide exposure")
+    
+    if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
+    
+    # transportation noise model
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (%)")
+    
+    if(col == "Walkability") return("Walkability")
+    
+    if(col == "No.broadband.internet") return("No internet (%)")
+    if(col == "No.high.school.diploma") return("No high school diploma (%)")
+    if(col == "Single.parent.households") return("Single parent households (%)")
+    if(col == "Crowding") return("Crowding among housing units (%)")
+    if(col == "Poverty") return("Poverty (%)")
+    if(col == "Housing.cost.burden") return("Housing cost burden (%)")
+    
+    if(col == "Dew.point") return(paste0("Dew point ", "(\U00B0", "F)"))
+    if(col == "Maximum.temperature") return(paste0("Maximum temperature ", "(\U00B0", "F)"))
+    if(col == "Minimum.temperature") return(paste0("Minimum temperature ", "(\U00B0", "F)"))
+    if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
+    if(col == "Precipitation") return("Precipitation (in.)")
+    
+    if(col == "Wildfire.smoke") return(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
+    if(col == "Nitrogen.dioxide") return(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)"))
+    if(col == "Sulfur.dioxide") return("Sulfur dioxide (SO<sub>2</sub>) (ppb)")
+    if(col == "Carbon.monoxide") return("Carbon monoxide (CO) (ppm)")
+    if(col == "Ozone") return("Ozone (O<sub>3</sub>) (ppb)")
+    
+    if(col == "Population.density") return("Population density (persons per square mile)")
+    if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value ($)")
+    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value ($)")
+    if(col == "Drought.Risk.Score") return("Drought risk value ($)")
+    if(col == "Earthquake.Risk.Score") return("Earthquake risk value ($)")
+    if(col == "Hail.Risk.Score") return("Hail risk value ($)")
+    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk value ($)")
+    if(col == "Hurricane.Risk.Score") return("Hurricane risk value ($)")
+    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk value ($)")
+    if(col == "Landslide.Risk.Score") return("Landslide risk value ($)")
+    if(col == "Lightning.Risk.Score") return("Lightning risk value ($)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk value ($)")
+    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk value ($)")
+    if(col == "Tornado.Risk.Score") return("Tornado risk value ($)")
+    if(col == "Tsunami.Risk.Score") return("Tsunami risk value ($)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk value ($)")
+    if(col == "Wildfire.Risk.Score") return("Wildfire risk value ($)")
+    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value ($)")
+    
+    if(col == "bluespace") return("Blue space (%)")
+    if(col == "social_capital") return("Social capital")
+    
+    if(col == "PFAS_dw") return("Water tested positive for PFAS")
+    if(col == "Median.HH.Income") return("Median household income ($)")
+    if(col == "HT_Index") return("Housing and Transportation &copy; Index")
+    if(col == "Historic.Redlining.Score") return("Historic redlining")
+    
+    if(col == "pct_Open_Water") return("Open water (%)")
+    if(col == "pct_Developed_Open") return("Developed open land (%)")
+    if(col == "pct_Developed_Low") return("Minimally developed land (%)")
+    if(col == "pct_Developed_Medium") return("Moderately developed land (%)")
+    if(col == "pct_Developed_High") return("Highly developed land (%)")
+    if(col == "pct_Barren") return("Barren land (%)")
+    if(col == "pct_Evergreen_Forest") return("Evergreen forest (%)")
+    if(col == "pct_Shrub") return("Shrubland (%)")
+    if(col == "pct_Grassland") return("Grassland (%)")
+    if(col == "pct_Pasture") return("Pasture (%)")
+    if(col == "pct_Crops") return("Cropland (%)")
+    if(col == "pct_Woody_Wetlands") return("Woody wetlands (%)")
+    if(col == "pct_Herbaceous_Wetlands") return("Herbaceous wetlands (%)")
+    if(col == "pct_Deciduous_Forest") return("Deciduous forest (%)")
+    if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
+    if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
+    
+    if(col == "total_p1") return("Total Part I Offenses")
+    if(col == "p1_rate") return("Part I Offense Rate (Per 1,000 Population)")
+    
+    if(col == "total_p2") return("Total Part II Offenses")
+    if(col == "p2_rate") return("Part II Offense Rate (Per 1,000 Population)")
+    
+    # TODO: add legend titles for food environment columns
+    
+  }
+  
   #### CLEAR BUTTON OBSERVER ####
   # observe event for clear button click
   observeEvent(input$clear_all_vars, {
@@ -2383,13 +2597,13 @@ server <- function(input, output, session) {
             
             opacity <- if (k == 1) 0.5 else 0.2
             
-            groups <- append(groups, c_name)
+            groups <- append(groups, layer.titles(c_name))
             print(groups)
             
             proxy <- proxy %>% 
               addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.2,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                          group = ~c_name, label = "") %>% 
+                          group = layer.titles(c_name), label = "") %>% 
               addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                orientation = "horizontal", shape = "stadium", 
                                width = 120,   # wider bar
