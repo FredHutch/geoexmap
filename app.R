@@ -2384,11 +2384,13 @@ server <- function(input, output, session) {
         #bindEvent(input$foodenv)
       
       ##### map (main data) #####
-      #observe({
+        groups <- character(0)
+      
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
           x <- map_cols()[[c_name]]
           k <- NULL
+
           
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
@@ -2400,10 +2402,12 @@ server <- function(input, output, session) {
           
           
           if (!is.null(pal)){
-            # x <- map_cols()[[c]]
             pal_colors <- unique(pal(sort(x))) # hex codes
             
             opacity <- if (k == 1) 0.5 else 0.2
+            
+            groups <- append(groups, c_name)
+            print(groups)
             
             proxy <- proxy %>% 
               addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.2,
@@ -2419,13 +2423,15 @@ server <- function(input, output, session) {
                                ),
                                labelStyle = "text-align: center; font-weight: bold;",
                                className  = "my-centered-num-legend",
-                               position   = "bottomright")
+                               position   = "bottomright") %>% 
+              addLayersControl(overlayGroups = groups,
+                               position = "topright",
+                               options = layersControlOptions(collapsed = FALSE))
+              
               # addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA",
               #           position = "bottomright", className = "horiz-legend")
           }
-        }#}) %>% 
-        # bindEvent(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv,
-        #           input$behaviors, input$prevention, input$naturalenv, input$builtenv)
+        }
       
       ##### map (crime) #####
       #observe({
