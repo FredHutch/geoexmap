@@ -744,9 +744,8 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(categories,
                                 width = "400px"),
-              bslib::card(
-                leafletOutput("geoexmap"),
-                   card_footer(popover(bs_icon('question-circle'), title = "Attribution", "here it is"))),
+              
+              leafletOutput("geoexmap"),
               conditionalPanel(
                 condition = "(input.showchart == true ) || (input.clear == null && input.clear == 0)",
                 absolutePanel(
@@ -2618,9 +2617,6 @@ server <- function(input, output, session) {
               addLayersControl(overlayGroups = groups,
                                position = "topright",
                                options = layersControlOptions(collapsed = FALSE))
-              
-              # addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA",
-              #           position = "bottomright", className = "horiz-legend")
           }
         }
       
@@ -2639,10 +2635,10 @@ server <- function(input, output, session) {
         pal <- geoex.palette(c_name, food, layer_index = layer_counter())
         
         if (!is.null(pal)) {
-          groups <- append(groups, c_name)
+          groups <- append(groups, layer.titles(c_name))
           opacity <- if (k == 1) 0.5 else 0.2
           proxy <- proxy %>% 
-            addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue", group = ~c_name,
+            addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue", group = layer.titles(c_name),
                         fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
             addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
@@ -2678,11 +2674,11 @@ server <- function(input, output, session) {
           pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
           
           if (!is.null(pal)){
-            groups <- append(groups, c_name)
+            groups <- append(groups, layer.titles(c_name))
             opacity <- if (k == 1) 0.5 else 0.2
             
             proxy <- proxy %>% 
-              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = ~c_name,
+              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = layer.titles(c_name),
                           fillOpacity = opacity, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
               #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
               #addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
