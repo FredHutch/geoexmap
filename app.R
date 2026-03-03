@@ -151,12 +151,12 @@ prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
                 "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
                 "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75")
 
-airpol <- c("PM2.5" = "Particulate.Matter.2.5",
+airpol <- c("Particulate matter <2.5 microns in diameter (PM\U2082.\U0323\U2085)" = "Particulate.Matter.2.5",
             "Wildfire smoke" = "Wildfire.smoke",
-            "Nitrogen dioxide (No2)" = "Nitrogen.dioxide",
-            "Sulfur dioxide (So2)" = "Sulfur.dioxide",
+            "Nitrogen dioxide (NO\U2082)" = "Nitrogen.dioxide",
+            "Sulfur dioxide (SO\U2082)" = "Sulfur.dioxide",
             "Carbon monoxide (CO)" = "Carbon.monoxide",
-            "Ozone (O3)" = "Ozone")
+            "Ozone (O\U2083)" = "Ozone")
 
 naturalenv <- c("Ultraviolet radiation index (UVI)" = "UV.Index",
                 "Maximum temperature" = "Maximum.temperature",
@@ -227,22 +227,22 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "No high school education" = "No.high.school.diploma",
                "Single parent households" = "Single.parent.households",
                "Housing cost burden" = "Housing.cost.burden",
-               "Crowding" = "Crowding",
+               "Household crowding" = "Crowding",
                "Poverty" = "Poverty",
                "Unemployment" = "Unemployment",
                "Social Vulnerability Index" = "Social.Vulnerability.Index",
                "Environmental Justice Index" = "Environmental.Justice.Index",
-               "Segregation" = "Racial.Residential.Segregation",
+               "Racial residential segregation" = "Racial.Residential.Segregation",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
                "Median household income" = "Median.HH.Income",
-               "Housing and transportation affordability" = "HT_Index",
+               "Housing and Transportation (H+T\U00AE) Affordability Index" = "HT_Index",
                "Historic redlining" = "Historic.Redlining.Score")
 
-crimeenv <- c("Part I Offenses (Count)" = "total_p1",
-              "Part I Offenses (Rate)" = "p1_rate",
-              "Part II Offenses (Count)" = "total_p2",
-              "Part II Offenses (Rate)" = "p2_rate")
+crimeenv <- c("Part I offenses (count)" = "total_p1",
+              "Part I offenses (rate)" = "p1_rate",
+              "Part II offenses (count)" = "total_p2",
+              "Part II offenses (rate)" = "p2_rate")
 
 # TODO: take out variables according to feedback
 foodenv <- c("Population (2010)" = "Pop2010",
@@ -459,7 +459,7 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
                "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)*: What is the [Environmental Justice Index](https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html)?",
                "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the [Social Vulnerability Index](https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html)",
                "Median.HH.Income" = "- **Median household income**: What does a [median household income](https://usafacts.org/answers/what-is-the-income-of-a-us-household/country/united-states/) mean?",
-               "HT_Index" = "- **Housing and Transportation (H + T) Affordability Index**: Why is it important to consider [transportation costs with affordability](https://cnt.org/tools/housing-and-transportation-affordability-index)?",
+               "HT_Index" = "- **Housing and Transportation (H + T\U00AE) Affordability Index**: Why is it important to consider [transportation costs with affordability](https://cnt.org/tools/housing-and-transportation-affordability-index)?",
                "Racial.Residential.Segregation" = "- **Residential segregation**: What is the [Dissimilarity Index](https://www.khanacademy.org/test-prep/mcat/social-inequality/social-class/v/residential-segregation), which is a measure of residential segregation?",
                "Historic.Redlining.Score" = "- **Redlining**: What is [redlining](https://education.nationalgeographic.org/resource/mapmaker-redlining-united-states/)?",
                "social_capital" = "- **Social capital**: What is [social capital](https://aspe.hhs.gov/sites/default/files/private/pdf/263491/What-is-social-capital.pdf)?",
@@ -1134,7 +1134,7 @@ server <- function(input, output, session) {
   legend.titles <- function(col) {
     if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI) in July 2024")
-    if(col == "Nighttime.Radiance") return(HTML("Light at Night (nW/cm<sup>2</sup>/sr)"))
+    if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
     if(col == "Food.Insecurity") return("Food insecurity in 2023 (%)")
     if(col == "Housing.Insecurity") return("Housing insecurity in 2023 (%)")
@@ -1243,8 +1243,8 @@ server <- function(input, output, session) {
     if(col == "Total.85.and.older") return("85+ years (total)")
     if(col == "Percent.85.and.older") return("85+ years (%)")
     
-    if(col == "Social.Vulnerability.Index") return("Social vulnerability index (SVI)")
-    if(col == "Environmental.Justice.Index") return("Environmental justice index (EJI)")
+    if(col == "Social.Vulnerability.Index") return("Social Vulnerability Index (SVI)")
+    if(col == "Environmental.Justice.Index") return("Environmental Justice Index (EJI)")
     if(col == "Unemployment") return("Unemployment (%)")
     
     if(col == "UV.Index") return("UVI in 2024")
@@ -1271,12 +1271,12 @@ server <- function(input, output, session) {
     
     if(col == "Walkability") return("Walkability score in 2019")
     
-    if(col == "No.broadband.internet") return("No internet (%)")
-    if(col == "No.high.school.diploma") return("No high school diploma (%)")
-    if(col == "Single.parent.households") return("Single parent households (%)")
-    if(col == "Crowding") return("Crowding among housing units (%)")
-    if(col == "Poverty") return("Poverty (%)")
-    if(col == "Housing.cost.burden") return("Housing cost burden (%)")
+    if(col == "No.broadband.internet") return("No internet in 2021 (%)")
+    if(col == "No.high.school.diploma") return("No high school diploma in 2021 (%)")
+    if(col == "Single.parent.households") return("Single parent households in 2021 (%)")
+    if(col == "Crowding") return("Crowding among households in 2021 (%)")
+    if(col == "Poverty") return("Poverty in 2021 (%)")
+    if(col == "Housing.cost.burden") return("Housing cost burden in 2021 (%)")
     
     if(col == "Dew.point") return(paste0("Dew point ", "(\U00B0", "F)"))
     if(col == "Maximum.temperature") return(paste0("Maximum temperature ", "(\U00B0", "F)"))
@@ -1290,7 +1290,7 @@ server <- function(input, output, session) {
     if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
     if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
     
-    if(col == "Population.density") return("Population density (persons per square mile)")
+    if(col == "Population.density") return("Population density in 2023 (population per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
     if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value ($)")
     if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value ($)")
@@ -1315,7 +1315,7 @@ server <- function(input, output, session) {
     
     if(col == "PFAS_dw") return("Water tested positive for PFAS")
     if(col == "Median.HH.Income") return("Median household income ($)")
-    if(col == "HT_Index") return("Housing and Transportation &copy; Index")
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index")
     if(col == "Historic.Redlining.Score") return("Historic redlining")
     
     if(col == "pct_Open_Water") return("Open water (%)")
@@ -1335,11 +1335,11 @@ server <- function(input, output, session) {
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
     
-    if(col == "total_p1") return("Total Part I Offenses")
-    if(col == "p1_rate") return("Part I Offense Rate (Per 1,000 Population)")
+    if(col == "total_p1") return("Part I offenses (total)")
+    if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
     
-    if(col == "total_p2") return("Total Part II Offenses")
-    if(col == "p2_rate") return("Part II Offense Rate (Per 1,000 Population)")
+    if(col == "total_p2") return("Part II offenses")
+    if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
       
@@ -1529,7 +1529,7 @@ server <- function(input, output, session) {
     
     if(col == "PFAS_dw") return("Water tested positive for PFAS")
     if(col == "Median.HH.Income") return("Median household income ($)")
-    if(col == "HT_Index") return("Housing and Transportation &copy; Index")
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index")
     if(col == "Historic.Redlining.Score") return("Historic redlining")
     
     if(col == "pct_Open_Water") return("Open water (%)")
@@ -1549,11 +1549,11 @@ server <- function(input, output, session) {
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
     
-    if(col == "total_p1") return("Total Part I Offenses")
-    if(col == "p1_rate") return("Part I Offense Rate (Per 1,000 Population)")
+    if(col == "total_p1") return("Part I offenses (total)")
+    if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
     
-    if(col == "total_p2") return("Total Part II Offenses")
-    if(col == "p2_rate") return("Part II Offense Rate (Per 1,000 Population)")
+    if(col == "total_p2") return("Part II offenses")
+    if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
     
@@ -2636,7 +2636,7 @@ server <- function(input, output, session) {
             info_id <- "legend info"
             
             proxy <- proxy %>% 
-              addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.2,
+              addPolygons(., fillColor = ~pal(x), stroke = FALSE,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           group = layer.titles(c_name), label = "") %>% 
               addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
