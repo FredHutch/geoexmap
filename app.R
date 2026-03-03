@@ -158,7 +158,7 @@ airpol <- c("PM2.5" = "Particulate.Matter.2.5",
             "Carbon monoxide (CO)" = "Carbon.monoxide",
             "Ozone (O3)" = "Ozone")
 
-naturalenv <- c("UV index" = "UV.Index",
+naturalenv <- c("Ultraviolet radiation index (UVI)" = "UV.Index",
                 "Maximum temperature" = "Maximum.temperature",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
@@ -532,7 +532,7 @@ categories <- accordion(
     input_switch('ems', "Emergency medical stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('pharmacies', "Pharmacies", value = FALSE),
-    input_switch('wic_clinics', "WIC clinics", value = FALSE),
+    input_switch('wic_clinics', "Nutrition Program for Women, Infancts, and Childeren (WIC) clinics", value = FALSE),
     input_switch('wic_retailers', "WIC retailers", value = FALSE),
     input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
   ),
@@ -1132,9 +1132,9 @@ server <- function(input, output, session) {
   # defines legend titles based on defined column
   #TODO: fix title sub and superscripts to work with leaflegend
   legend.titles <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
+    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI) in July 2024")
-    if(col == "Nighttime.Radiance") return("Light at Night (nW/cm<sup>2</sup>/sr)")
+    if(col == "Nighttime.Radiance") return(HTML("Light at Night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
     if(col == "Food.Insecurity") return("Food insecurity in 2023 (%)")
     if(col == "Housing.Insecurity") return("Housing insecurity in 2023 (%)")
@@ -1247,29 +1247,29 @@ server <- function(input, output, session) {
     if(col == "Environmental.Justice.Index") return("Environmental justice index (EJI)")
     if(col == "Unemployment") return("Unemployment (%)")
     
-    if(col == "UV.Index") return("UV index (UVI)")
+    if(col == "UV.Index") return("UVI in 2024")
     
-    if(col == "Radon") return("Radon gas concentration (Bq/m<sup>3</sup>)")
+    if(col == "Radon") return(HTML("Radon gas concentration in 2021 (Bq/m<sup>3</sup>)"))
     
-    if(col == "Pesticide.Exposure") return("Pesticide exposure")
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lbs/mi<sup>2</sup>)"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
     
     # transportation noise model
-    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (%)")
     
-    if(col == "Walkability") return("Walkability")
+    if(col == "Walkability") return("Walkability score in 2019")
     
     if(col == "No.broadband.internet") return("No internet (%)")
     if(col == "No.high.school.diploma") return("No high school diploma (%)")
@@ -1284,11 +1284,11 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
-    if(col == "Nitrogen.dioxide") return(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)"))
-    if(col == "Sulfur.dioxide") return("Sulfur dioxide (SO<sub>2</sub>) (ppb)")
-    if(col == "Carbon.monoxide") return("Carbon monoxide (CO) (ppm)")
-    if(col == "Ozone") return("Ozone (O<sub>3</sub>) (ppb)")
+    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)")))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb)"))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
     
     if(col == "Population.density") return("Population density (persons per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
@@ -1346,9 +1346,9 @@ server <- function(input, output, session) {
   }
   
   layer.titles <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
+    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI)")
-    if(col == "Nighttime.Radiance") return("Light at Night (nW/cm<sup>2</sup>/sr)")
+    if(col == "Nighttime.Radiance") return(HTML("Light at Night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits  (%)")
     if(col == "Food.Insecurity") return("Food insecurity (%)")
     if(col == "Housing.Insecurity") return("Housing insecurity (%)")
@@ -1463,25 +1463,25 @@ server <- function(input, output, session) {
     
     if(col == "UV.Index") return("UV index (UVI)")
     
-    if(col == "Radon") return("Radon gas concentration (Bq/m<sup>3</sup>)")
+    if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>)"))
     
-    if(col == "Pesticide.Exposure") return("Pesticide exposure")
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lbs/mi<sup>2</sup>)"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
     
     # transportation noise model
-    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (%)")
     
     if(col == "Walkability") return("Walkability")
     
@@ -1498,11 +1498,11 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
-    if(col == "Nitrogen.dioxide") return(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)"))
-    if(col == "Sulfur.dioxide") return("Sulfur dioxide (SO<sub>2</sub>) (ppb)")
-    if(col == "Carbon.monoxide") return("Carbon monoxide (CO) (ppm)")
-    if(col == "Ozone") return("Ozone (O<sub>3</sub>) (ppb)")
+    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)")))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb)"))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
     
     if(col == "Population.density") return("Population density (persons per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
@@ -2684,7 +2684,7 @@ server <- function(input, output, session) {
                         fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
             addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
-                             width = 120,   # wider bar
+                             width = 300,   # wider bar
                              height = 18, bins = 5,
                              title = htmltools::tags$div(
                                legend.titles(c_name),
@@ -2726,7 +2726,7 @@ server <- function(input, output, session) {
               #addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
               addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                orientation = "horizontal", shape = "stadium", 
-                               width = 120,   # wider bar
+                               width = 300,   # wider bar
                                height = 18, bins = 5,
                                title = htmltools::tags$div(
                                  legend.titles(c_name),
@@ -2766,7 +2766,7 @@ server <- function(input, output, session) {
                         group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
-                             width = 120,   # wider bar
+                             width = 300,   # wider bar
                              height = 18, bins = 5,
                              title = htmltools::tags$div(
                                paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000 in 2025):"),
@@ -2809,7 +2809,7 @@ server <- function(input, output, session) {
                         group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>%
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
-                             width = 120,   # wider bar
+                             width = 300,   # wider bar
                              height = 18, bins = 5,
                              title = htmltools::tags$div(
                                paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000 in 2023):"),
@@ -2856,7 +2856,7 @@ server <- function(input, output, session) {
       
       if (input$showbounds) {
         proxy <- proxy %>% 
-          addPolygons(data = tract.bounds, stroke = TRUE, weight = 1, color = "black", fill = FALSE,
+          addPolygons(data = tract.bounds, stroke = TRUE, weight = 1, color = "grey", fill = FALSE,
                       group = "tractbounds")
       } else {
         proxy <- proxy %>% 
