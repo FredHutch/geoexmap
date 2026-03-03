@@ -132,7 +132,7 @@ behaviors <- c("Binge drinking" =  "Binge.Drinking.among.Adults",
 outcomes <- c("Arthritis" = "Arthritis.among.Adults",
               "Asthma" = "Asthma.among.Adults",
               "High blood pressure" = "High.Blood.Pressure.among.Adults",
-              "Cancer" = "Cancer.or.Melanoma.among.Adults",
+              "Cancer prevalence" = "Cancer.or.Melanoma.among.Adults",
               "High cholesterol" = "High.Cholesterol.among.Screened.Adults",
               "Chronic obstructive pulmonary disease" = "COPD.among.Adults",
               "Coronary heart disease" = "Coronary.Heart.Disease.among.Adults",
@@ -527,14 +527,14 @@ categories <- accordion(
             title = "Tips",
             placement = "right",
             id = "healthaccpopover"))),
-    input_switch('cancer', "Cancer Programs", value = FALSE),
+    input_switch('cancer', "Commission on Cancer (Coc)-accredited programs ", value = FALSE),
     input_switch('clinics', "Clinics", value = FALSE), 
-    input_switch('ems', "Emergency Medical Stations", value = FALSE),
+    input_switch('ems', "Emergency medical stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('pharmacies', "Pharmacies", value = FALSE),
-    input_switch('wic_clinics', "WIC Clinics", value = FALSE),
-    input_switch('wic_retailers', "WIC Retailers", value = FALSE),
-    input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
+    input_switch('wic_clinics', "WIC clinics", value = FALSE),
+    input_switch('wic_retailers', "WIC retailers", value = FALSE),
+    input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
   ),
   accordion_panel(
     HTML("<b>Natural Environment</b>"), icon = bs_icon("sun"),
@@ -722,6 +722,10 @@ standalone_tab <- c("Choose dataset" = "",
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
+  tooltip(bsicons::bs_icon("info-circle"),
+          "Placeholder",
+          id = "legend_tip",
+          placement = "top"),
   tags$head(
     tags$style(HTML("
     .leaflet-control.my-centered-num-legend {
@@ -730,13 +734,24 @@ ui <- page_navbar(
       border-radius: 4px;
       padding: 4px 6px;
     }
+    
 
     /* Keep label centering without touching fill colors */
     .leaflet-control.my-centered-num-legend text {
       text-anchor: middle;
       fill: #333;              /* text color */
     }
-  "))
+  ")),
+    tags$script(HTML("
+        // When called, move the tooltip icon into the legend title
+      Shiny.addCustomMessageHandler('moveLegendTooltip', function(message) {
+        var legend = document.querySelector('.leaflet-control.my-centered-num-legend .legend-title');
+        var tip    = document.getElementById('legend_tip');
+        if (!legend || !tip) return;
+        legend.appendChild(tip);                  // move icon into legend
+        tip.setAttribute('title', message.text);  // set tooltip text
+      });
+      "))
   ),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
@@ -1140,7 +1155,7 @@ server <- function(input, output, session) {
     if(col == "Arthritis.among.Adults") return("Arthritis in 2023 (%)")
     if(col == "Asthma.among.Adults") return("Asthma in 2023 (%)")
     if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure in 2023 (%)")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer or melanoma among adults in 2023 (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence among adults in 2023 (%)")
     if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol in 2023 (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease in 2023 (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease in 2023 (%)")
@@ -2352,6 +2367,19 @@ server <- function(input, output, session) {
   #### MAIN OBSERVER LOGIC ####
   observe({
     layer_counter(0)
+    observeEvent(input$legend_info_click, {
+      v <- input$legend_info_click$var
+      
+      showModal(modalDialog(
+        title = paste("About", legend.titles(v)),
+        tagList(
+          p("Data source", v),
+          p("Text from lookup table...")
+        ),
+        easyClose = TRUE,
+        footer = modalButton("Close")
+      ))
+    })
     cat("RESET LAYER COUNTER TO 0\n")
     withProgress(message = "Working...", 
     {plotlyProxy("chart")
@@ -2582,6 +2610,12 @@ server <- function(input, output, session) {
           x <- map_cols()[[c_name]]
           k <- NULL
           
+          info_id <- paste0("legend info!", c_name)
+          session$sendCustomMessage(
+            "attachLegendInfoHandler",
+            list(id = info_id, var = c_name)
+          )
+          
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
             layer_counter(k) # set the new layer count
@@ -2599,17 +2633,20 @@ server <- function(input, output, session) {
             groups <- append(groups, layer.titles(c_name))
             print(groups)
             
+            info_id <- "legend info"
+            
             proxy <- proxy %>% 
               addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.2,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           group = layer.titles(c_name), label = "") %>% 
               addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                orientation = "horizontal", shape = "stadium", 
-                               width = 120,   # wider bar
+                               width = 300,   # wider bar
                                height = 18, bins = 5,
                                title = htmltools::tags$div(
                                  legend.titles(c_name),
-                                 style = "text-align: center; width: 100%; font-weight: bold;"
+                                 class = "legend-title",
+                                 style = "display:flex; align-items:center; justify-content:center; gap:6px;"
                                ),
                                labelStyle = "text-align: center; font-weight: bold;",
                                className  = "my-centered-num-legend",
@@ -2618,6 +2655,11 @@ server <- function(input, output, session) {
                                position = "topright",
                                options = layersControlOptions(collapsed = FALSE))
           }
+          
+          session$sendCustomMessage(
+            "modeLegendTooltip",
+            list(text = "more about variable")
+          )
         }
       
       ##### map (food environment) #####
@@ -2727,7 +2769,7 @@ server <- function(input, output, session) {
                              width = 120,   # wider bar
                              height = 18, bins = 5,
                              title = htmltools::tags$div(
-                               paste(unique(geo.inc$Cancer.Site), "Cancer incidence rate per 100,000:"),
+                               paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000 in 2025):"),
                                style = "text-align: center; width: 100%; font-weight: bold;"
                              ),
                              labelStyle = "text-align: center; font-weight: bold;",
@@ -2764,13 +2806,13 @@ server <- function(input, output, session) {
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "cancermortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>%
+                        group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>%
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
                              width = 120,   # wider bar
                              height = 18, bins = 5,
                              title = htmltools::tags$div(
-                               paste(unique(geo.mort$Cancer.Site), "Cancer mortality rate per 100,000:"),
+                               paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000 in 2023):"),
                                style = "text-align: center; width: 100%; font-weight: bold;"
                              ),
                              labelStyle = "text-align: center; font-weight: bold;",
@@ -2784,7 +2826,7 @@ server <- function(input, output, session) {
         
       } else {
         proxy <- proxy %>%
-          clearGroup("cancermortality")
+          clearGroup("Cancer mortality")
       }
       
       if (length(current_vars) == 0) {
