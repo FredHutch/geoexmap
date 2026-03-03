@@ -152,7 +152,7 @@ prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
                 "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75")
 
 airpol <- c("Particulate matter <2.5 microns in diameter (PM\U2082.\U0323\U2085)" = "Particulate.Matter.2.5",
-            "Wildfire smoke" = "Wildfire.smoke",
+            "Wildfire smoke PM\U2082.\U0323\U2085" = "Wildfire.smoke",
             "Nitrogen dioxide (NO\U2082)" = "Nitrogen.dioxide",
             "Sulfur dioxide (SO\U2082)" = "Sulfur.dioxide",
             "Carbon monoxide (CO)" = "Carbon.monoxide",
@@ -163,7 +163,7 @@ naturalenv <- c("Ultraviolet radiation index (UVI)" = "UV.Index",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
                 "Radon" = "Radon",
-                "PFAS in drinking water" = "PFAS_dw",
+                "Per- and polyfluoroalkyl substances (PFAS) in drinking water" = "PFAS_dw",
                 "Avalanche risk" = "Avalanche.Risk.Score",
                 "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
                 "Cold wave risk" = "Cold.Wave.Risk.Score",
@@ -189,20 +189,20 @@ builtenv <- c("Walkability" = "Walkability",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
               "Blue space" = "bluespace",
-              "Persons exposed to noise LAeq >=45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
-              "Persons exposed to noise LAeq >=45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
-              "Persons exposed to noise LAeq >=50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
-              "Persons exposed to noise LAeq >=50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
-              "Persons exposed to noise LAeq >=60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
-              "Persons exposed to noise LAeq >=60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
-              "Persons exposed to noise LAeq >=70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
-              "Persons exposed to noise LAeq >=70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
-              "Persons exposed to noise LAeq >=80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
-              "Persons exposed to noise LAeq >=80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
-              "Persons exposed to noise LAeq >=90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
-              "Persons exposed to noise LAeq >=90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db",
+              "Persons exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
+              "Persons exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
+              "Persons exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
+              "Persons exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
+              "Persons exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
+              "Persons exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
+              "Persons exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
+              "Persons exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
+              "Persons exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
+              "Persons exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
+              "Persons exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
+              "Persons exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db",
               "Open water" = "pct_Open_Water",
-              "Developed open" = "pct_Developed_Open",
+              "Developed open land" = "pct_Developed_Open",
               "Low development" = "pct_Developed_Low",
               "Moderate development" = "pct_Developed_Medium",
               "High development" = "pct_Developed_High",
@@ -998,7 +998,7 @@ server <- function(input, output, session) {
     } 
     
     if (input$ems) {
-      switch_md <- c(switch_md, "- **Emergency Medical Services (EMS) Stations**: Where can you find [EMS stations and trauma care](https://wadoh.maps.arcgis.com/apps/instant/basic/index.html?appid=c7e3f2249bb34175a20849c2d02fc06a) in your area?")
+      switch_md <- c(switch_md, "- **Emergency Medical Services (EMS) stations**: Where can you find [EMS stations and trauma care](https://wadoh.maps.arcgis.com/apps/instant/basic/index.html?appid=c7e3f2249bb34175a20849c2d02fc06a) in your area?")
     } 
     
     if (input$hospitals) {
@@ -1132,8 +1132,8 @@ server <- function(input, output, session) {
   # defines legend titles based on defined column
   #TODO: fix title sub and superscripts to work with leaflegend
   legend.titles <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
-    if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI) in July 2024")
+    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> concentrations in 2022 ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
     if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
     if(col == "Food.Insecurity") return("Food insecurity in 2023 (%)")
@@ -1243,9 +1243,9 @@ server <- function(input, output, session) {
     if(col == "Total.85.and.older") return("85+ years (total)")
     if(col == "Percent.85.and.older") return("85+ years (%)")
     
-    if(col == "Social.Vulnerability.Index") return("Social Vulnerability Index (SVI)")
-    if(col == "Environmental.Justice.Index") return("Environmental Justice Index (EJI)")
-    if(col == "Unemployment") return("Unemployment (%)")
+    if(col == "Social.Vulnerability.Index") return("SVI in 2022")
+    if(col == "Environmental.Justice.Index") return("EJI in 2019")
+    if(col == "Unemployment") return("Unemployment in 2021 (%)")
     
     if(col == "UV.Index") return("UVI in 2024")
     
@@ -1284,7 +1284,7 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> in 2020 ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)")))
     if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb)"))
     if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
@@ -1310,10 +1310,10 @@ server <- function(input, output, session) {
     if(col == "Wildfire.Risk.Score") return("Wildfire risk value ($)")
     if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value ($)")
     
-    if(col == "bluespace") return("Blue space (%)")
+    if(col == "bluespace") return("Blue space coverage (% in tract)")
     if(col == "social_capital") return("Social capital")
     
-    if(col == "PFAS_dw") return("Water tested positive for PFAS")
+    if(col == "PFAS_dw") return("PFAS in drinking water in 2021")
     if(col == "Median.HH.Income") return("Median household income ($)")
     if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index")
     if(col == "Historic.Redlining.Score") return("Historic redlining")
