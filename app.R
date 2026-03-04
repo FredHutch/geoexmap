@@ -1573,7 +1573,7 @@ server <- function(input, output, session) {
   }
   
   var.info <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> concentrations in 2022 ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width from Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2022)")
     if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
     if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
@@ -1606,10 +1606,10 @@ server <- function(input, output, session) {
     if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("All teeth lost in 2023 (%)")
     if(col == "Stroke.among.Adults") return("Stroke in 2023 (%)")
     
-    if(col == "Total.Population") return("Total number of people in a census tract using American Community Survey 5-year data (years)")
-    if(col == "Hispanic.or.Latino") return("Total number of Hispanic or Latino individuals in 2023")
-    if(col == "Percent.Hispanic.or.Latino") return("Percent Hispanic or Latino population in a census tract using American Community Survey 5-year data (2023)")
-    if(col == "White.NonHispanic") return("Total number of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2023)")
+    if(col == "Total.Population") return("Total number of individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Hispanic.or.Latino") return("Total number of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Hispanic.or.Latino") return("Percent Hispanic or Latino population in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "White.NonHispanic") return("Total number of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population in 2023 (%)")
     if(col == "Black.NonHispanic") return("Non-Hispanic Black population in 2023 (total)")
     if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population in 2023 (%)")
@@ -1688,7 +1688,7 @@ server <- function(input, output, session) {
     if(col == "Environmental.Justice.Index") return("EJI in 2019")
     if(col == "Unemployment") return("Unemployment in 2021 (%)")
     
-    if(col == "UV.Index") return("UVI in 2024")
+    if(col == "UV.Index") return("Ultraviolet radiation index from Tropospheric Emission Monitoring Internet Service (TEMIS) satellite data (2024)")
     
     if(col == "Radon") return(HTML("Radon gas concentration in 2021 (Bq/m<sup>3</sup>)"))
     
@@ -1725,31 +1725,31 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> in 2020 ", "(\U03BC", "g/m<sup>3</sup>)")))
-    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)")))
-    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb)"))
-    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
-    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
+    if(col == "Wildfire.smoke") return("Wildfire smoke concentration estimate from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023)")
+    if(col == "Nitrogen.dioxide") return("Nitrogen dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2020)")
+    if(col == "Sulfur.dioxide") return("Sulfur dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2020)")
+    if(col == "Carbon.monoxide") return("Carbon monoxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2020)")
+    if(col == "Ozone") return("Ozone concentration estimate from Centers for Disease Control and Prevention (CDC) (2016-2020)")
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
-    if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
-    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value ($)")
-    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value ($)")
-    if(col == "Drought.Risk.Score") return("Drought risk value ($)")
-    if(col == "Earthquake.Risk.Score") return("Earthquake risk value ($)")
-    if(col == "Hail.Risk.Score") return("Hail risk value ($)")
-    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk value ($)")
-    if(col == "Hurricane.Risk.Score") return("Hurricane risk value ($)")
-    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk value ($)")
-    if(col == "Landslide.Risk.Score") return("Landslide risk value ($)")
-    if(col == "Lightning.Risk.Score") return("Lightning risk value ($)")
-    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk value ($)")
-    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk value ($)")
-    if(col == "Tornado.Risk.Score") return("Tornado risk value ($)")
-    if(col == "Tsunami.Risk.Score") return("Tsunami risk value ($)")
-    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk value ($)")
-    if(col == "Wildfire.Risk.Score") return("Wildfire risk value ($)")
-    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value ($)")
+    if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to avalanches")
+    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to coastal flooding")
+    if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to cold waves")
+    if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to droughts")
+    if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to earthquakes")
+    if(col == "Hail.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to hail")
+    if(col == "Heat.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to heat waves")
+    if(col == "Hurricane.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to hurricanes")
+    if(col == "Ice.Storm.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to ice storms")
+    if(col == "Landslide.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to landslides")
+    if(col == "Lightning.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to lightning")
+    if(col == "Riverine.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to riverine flooding")
+    if(col == "Strong.Wind.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to strong wind")
+    if(col == "Tornado.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to tornadoes")
+    if(col == "Tsunami.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to tsunamis")
+    if(col == "Volcanic.Activity.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to volcanic activity")
+    if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to wildfires")
+    if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to winter weather")
     
     if(col == "bluespace") return("Blue space coverage (% in tract)")
     if(col == "social_capital") return("Social capital")
@@ -1779,7 +1779,7 @@ server <- function(input, output, session) {
     if(col == "total_p1") return("Part I offenses (total)")
     if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
     
-    if(col == "total_p2") return("Part II offenses")
+    if(col == "total_p2") return("Part II offenses (total)")
     if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
@@ -2837,8 +2837,6 @@ server <- function(input, output, session) {
           x <- map_cols()[[c_name]]
           k <- NULL
           
-          info_id <- paste0("legend info!", c_name)
-          
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
             layer_counter(k) # set the new layer count
@@ -2865,10 +2863,13 @@ server <- function(input, output, session) {
                                orientation = "horizontal", shape = "stadium", 
                                width = 300,   # wider bar
                                height = 18, bins = 5,
-                               title = htmltools::tags$div(
-                                 legend.titles(c_name),
+                               title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                           htmltools::tags$span(
+                                                             legend.titles(c_name),
+                                                             style = "flex:0 1 auto; text-align:center;"
+                                                           ),
                                  htmltools::tags$span(
-                                   "\u24D8",                    # circled 'i'
+                                   bs_icon('info-circle-fill'),                    # circled 'i'
                                    id    = info_id,
                                    `data-bs-toggle` = "tooltip",
                                    `data-bs-placement` = "top",
