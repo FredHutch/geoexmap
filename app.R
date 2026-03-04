@@ -722,8 +722,8 @@ standalone_tab <- c("Choose dataset" = "",
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
-  tags$head(
-    tags$style(HTML("
+  tags$head( # define style and scrips
+    tags$style(HTML(" 
     .leaflet-control.my-centered-num-legend {
       background: white;
       border: 1px solid #ccc;
@@ -731,8 +731,14 @@ ui <- page_navbar(
       padding: 4px 6px;
     }
     
+    /* center the SVG bar inside the legend box */
+    .leaflet-control.my-centered-num-legend svg {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-    /* Keep label centering without touching fill colors */
+    /* keep label centering without touching fill colors */
     .leaflet-control.my-centered-num-legend text {
       text-anchor: middle;
       fill: #333;              /* text color */
@@ -750,7 +756,7 @@ ui <- page_navbar(
       });
     });
 
-    // Also re-initialize when Leaflet redraws legends:
+    // re-initialize when Leaflet redraws legends:
     document.addEventListener('DOMNodeInserted', function(e) {
       if (e.target && e.target.classList &&
           e.target.classList.contains('leaflet-control')) {
@@ -1197,64 +1203,64 @@ server <- function(input, output, session) {
     if(col == "Percent.Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population in 2023 (%)")
     
     # hispanic or latino subcats
-    if(col == "White.Hispanic.or.Latino") return("Hispanic or Latino White (total)")
-    if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White (%)")
-    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black(total)")
-    if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black (%)")
-    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (%)")
-    if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (total)")
-    if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (%)")
-    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (total)")
-    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (%)")
-    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino (total)")
-    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races (%)")
+    if(col == "White.Hispanic.or.Latino") return("Hispanic or Latino White population in 2023 (total)")
+    if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White population in 2023 (%)")
+    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black population in 2023 (total)")
+    if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black population in 2023 (%)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native population in 2023 (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native population in 2023 (%)")
+    if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian population in 2023 (total)")
+    if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian population in 2023 (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander population in 2023 (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander population in 2023 (%)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race population in 2023 (total)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race population in 2023 (%)")
+    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races population in 2023 (total)")
+    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races population in 2023 (%)")
     
     # sex
-    if(col == "Total.Male.Population") return("Male (total)")
-    if(col == "Total.Female.Population") return("Female (total)")
-    if(col == "Percent.Male") return("Male (%)")
-    if(col == "Percent.Female") return("Female (%)")
+    if(col == "Total.Male.Population") return("Male population in 2023 (total)")
+    if(col == "Total.Female.Population") return("Female population in 2023 (total)")
+    if(col == "Percent.Male") return("Male population in 2023 (%)")
+    if(col == "Percent.Female") return("Female population in 2023 (%)")
     
     # age
-    if(col == "Total.0.to.4.years") return("0-4 years (total)")
-    if(col == "Percent.0.to.4.years") return("0-4 years (%)")
-    if(col == "Total.5.to.9.years") return("5-9 years (total)")
-    if(col == "Percent.5.to.9.years") return("5-9 years (%)")
-    if(col == "Total.10.to.14.years") return("10-14 years (total)")
-    if(col == "Percent.10.to.14.years") return("10-14 years (%)")
-    if(col == "Total.15.to.19.years") return("15-19 years (total)")
-    if(col == "Percent.15.to.19.years") return("15-19 years (%)")
-    if(col == "Total.20.to.24.years") return("20-24 years (total)")
-    if(col == "Percent.20.to.24.years") return("20-24 years (%)")
-    if(col == "Total.25.to.29.years") return("25-29 years (total)")
-    if(col == "Percent.25.to.29.years") return("25-29 years (%)")
-    if(col == "Total.30.to.34.years") return("30-34 years (total)")
-    if(col == "Percent.30.to.34.years") return("30-34 years (%)")
-    if(col == "Total.35.to.39.years") return("35-39 years (total)")
-    if(col == "Percent.35.to.39.years") return("35-39 years (%)")
-    if(col == "Total.40.to.44.years") return("40-44 years (total)")
-    if(col == "Percent.40.to.44.years") return("40-44 years (%)")
-    if(col == "Total.45.to.49.years") return("45-49 years (total)")
-    if(col == "Percent.45.to.49.years") return("45-49 years (%)")
-    if(col == "Total.50.to.54.years") return("50-54 years (total)")
-    if(col == "Percent.50.to.54.years") return("50-54 years (%)")
-    if(col == "Total.55.to.59.years") return("55-59 years (total)")
-    if(col == "Percent.55.to.59.years") return("55-59 years (%)")
-    if(col == "Total.60.to.64.years") return("60-64 years (total)")
-    if(col == "Percent.60.to.64.years") return("60-64 years (%)")
-    if(col == "Total.65.to.69.years") return("65-69 years (total)")
-    if(col == "Percent.65.to.69.years") return("65-69 years (%)")
-    if(col == "Total.70.to.74.years") return("70-74 years (total)")
-    if(col == "Percent.70.to.74.years") return("70-74 years (%)")
-    if(col == "Total.75.to.79.years") return("75-79 years (total)")
-    if(col == "Percent.75.to.79.years") return("75-79 years (%)")
-    if(col == "Total.80.to.84.years") return("80-84 years (total)")
-    if(col == "Percent.80.to.84.years") return("80-84 years (%)")
-    if(col == "Total.85.and.older") return("85+ years (total)")
-    if(col == "Percent.85.and.older") return("85+ years (%)")
+    if(col == "Total.0.to.4.years") return("0-4 years population in 2024 (total)")
+    if(col == "Percent.0.to.4.years") return("0-4 years population in 2024 (%)")
+    if(col == "Total.5.to.9.years") return("5-9 years poulation in 2024 (total)")
+    if(col == "Percent.5.to.9.years") return("5-9 years population in 2024 (%)")
+    if(col == "Total.10.to.14.years") return("10-14 years population in 2024 (total)")
+    if(col == "Percent.10.to.14.years") return("10-14 years population in 2024 (%)")
+    if(col == "Total.15.to.19.years") return("15-19 years population in 2024 (total)")
+    if(col == "Percent.15.to.19.years") return("15-19 years population in 2024 (%)")
+    if(col == "Total.20.to.24.years") return("20-24 years population in 2024 (total)")
+    if(col == "Percent.20.to.24.years") return("20-24 years population in 2024 (%)")
+    if(col == "Total.25.to.29.years") return("25-29 years population in 2024 (total)")
+    if(col == "Percent.25.to.29.years") return("25-29 years population in 2024 (%)")
+    if(col == "Total.30.to.34.years") return("30-34 years population in 2024 (total)")
+    if(col == "Percent.30.to.34.years") return("30-34 years population in 2024 (%)")
+    if(col == "Total.35.to.39.years") return("35-39 years population in 2024 (total)")
+    if(col == "Percent.35.to.39.years") return("35-39 years population in 2024 (%)")
+    if(col == "Total.40.to.44.years") return("40-44 years population in 2024 (total)")
+    if(col == "Percent.40.to.44.years") return("40-44 years population in 2024 (%)")
+    if(col == "Total.45.to.49.years") return("45-49 years population in 2024 (total)")
+    if(col == "Percent.45.to.49.years") return("45-49 years population in 2024 (%)")
+    if(col == "Total.50.to.54.years") return("50-54 years population in 2024 (total)")
+    if(col == "Percent.50.to.54.years") return("50-54 years population in 2024 (%)")
+    if(col == "Total.55.to.59.years") return("55-59 years population in 2024 (total)")
+    if(col == "Percent.55.to.59.years") return("55-59 years population in 2024 (%)")
+    if(col == "Total.60.to.64.years") return("60-64 years population in 2024 (total)")
+    if(col == "Percent.60.to.64.years") return("60-64 years population in 2024 (%)")
+    if(col == "Total.65.to.69.years") return("65-69 years population in 2024 (total)")
+    if(col == "Percent.65.to.69.years") return("65-69 years population in 2024 (%)")
+    if(col == "Total.70.to.74.years") return("70-74 years population in 2024 (total)")
+    if(col == "Percent.70.to.74.years") return("70-74 years population in 2024 (%)")
+    if(col == "Total.75.to.79.years") return("75-79 years population in 2024 (total)")
+    if(col == "Percent.75.to.79.years") return("75-79 years population in 2024 (%)")
+    if(col == "Total.80.to.84.years") return("80-84 years population in 2024 (total)")
+    if(col == "Percent.80.to.84.years") return("80-84 years population in 2024 (%)")
+    if(col == "Total.85.and.older") return("85+ years population in 2024 (total)")
+    if(col == "Percent.85.and.older") return("85+ years population in 2024 (%)")
     
     if(col == "Social.Vulnerability.Index") return("SVI in 2022")
     if(col == "Environmental.Justice.Index") return("EJI in 2019")
@@ -1266,21 +1272,21 @@ server <- function(input, output, session) {
     
     if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lbs/mi<sup>2</sup>)"))
     
-    if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
+    if(col == "Racial.Residential.Segregation") return("Racial residential segregation in 2020")
     
     # transportation noise model
-    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (total)")
-    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (%)")
-    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (total)")
-    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (%)")
-    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (total)")
-    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (%)")
-    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (total)")
-    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (%)")
-    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (total)")
-    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (%)")
-    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (total)")
-    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB in 2020 (%)")
     
     if(col == "Walkability") return("Walkability score in 2019")
     
@@ -1291,68 +1297,68 @@ server <- function(input, output, session) {
     if(col == "Poverty") return("Poverty in 2021 (%)")
     if(col == "Housing.cost.burden") return("Housing cost burden in 2021 (%)")
     
-    if(col == "Dew.point") return(paste0("Dew point ", "(\U00B0", "F)"))
-    if(col == "Maximum.temperature") return(paste0("Maximum temperature ", "(\U00B0", "F)"))
-    if(col == "Minimum.temperature") return(paste0("Minimum temperature ", "(\U00B0", "F)"))
-    if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
-    if(col == "Precipitation") return("Precipitation (in.)")
+    if(col == "Dew.point") return(paste0("Dew point in 2020 ", "(\U00B0", "F)"))
+    if(col == "Maximum.temperature") return(paste0("Maximum temperature in 2020 ", "(\U00B0", "F)"))
+    if(col == "Minimum.temperature") return(paste0("Minimum temperature in 2020 ", "(\U00B0", "F)"))
+    if(col == "Average.temperature") return(paste0("Average temperature in 2020 ", "(\U00B0", "F)"))
+    if(col == "Precipitation") return("Precipitation in 2020 (in.)")
     
     if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> in 2020 ", "(\U03BC", "g/m<sup>3</sup>)")))
-    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)")))
-    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb)"))
-    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
-    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
+    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) in 2020 (ppb)")))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb) in 2020 "))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020 "))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb) in 2020 "))
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
-    if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
-    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value ($)")
-    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value ($)")
-    if(col == "Drought.Risk.Score") return("Drought risk value ($)")
-    if(col == "Earthquake.Risk.Score") return("Earthquake risk value ($)")
-    if(col == "Hail.Risk.Score") return("Hail risk value ($)")
-    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk value ($)")
-    if(col == "Hurricane.Risk.Score") return("Hurricane risk value ($)")
-    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk value ($)")
-    if(col == "Landslide.Risk.Score") return("Landslide risk value ($)")
-    if(col == "Lightning.Risk.Score") return("Lightning risk value ($)")
-    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk value ($)")
-    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk value ($)")
-    if(col == "Tornado.Risk.Score") return("Tornado risk value ($)")
-    if(col == "Tsunami.Risk.Score") return("Tsunami risk value ($)")
-    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk value ($)")
-    if(col == "Wildfire.Risk.Score") return("Wildfire risk value ($)")
-    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value ($)")
+    if(col == "Avalanche.Risk.Score") return("Avalanche risk value in 2024 ($)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value in 2024 ($)")
+    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value in 2024 ($)")
+    if(col == "Drought.Risk.Score") return("Drought risk value in 2024 ($)")
+    if(col == "Earthquake.Risk.Score") return("Earthquake risk value in 2024 ($)")
+    if(col == "Hail.Risk.Score") return("Hail risk value in 2024 ($)")
+    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk value in 2024 ($)")
+    if(col == "Hurricane.Risk.Score") return("Hurricane risk value in 2024 ($)")
+    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk value in 2024 ($)")
+    if(col == "Landslide.Risk.Score") return("Landslide risk value in 2024 ($)")
+    if(col == "Lightning.Risk.Score") return("Lightning risk value in 2024 ($)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk value in 2024 ($)")
+    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk value in 2024 ($)")
+    if(col == "Tornado.Risk.Score") return("Tornado risk value in 2024 ($)")
+    if(col == "Tsunami.Risk.Score") return("Tsunami risk value in 2024 ($)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk value in 2024 ($)")
+    if(col == "Wildfire.Risk.Score") return("Wildfire risk value in 2024 ($)")
+    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value in 2024 ($)")
     
-    if(col == "bluespace") return("Blue space coverage (% in tract)")
-    if(col == "social_capital") return("Social capital")
+    if(col == "bluespace") return("Blue space coverage in 2021 (%)")
+    if(col == "social_capital") return("Social capital in 2022")
     
     if(col == "PFAS_dw") return("PFAS in drinking water in 2021")
-    if(col == "Median.HH.Income") return("Median household income ($)")
-    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index")
-    if(col == "Historic.Redlining.Score") return("Historic redlining")
+    if(col == "Median.HH.Income") return("Median household income in 2023 ($)")
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index in 2022")
+    if(col == "Historic.Redlining.Score") return("Historic redlining score")
     
-    if(col == "pct_Open_Water") return("Open water (%)")
-    if(col == "pct_Developed_Open") return("Developed open land (%)")
-    if(col == "pct_Developed_Low") return("Minimally developed land (%)")
-    if(col == "pct_Developed_Medium") return("Moderately developed land (%)")
-    if(col == "pct_Developed_High") return("Highly developed land (%)")
-    if(col == "pct_Barren") return("Barren land (%)")
-    if(col == "pct_Evergreen_Forest") return("Evergreen forest (%)")
-    if(col == "pct_Shrub") return("Shrubland (%)")
-    if(col == "pct_Grassland") return("Grassland (%)")
-    if(col == "pct_Pasture") return("Pasture (%)")
-    if(col == "pct_Crops") return("Cropland (%)")
-    if(col == "pct_Woody_Wetlands") return("Woody wetlands (%)")
-    if(col == "pct_Herbaceous_Wetlands") return("Herbaceous wetlands (%)")
-    if(col == "pct_Deciduous_Forest") return("Deciduous forest (%)")
-    if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
-    if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
+    if(col == "pct_Open_Water") return("Open water in 2024 (%)")
+    if(col == "pct_Developed_Open") return("Developed open land in 2024 (%)")
+    if(col == "pct_Developed_Low") return("Minimally developed land in 2024 (%)")
+    if(col == "pct_Developed_Medium") return("Moderately developed land in 2024 (%)")
+    if(col == "pct_Developed_High") return("Highly developed land in 2024 (%)")
+    if(col == "pct_Barren") return("Barren land in 2024 (%)")
+    if(col == "pct_Evergreen_Forest") return("Evergreen forest in 2024 (%)")
+    if(col == "pct_Shrub") return("Shrubland in 2024 (%)")
+    if(col == "pct_Grassland") return("Grassland in 2024 (%)")
+    if(col == "pct_Pasture") return("Pasture in 2024 (%)")
+    if(col == "pct_Crops") return("Cropland in 2024 (%)")
+    if(col == "pct_Woody_Wetlands") return("Woody wetlands in 2024 (%)")
+    if(col == "pct_Herbaceous_Wetlands") return("Herbaceous wetlands in 2024 (%)")
+    if(col == "pct_Deciduous_Forest") return("Deciduous forest in 2024 (%)")
+    if(col == "pct_Mixed_Forest") return("Mixed forest in 2024 (%)")
+    if(col == "pct_Perennial_Ice") return("Perennial ice in 2024 (%)")
     
-    if(col == "total_p1") return("Part I offenses (total)")
-    if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
+    if(col == "total_p1") return("Part I offenses in 2023 (total)")
+    if(col == "p1_rate") return("Part I offenses in 2023 (per 1,000 population)")
     
-    if(col == "total_p2") return("Part II offenses")
-    if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
+    if(col == "total_p2") return("Part II offenses in 2023 (total)")
+    if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
       
@@ -1478,7 +1484,7 @@ server <- function(input, output, session) {
     
     if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>)"))
     
-    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lbs/mi<sup>2</sup>)"))
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lbs/mi<sup>2</sup>)"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
     
@@ -1565,7 +1571,7 @@ server <- function(input, output, session) {
     if(col == "total_p1") return("Part I offenses (total)")
     if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
     
-    if(col == "total_p2") return("Part II offenses")
+    if(col == "total_p2") return("Part II offenses (total)")
     if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
@@ -1573,7 +1579,7 @@ server <- function(input, output, session) {
   }
   
   var.info <- function(col) {
-    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width from Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2022)")
+    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2022)")
     if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
     if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
@@ -1593,10 +1599,10 @@ server <- function(input, output, session) {
     if(col == "Cigarette.Smoking.among.Adults") return("Cigarette smoking in 2023 (%)")
     if(col == "No.Leisure.time.Physical.Activity.among.Adults") return("No physical activity in 2023 (%)")
     if(col == "Short.Sleep.Duration") return("Short sleep duration in 2023 (%)")
-    if(col == "Arthritis.among.Adults") return("Arthritis in 2023 (%)")
-    if(col == "Asthma.among.Adults") return("Asthma in 2023 (%)")
-    if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure in 2023 (%)")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence among adults in 2023 (%)")
+    if(col == "Arthritis.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor or other health professional that you have some form of arthritis, rheumatoid arthritis, gout, lupus, or fibromyalgia?' from CDC PLACES (2025 release)")
+    if(col == "Asthma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to both of the questions, 'Have you ever been told by a doctor, nurse, or other health professional that you have asthma?' and 'Do you still have asthma?' from CDC PLACES (2025 release)")
+    if(col == "High.Blood.Pressure.among.Adults") return("Estimate of the percentage of adults in a census tract who reported ever having been told by a doctor, nurse, or other health professional that they have high blood pressure from CDC PLACES (2025 release)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had melanoma or any other types of cancer?' and 'no' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had skin cancer that is not melanoma?' from CDC PLACES (2025 release)")
     if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol in 2023 (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease in 2023 (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease in 2023 (%)")
@@ -1751,7 +1757,7 @@ server <- function(input, output, session) {
     if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to wildfires")
     if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to winter weather")
     
-    if(col == "bluespace") return("Blue space coverage (% in tract)")
+    if(col == "bluespace") return("Blue space coverage in a census tract using the global surface water dataset from the Copernicus Programme (1984-2021)")
     if(col == "social_capital") return("Social capital")
     
     if(col == "PFAS_dw") return("PFAS in drinking water in 2021")
@@ -2866,7 +2872,7 @@ server <- function(input, output, session) {
                                title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                            htmltools::tags$span(
                                                              legend.titles(c_name),
-                                                             style = "flex:0 1 auto; text-align:center;"
+                                                             style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                            ),
                                  htmltools::tags$span(
                                    bs_icon('info-circle-fill'),                    # circled 'i'
@@ -2874,10 +2880,10 @@ server <- function(input, output, session) {
                                    `data-bs-toggle` = "tooltip",
                                    `data-bs-placement` = "top",
                                    title = info_txt,
-                                   style = "cursor:pointer; font-weight:bold; text-align: center; font-weight: bold"
+                                   style = "cursor:pointer; font-weight:bold; text-align: center;"
                                  )
                                ),
-            labelStyle = "text-align: center; font-weight: bold;",
+            labelStyle = "text-align: center;",
             className  = "my-centered-num-legend",
             position   = "bottomright") %>% 
       addLayersControl(overlayGroups = groups,
@@ -2915,10 +2921,19 @@ server <- function(input, output, session) {
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
                              height = 18, bins = 5,
-                             title = htmltools::tags$div(
-                               legend.titles(c_name),
-                               class = "legend-title",
-                               style = "text-align: center; width: 100%; font-weight: bold;"
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           legend.titles(c_name),
+                                                           style = "flex:0 1 auto; text-align:center;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'),                    # circled 'i'
+                                                           id    = info_id,
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = info_txt,
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center; font-weight: bold"
+                                                         )
                              ),
                              labelStyle = "text-align: center; font-weight: bold;",
                              className  = "my-centered-num-legend",
@@ -2993,14 +3008,23 @@ server <- function(input, output, session) {
             addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                        group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>% 
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
                              height = 18, bins = 5,
-                             title = htmltools::tags$div(
-                               paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000 in 2025):"),
-                               style = "text-align: center; width: 100%; font-weight: bold;"
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2025:"),
+                                                           style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'),
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = "Data from the Washington State Cancer Registry",
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                         )
                              ),
                              labelStyle = "text-align: center; font-weight: bold;",
                              className  = "my-centered-num-legend",
@@ -3036,14 +3060,23 @@ server <- function(input, output, session) {
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
                                        "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                        group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>%
+                        group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>%
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
                              height = 18, bins = 5,
-                             title = htmltools::tags$div(
-                               paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000 in 2023):"),
-                               style = "text-align: center; width: 100%; font-weight: bold;"
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2023:"),
+                                                           style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'),
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = "Data from the Washington State Cancer Registry",
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                         )
                              ),
                              labelStyle = "text-align: center; font-weight: bold;",
                              className  = "my-centered-num-legend",
