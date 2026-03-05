@@ -1568,26 +1568,26 @@ server <- function(input, output, session) {
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
     
-    if(col == "total_p1") return("Part I offenses (total)")
-    if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
+    if(col == "total_p1") return("Part I offenses in 2023 (total)")
+    if(col == "p1_rate") return("Part I offenses in 2023 (per 1,000 population)")
     
-    if(col == "total_p2") return("Part II offenses (total)")
-    if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
+    if(col == "total_p2") return("Part II offenses in 2023 (total)")
+    if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
     
   }
   
   var.info <- function(col) {
-    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2022)")
-    if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
-    if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
-    if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
-    if(col == "Food.Insecurity") return("Food insecurity in 2023 (%)")
-    if(col == "Housing.Insecurity") return("Housing insecurity in 2023 (%)")
-    if(col == "Utility.Services.Threat") return("Utility services threat in 2023 (%)")
-    if(col == "Lacking.Reliable.Transportation") return("Lack of reliable transportation in 2023 (%)")
-    if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support in 2023 (%)")
+    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
+    if(col == "Green.Space") return("Green space vegetation health and intensity in a census tract measured using the Normalized Difference Vegetation Index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
+    if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN), also known as nighttime radiance or light pollution, from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
+    if(col == "Food.Stamps") return("Estimate of the percentage of adults in a census tract who reported receiving food stamps, also called SNAP, the Supplemental Nutrition Assistance Program, on an EBT card from CDC PLACES (2025 release)")
+    if(col == "Food.Insecurity") return("Estimate of the percentage of adults in a census tract who reported that the food that they bought always/usually/sometimes did not last, and they didn’t have money to get more from CDC PLACES (2025 release)")
+    if(col == "Housing.Insecurity") return("Estimate of the percentage of adults in a census tract who reported they were not able to pay mortgage, rent, or utility bill in the past 12 months from CDC PLACES (2025 release)")
+    if(col == "Utility.Services.Threat") return("Estimate of the percentage of adults in a census tract who reported that an electric, gas, oil, or water company threatened to shut off services at any time during the prior 12 months from CDC PLACES (2025 release)")
+    if(col == "Lacking.Reliable.Transportation") return("Estimate of the percentage of adults in a census tract who reported a lack of reliable transportation keeping them from medical appointments, meetings, work, or from getting things needed for daily living in the past 12 months from CDC PLACES (2025 release)")
+    if(col == "Lack.of.Social.and.Emotional.Support") return("Estimate of the percentage of adults in a census tract who report sometimes, rarely, or never getting the social and emotional support needed from CDC PLACES (2025 release)")
     if(col == "Lack.of.Health.Insurance") return("Estimate of the percentage of adults aged 18-64 in a census tract who report having no current health insurance coverage from CDC PLACES (2025 release)")
     if(col == "Routine.Checkup.in.the.Past.Year") return("Estimate of the percentage of adults in a census tract who report having been to a doctor for a routine checkup (e.g., a general physical exam, not an exam for a specific injury, illness, or condition) in the previous year from CDC PLACES (2025 release)")
     if(col == "Visited.Dentist.in.Past.Year") return("Estimate of the percentage of adults in a census tract who report having been to the dentist or dental clinic in the past year from CDC PLACES (2025 release)")
@@ -1616,11 +1616,11 @@ server <- function(input, output, session) {
     if(col == "Hispanic.or.Latino") return("Total number of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.Hispanic.or.Latino") return("Percent Hispanic or Latino population in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "White.NonHispanic") return("Total number of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population in 2023 (%)")
-    if(col == "Black.NonHispanic") return("Non-Hispanic Black population in 2023 (total)")
-    if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population in 2023 (%)")
-    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population in 2023 (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population in 2023 (%)")
+    if(col == "Percent.White.NonHispanic") return("Percentage of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Black.NonHispanic") return("Total number of Non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Black.NonHispanic") return("Percentage of Non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Total number of Non-Hispanic American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Percentage of Non-Hispanic American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Asian.NonHispanic") return("Non-Hispanic Asian population in 2023 (total)")
     if(col == "Percent.Asian.NonHispanic") return("Non-Hispanic Asian population in 2023 (%)")
     if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population in 2023 (total)")
@@ -1731,7 +1731,7 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return("Wildfire smoke concentration estimate from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023)")
+    if(col == "Wildfire.smoke") return("Wildfire smoke concentration estimate from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023 release)")
     if(col == "Nitrogen.dioxide") return("Nitrogen dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2020)")
     if(col == "Sulfur.dioxide") return("Sulfur dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2020)")
     if(col == "Carbon.monoxide") return("Carbon monoxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2020)")
@@ -1782,10 +1782,10 @@ server <- function(input, output, session) {
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
     
-    if(col == "total_p1") return("Part I offenses (total)")
-    if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
+    if(col == "total_p1") return("Total Part I offenses in a county, defined by the Federal Bureau of Investigation (FBI) as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2025 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
+    if(col == "p1_rate") return("Total Part I offenses per 1,000 population in a county, defined by the Federal Bureau of Investigation (FBI) as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2025 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
     
-    if(col == "total_p2") return("Part II offenses (total)")
+    if(col == "total_p2") return("Total Part II offenses in a county, defined by the Federal Bureau of Investigation (FBI) as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2025 release)")
     if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
