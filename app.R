@@ -1758,11 +1758,11 @@ server <- function(input, output, session) {
     if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to winter weather")
     
     if(col == "bluespace") return("Percentage of blue space coverage in a census tract using the global surface water dataset from the European Commission (EC) Joint Research Commission (JRC)/Google and the Copernicus Programme (2024 release)")
-    if(col == "social_capital") return("Social capital")
+    if(col == "social_capital") return("Social capital index, indicating the overall strength of social infrastructures within communities of a census tract using data from Fraser et al. Scientific Reports 2022")
     
-    if(col == "PFAS_dw") return("PFAS in drinking water in 2021")
-    if(col == "Median.HH.Income") return("Median household income ($)")
-    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index")
+    if(col == "PFAS_dw") return("Whether PFAS has been found in water within a census tract using data from the Environmental Protection Agency (EPA) Unregulated Contaminant Monitoring Rule (UCMR) 5 (2025 release)")
+    if(col == "Median.HH.Income") return("Median income of households within a census tract using data from American Community Survey 5-year data (2019-2023). Values are censored for tracts with a median household income of over $250,000") # TODO: reword this
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index from the Center for Neighborhood Technology")
     if(col == "Historic.Redlining.Score") return("Historic redlining")
     
     if(col == "pct_Open_Water") return("Open water (%)")
@@ -2383,112 +2383,8 @@ server <- function(input, output, session) {
 
   })
   
-  #### ACTIVE VARIABLE PANEL ####
-  # create the variable panel HTML
-  create_variable_panel <- function(variables) {
-    if (length(variables) == 0) {
-      return("")
-    }
-    
-    # clickable variable items
-    variable_items <- sapply(variables, function(var) {
-      # shortened display name if needed
-      display_name <- if(nchar(var) > 25) paste0(substr(var, 1, 22), "...") else var
-      
-      paste0(
-        '<div class="variable-item" onclick="Shiny.setInputValue(\'remove_variable\', \'', var, '\', {priority: \'event\'});" ',
-        'title="Click to remove: ', var, '">',
-        '<span class="variable-name">', display_name, '</span>',
-        '<span class="remove-icon">×</span>',
-        '</div>'
-      )
-    })
-    
-    # combine full panel HTML
-    panel_html <- paste0(
-      '<div id="variable-panel" style="
-        background: rgba(255, 255, 255, 0.9);
-        border: 2px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 10px;
-        max-width: 250px;
-        max-height: 300px;
-        overflow-y: auto;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      ">',
-      '<div style="font-weight: bold; margin-bottom: 8px; color: #333;">Active Variables</div>',
-      paste(variable_items, collapse = ""),
-      '</div>',
-      '<style>
-        .variable-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 5px 8px;
-          margin: 2px 0;
-          background: #f8f9fa;
-          border: 1px solid #dee2e6;
-          border-radius: 3px;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-        .variable-item:hover {
-          background: #e9ecef;
-          border-color: #adb5bd;
-        }
-        .variable-name {
-          flex: 1;
-          font-size: 12px;
-          color: #495057;
-        }
-        .remove-icon {
-          color: #dc3545;
-          font-weight: bold;
-          font-size: 16px;
-          margin-left: 5px;
-        }
-        .variable-item:hover .remove-icon {
-          color: #c82333;
-        }
-      </style>'
-    )
-    
-    return(panel_html)
-  }
+  # TODO: add visual cue for accordion panels to indicate values are chosen
   
-  # handle individual variable removal
-  observeEvent(input$remove_variable, {
-    var_to_remove <- input$remove_variable
-    
-    if (!is.null(var_to_remove) && var_to_remove != "") {
-      # lookup table for variable categories
-      variable_lookup <- list(
-        list(data = health_outcomes, input_id = "outcomes", update_fn = updateSelectInput),
-        list(data = sociodemo, input_id = "sociodemo", update_fn = updateSelectInput),
-        list(data = age, input_id = "age", update_fn = updateSelectInput),
-        list(data = sex, input_id = "sex", update_fn = updateSelectInput),
-        list(data = race, input_id = "race", update_fn = updateSelectInput),
-        list(data = social_env, input_id = "socialenv", update_fn = updateSelectInput),
-        list(data = health_prevention, input_id = "prevention", update_fn = updateSelectInput),
-        list(data = health_behaviors, input_id = "behaviors", update_fn = updateSelectInput),
-        list(data = natural_env, input_id = "naturalenv", update_fn = updateSelectInput),
-        list(data = air_pol, input_id = "airpol", update_fn = updateSelectInput),
-        list(data = built_env, input_id = "builtenv", update_fn = updateSelectInput),
-        list(data = food_env_inp, input_id = "foodenv", update_fn = updateVarSelectInput)
-      )
-      
-      # find the matching category and update
-      for (category in variable_lookup) {
-        if (var_to_remove %in% colnames(category$data)) {
-          current_selection <- input[[category$input_id]]
-          new_selection <- setdiff(current_selection, var_to_remove)
-          category$update_fn(session, category$input_id, selected = new_selection)
-          break
-        }
-      }
-    }
-  })
   
   #### INITIAL MAP RENDER ####
   output$geoexmap <- renderLeaflet({
@@ -2545,58 +2441,6 @@ server <- function(input, output, session) {
     reactable(tab_point_data())
   })
   
-  #### LEGEND CREATION ####
-  # legend <- function(values, var, df, layer_index, palette, title, left_label, right_label, bins = 5) {
-  #   # validate args
-  #   stopifnot(!is.null(values))
-  #   stopifnot(!is.null(palette))
-  #   stopifnot(!is.null(title))
-  #   stopifnot(!is.null(left_label))
-  #   stopifnot(!is.null(right_label))
-  #   
-  #   pal <- geoex.palette(var, df, layer_index)
-  #   # accommodate different bin arguments--may be needed?
-  #   cuts <- if (length(bins) == 1) pretty(values, n = bins) else bins
-  #   n <- length(cuts)
-  #   r <- range(values, na.rm = TRUE)
-  #   # pretty cut points may be out of the range of `values`
-  #   cuts <- cuts[cuts >= r[1] & cuts <= r[2]]
-  #   colors <- pal(c(r[1], cuts, r[2]))
-  #   
-  #   # generate html list object using colors
-  #   legend <- tags$ul(class = "legend")
-  #   legend$children <- lapply(seq_len(length(colors)), function(color) {
-  #     tags$li(
-  #       class = "legend-item legend-color",
-  #       style = paste0(
-  #         "background-color:", colors[color]
-  #       ),
-  #     )
-  #   })
-  #   
-  #   # add labels to list
-  #   legend$children <- tagList(
-  #     tags$li(
-  #       class = "legend-item legend-label left-label",
-  #       as.character(left_label)
-  #     ),
-  #     legend$children,
-  #     tags$li(
-  #       class = "legend-item legend-label right-label",
-  #       as.character(right_label)
-  #     )
-  #   )
-  #   
-  #   # render legend with title
-  #   return(
-  #     tagList(
-  #       tags$span(class = "legend-title", as.character(title)),
-  #       legend
-  #     )
-  #   )
-  #   # TODO: consider other legends (PFAS)
-  # }
-  
   #### MAIN OBSERVER LOGIC ####
   observe({
     layer_counter(0)
@@ -2628,15 +2472,7 @@ server <- function(input, output, session) {
         clearMarkers() %>% 
         addProviderTiles(providers$CartoDB.Positron)
       
-      # update the variable panel
-      if (length(current_vars) > 0) {
-        panel_html <- create_variable_panel(current_vars)
-        proxy <- proxy %>% addControl(
-            html = panel_html,
-            position = "bottomright",
-            layerId = "variable_panel"
-          ) 
-      }
+      # TODO: 
       # TODO: dynamic labels for tracts
       label = ""
       
@@ -2865,7 +2701,7 @@ server <- function(input, output, session) {
               addPolygons(., fillColor = ~pal(x), stroke = FALSE,
                           fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                           group = layer.titles(c_name), label = "") %>% 
-              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
                                orientation = "horizontal", shape = "stadium", 
                                width = 300,   # wider bar
                                height = 18, bins = 5,
@@ -2875,7 +2711,7 @@ server <- function(input, output, session) {
                                                              style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                            ),
                                  htmltools::tags$span(
-                                   bs_icon('info-circle-fill'),                    # circled 'i'
+                                   bs_icon('info-circle-fill'), # circled 'i'
                                    id    = info_id,
                                    `data-bs-toggle` = "tooltip",
                                    `data-bs-placement` = "top",
