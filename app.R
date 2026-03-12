@@ -464,12 +464,12 @@ categories <- accordion(
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
     accordion_panel("Race and Ethnicity", icon = uiOutput("race_icon"), selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Sex", selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Sex", icon = uiOutput("sex_icon"), selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
     accordion_panel("Age", icon = uiOutput("age_icon"), selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
-    HTML("<b>Health Outcomes</b>"), icon = bs_icon("heart-pulse"),
+    HTML("<b>Health Outcomes</b>"), icon = uiOutput("outcomes_icon"),
     selectInput('outcomes', 
                 htmltools::span("Select variables",
                      popover(bs_icon("lightbulb"),
@@ -478,19 +478,19 @@ categories <- accordion(
                              placement = "right",
                              id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
-    accordion_panel("Cancer Incidence",
+    accordion_panel("Cancer Incidence", icon = uiOutput("inc_icon"),
                     selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
                     selectInput('incsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
                     actionButton('incbutton', "Reset filters")),
     # options to filter by cancer site, gender
-    accordion_panel("Cancer Mortality",
+    accordion_panel("Cancer Mortality", icon = uiOutput("mort_icon"),
                     selectInput('mortsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('mortsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
                     actionButton('mortbutton', "Reset filters"))
   ),
   accordion_panel(
-    HTML("<b>Health Behaviors</b>"), icon = bs_icon("person-walking"),
+    HTML("<b>Health Behaviors</b>"), icon = uiOutput("behaviors_icon"),
     selectInput('behaviors', htmltools::span("Select variables", 
                                   popover(bs_icon("lightbulb"),
                                           "Select one or more health behaviors to see tips.",
@@ -500,7 +500,7 @@ categories <- accordion(
                  multiple = TRUE, selectize = TRUE, selected = "")
   ),
   accordion_panel(
-    HTML("<b>Prevention</b>"), icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Prevention</b>"), icon = uiOutput("prevention_icon"),
     selectInput('prevention', htmltools::span("Select variables", 
                                       popover(bs_icon("lightbulb"),
                                               # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
@@ -510,7 +510,7 @@ categories <- accordion(
                                               id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
-    HTML("<b>Healthcare Access</b>"), icon = bs_icon("building-add"),
+    HTML("<b>Healthcare Access</b>"), icon = uiOutput("access_icon"),
     h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
             "Switch on one or more healthcare access features to see tips.",
             title = "Tips",
@@ -526,7 +526,7 @@ categories <- accordion(
     input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
   ),
   accordion_panel(
-    HTML("<b>Natural Environment</b>"), icon = bs_icon("sun"),
+    HTML("<b>Natural Environment</b>"), icon = uiOutput("natural_icon"),
     selectInput('naturalenv', htmltools::span("Select variables", 
                                               popover(bs_icon("lightbulb"),
                                                       "Select one or more natural environment measures to see tips.",
@@ -535,7 +535,7 @@ categories <- accordion(
                                                       id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
     input_switch('microplastics', "Microplastics", value = FALSE),
     div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
+    accordion_panel("Air pollutants", icon = uiOutput("airpol_icon"),
                    selectInput('airpol', htmltools::span("Select variables",
                                                          popover(bs_icon("question-circle"),
                                                                  "Select one or more air pollutants to see tips.",
@@ -544,7 +544,7 @@ categories <- accordion(
                                                                  id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
-    HTML("<b>Built Environment</b>"), icon = bs_icon("buildings"),
+    HTML("<b>Built Environment</b>"), icon = uiOutput("built_icon"),
     selectInput('builtenv', htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          "Select one or more built environment measures to see tips.",
@@ -556,7 +556,7 @@ categories <- accordion(
     input_switch('parks', "Parks", value = FALSE),
     input_switch('superfund', "Superfund sites", value = FALSE),
     accordion_panel(
-      "Food Environment", icon = bs_icon("basket"),
+      "Food Environment", icon = uiOutput("food_icon"),
       selectInput('foodenv', label = htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          food_env_md,
@@ -565,14 +565,14 @@ categories <- accordion(
     )
   ),
   accordion_panel(
-    HTML("<b>Social Environment</b>"), icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Social Environment</b>"), icon = uiOutput("social_icon"),
     selectInput('socialenv', htmltools::span("Select variables", 
                                           popover(bs_icon("lightbulb"),
                                                   "Select one or more social environment measures to see tips.",
                                                   title = "Tips",
                                                   placement = "right",
                                                   id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
-    accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
+    accordion_panel('Crime', icon = uiOutput("crime_icon"),
                     selectInput('crime', htmltools::span("Select variables",
                                                          popover(bs_icon("lightbulb"),
                                                                  crime_md,
@@ -821,9 +821,7 @@ server <- function(input, output, session) {
    # update_switch("")
   })
   
-  # observeEvent(input$sociodemo, {
-  #   accordion_panel_update('accordion', "totpop", icon = icon_success)
-  # })
+  #### ICONS ####
   output$sociodemo_icon <- renderUI({
     # if all values are null or empty, use original icon or no icon
     if ((is.null(input$sociodemo) || identical(input$sociodemo, "")) && (is.null(input$race) || identical(input$race, "")) && (is.null(input$age) || identical(input$age, "")) && (is.null(input$sex) || identical(input$sex, ""))) {
@@ -841,6 +839,14 @@ server <- function(input, output, session) {
     }
   })
   
+  output$sex_icon <- renderUI({
+    if (is.null(input$sex) || identical(input$sex, "")) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
   output$age_icon <- renderUI({
     if (is.null(input$age) || identical(input$age, "")) {
       NULL
@@ -848,12 +854,103 @@ server <- function(input, output, session) {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
     }
   })
-  
-  observeEvent(input$race, {
-    accordion_panel_update('accordion', "Race and Ethnicity", icon = icon_success)
+
+  output$outcomes_icon <- renderUI({
+    if ((is.null(input$outcomes) || identical(input$outcomes, "")) && (!inc.ready()) && (!mort.ready())) { # if outcomes, cancer incidence and mortality not ready
+      bs_icon("heart-pulse", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
   })
   
-  icon_success <- bsicons::bs_icon("check-circle-fill", class="text-success", title = "Variables selected")
+  output$inc_icon <- renderUI({
+    if (!inc.ready()) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$mort_icon <- renderUI({
+    if (!mort.ready()) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$behaviors_icon <- renderUI({
+    if (is.null(input$behaviors) || identical(input$behaviors, "")) {
+      bs_icon("person-walking", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$prevention_icon <- renderUI({
+    if (is.null(input$prevention) || identical(input$prevention, "")) {
+      tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+    
+  })
+  
+  output$access_icon <- renderUI({
+    if(!input$cancer && !input$clinics && !input$ems && !input$hospitals && !input$pharmacies && !input$wic_clinics && !input$wic_retailers && !input$fqhc) {
+      bs_icon("building-add", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$natural_icon <- renderUI({
+    if ((is.null(input$naturalenv) || identical(input$naturalenv, "")) && (is.null(input$airpol) || identical(input$airpol, "")) && !input$microplastics) {
+      bs_icon("sun", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$airpol_icon <- renderUI({
+    if (is.null(input$airpol) || identical(input$airpol, "")) {
+      bs_icon("cloud-haze", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$built_icon <- renderUI({
+    if ((is.null(input$builtenv) || identical(input$builtenv, "")) && (is.null(input$foodenv) || identical(input$foodenv, "")) && !input$transit && !input$parks && !input$superfund && !input$alc) {
+      bs_icon("buildings", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$food_icon <- renderUI({
+    if (is.null(input$foodenv) || identical(input$foodenv, "")) {
+      bs_icon("basket", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$social_icon <- renderUI({
+    if ((is.null(input$socialenv) || identical(input$socialenv, "")) && (is.null(input$crime) || identical(input$crime, ""))) {
+      tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$crime_icon <- renderUI({
+    if (is.null(input$crime) || identical(input$crime, "")) {
+      bs_icon("file-earmark-lock", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
   
   #### DYNAMIC TIP LOGIC ####
   outcomes_md <- reactive({
