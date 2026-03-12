@@ -456,15 +456,16 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
+  id = "accordion",
   open = FALSE,
   accordion_panel(
-    HTML("<b>Sociodemographics</b>"), icon = bs_icon("person-vcard"),
+    title = HTML("<b>Sociodemographics</b>"), icon = uiOutput("sociodemo_icon"), #icon = bs_icon("person-vcard"),
     selectInput('sociodemo', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
-    accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Race and Ethnicity", icon = uiOutput("race_icon"), selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
     accordion_panel("Sex", selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Age", selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
+    accordion_panel("Age", icon = uiOutput("age_icon"), selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
@@ -819,6 +820,40 @@ server <- function(input, output, session) {
     update_switch("showchart", value = FALSE)
    # update_switch("")
   })
+  
+  # observeEvent(input$sociodemo, {
+  #   accordion_panel_update('accordion', "totpop", icon = icon_success)
+  # })
+  output$sociodemo_icon <- renderUI({
+    # if all values are null or empty, use original icon or no icon
+    if ((is.null(input$sociodemo) || identical(input$sociodemo, "")) && (is.null(input$race) || identical(input$race, "")) && (is.null(input$age) || identical(input$age, "")) && (is.null(input$sex) || identical(input$sex, ""))) {
+      bs_icon("person-vcard", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$race_icon <- renderUI({
+    if (is.null(input$race) || identical(input$race, "")) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$age_icon <- renderUI({
+    if (is.null(input$age) || identical(input$age, "")) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  observeEvent(input$race, {
+    accordion_panel_update('accordion', "Race and Ethnicity", icon = icon_success)
+  })
+  
+  icon_success <- bsicons::bs_icon("check-circle-fill", class="text-success", title = "Variables selected")
   
   #### DYNAMIC TIP LOGIC ####
   outcomes_md <- reactive({
