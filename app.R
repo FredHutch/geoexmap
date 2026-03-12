@@ -41,7 +41,8 @@ og.data <- data # keep original data for data download/tables
 data <- data %>% 
   mutate(across(where(is.numeric), ~na_if(., 0)))
 
-food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
+food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env") %>% 
+  mutate(lapop1 = as.numeric(lapop1), lapop1share = as.numeric(lapop1share))
 
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
 
@@ -245,45 +246,32 @@ crimeenv <- c("Part I offenses (count)" = "total_p1",
               "Part II offenses (rate)" = "p2_rate")
 
 # TODO: take out variables according to feedback
-foodenv <- c("Population (2010)" = "Pop2010",
-             "Occupied Housing Units (2010)" = "OHU2010",
-             "Population > 1 mile from supermarket (total)" = "lapop1",
-             "Population > 1 mile from supermarket (proportion)" = "lapop1share",
+foodenv <- c("Population > 1 mile from supermarket (total)" = "lapop1",
+             "Population > 1 mile from supermarket (percentage)" = "lapop1share",
              "Low-income population > 1 mile from supermarket (total)" = "lalowi1",
-             "Low-income population > 1 mile from supermarket (proportion)" = "lalowi1share",
+             "Low-income population > 1 mile from supermarket (percentage)" = "lalowi1share",
              "Children age 0-17 > 1 mile from supermarket (total)"  = "lakids1",
-             "Children age 0-17 > 1 mile from supermarket (proportion)" = "lakids1share",
+             "Children age 0-17 > 1 mile from supermarket (percentage)" = "lakids1share",
              "Seniors age 65+ > 1 mile from supermarket (total)" = "laseniors1",
-             "Seniors age 65+ > 1 mile from supermarket (proportion)" = "laseniors1share",
+             "Seniors age 65+ > 1 mile from supermarket (percentage)" = "laseniors1share",
              "White population > 1 mile from supermarket (total)" = "lawhite1",
-             "White population > 1 mile from supermarket (proportion)" = "lawhite1share",
+             "White population > 1 mile from supermarket (percentage)" = "lawhite1share",
              "Black population > 1 mile from supermarket (total)" = "lablack1",
-             "Black population > 1 mile from supermarket (proportion)" = "lablack1share",
+             "Black population > 1 mile from supermarket (percentage)" = "lablack1share",
              "Asian population > 1 mile from supermarket (total)" = "laasian1",
-             "Asian population > 1 mile from supermarket (proportion)" = "laasian1share",
+             "Asian population > 1 mile from supermarket (percentage)" = "laasian1share",
              "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (total)" = "lanhopi1",
-             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (proportion)" = "lanhopi1share",
+             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (percentage)" = "lanhopi1share",
              "American Indian and Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
-             "American Indian and Alaska Native population > 1 mile from supermarket (proportion)" = "laaian1share",
+             "American Indian and Alaska Native population > 1 mile from supermarket (percentage)" = "laaian1share",
              "Other/Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
-             "Other/Multiple race population > 1 mile from supermarket (proportion)" = "laomultir1share",
+             "Other/Multiple race population > 1 mile from supermarket (percentage)" = "laomultir1share",
              "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
-             "Hispanic or Latino population > 1 mile from supermarket (proportion)" = "lahisp1share",
+             "Hispanic or Latino population > 1 mile from supermarket (percentage)" = "lahisp1share",
              "Housing units without a vehicle > 1 mile from supermarket (total)" = "lahunv1",
-             "Housing units without a vehicle > 1 mile from supermarket (proportion)" = "lahunv1share",
+             "Housing units without a vehicle > 1 mile from supermarket (percentage)" = "lahunv1share",
              "Housing units receiving SNAP > 1 mile from supermarket (total)" = "lasnap1",
-             "Housing units receiving SNAP > 1 mile from supermarket (proportion)" = "lasnap1share",
-             "Children age 0-17 (2010)" = "TractKids",
-             "Seniors age 65+ (2010)" = "TractSeniors",
-             "White population (2010)" = "TractWhite",
-             "Black population (2010)" = "TractBlack",
-             "Asian population (2010)" = "TractAsian",
-             "Native Hawaiian and Other Pacific Islander population (2010)" = "TractNHOPI",
-             "American Indian and Alaska Native population (2010)" = "TractAIAN",
-             "Other/Multiple race population (2010)" = "TractOMultir",
-             "Hispanic or Latino population (2010)" = "TractHispanic",
-             "Housing units without a vehicle (2010)" = "TractHUNV",
-             "Housing units receiving SNAP (2010)" = "TractSNAP")
+             "Housing units receiving SNAP > 1 mile from supermarket (percentage)" = "lasnap1share")
 
 # define filters
 health_outcomes <- df_vars %>% 
@@ -320,7 +308,7 @@ social_env <- df_vars %>%
   dplyr::select(c(5:10, 124:130, 105:106, 111, 140, 160, 162, 163, 164)) 
 
 food_env <- food %>% 
-  dplyr::select(c(11:50)) 
+  dplyr::select(c(11:37)) 
 food_env_inp <- food_env %>% 
   st_drop_geometry()
 
@@ -1361,7 +1349,32 @@ server <- function(input, output, session) {
     if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
-      
+    if(col == "lapop1") return("Low access population at 1 mile in 2019 (total)")
+    if(col == "lapop1share") return("Low access population at 1 mile in 2019 (percentage)")
+    if(col == "lalowi1") return("Low access, low income population at 1 mile in 2019 (total)")
+    if(col == "lalowi1share") return("Low access, low income population at 1 mile in 2019 (percentage)")
+    if(col == "lakids1") return("Low access, age 0-17 at 1 mile in 2019 (total)")
+    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile in 2019 (percentage)")
+    if(col == "laseniors1") return("Low access, age 65+ at 1 mile in 2019 (total)")
+    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile in 2019 (percentage)")
+    if(col == "lawhite1") return("Low access, White population at 1 mile in 2019 (total)")
+    if(col == "lawhite1share") return("Low access, White population at 1 mile in 2019 (percentage)")
+    if(col == "lablack1") return("Low access, Black population at 1 mile in 2019 (total)")
+    if(col == "lablack1share") return("Low access, Black population at 1 mile in 2019 (percentage)")
+    if(col == "laasian1") return("Low access, Asian population at 1 mile in 2019 (total)")
+    if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (percentage)")
+    if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile in 2019 (total)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile in 2019 (percentage)")
+    if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (total)")
+    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (percentage)")
+    if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile in 2019 (total)")
+    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile in 2019 (percentage)")
+    if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile in 2019 (total)")
+    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile in 2019 (percentage)")
+    if(col == "lahunv1") return("Low access, households without vehicle at 1 mile in 2019 (total)")
+    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile in 2019 (percentage)")
+    if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile in 2019 (total)")
+    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile in 2019 (percentage)")
   }
   
   layer.titles <- function(col) {
@@ -1575,6 +1588,34 @@ server <- function(input, output, session) {
     if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
+    # TODO: multiple x100 to get percentage, not proportion
+    if(col == "lapop1") return("Low access population at 1 mile (total)")
+    if(col == "lapop1share") return("Low access population at 1 mile (percentage)")
+    if(col == "lalowi1") return("Low access, low income population at 1 mile (total)")
+    if(col == "lalowi1share") return("Low access, low income population at 1 mile (percentage)")
+    if(col == "lakids1") return("Low access, age 0-17 at 1 mile (total)")
+    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile (percentage)")
+    if(col == "laseniors1") return("Low access, age 65+ at 1 mile (total)")
+    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile (percentage)")
+    if(col == "lawhite1") return("Low access, White population at 1 mile (total)")
+    if(col == "lawhite1share") return("Low access, White population at 1 mile (percentage)")
+    if(col == "lablack1") return("Low access, Black population at 1 mile (total)")
+    if(col == "lablack1share") return("Low access, Black population at 1 mile (percentage)")
+    if(col == "laasian1") return("Low access, Asian population at 1 mile (total)")
+    if(col == "laasian1share") return("Low access, Asian population at 1 mile (percentage)")
+    if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (total)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (percentage)")
+    if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile (total)")
+    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile (percentage)")
+    if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile (total)")
+    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile (percentage)")
+    if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile (total)")
+    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile (percentage)")
+    if(col == "lahunv1") return("Low access, households without vehicle at 1 mile (total)")
+    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile (percentage)")
+    if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile (total)")
+    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile (percentage)")
+    
     
   }
   
@@ -1789,7 +1830,32 @@ server <- function(input, output, session) {
     if(col == "p2_rate") return("Total Part II offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
     
     # TODO: add legend titles for food environment columns
-    
+    if(col == "lapop1") return("Population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lapop1share") return("Percentage of tract population that are beyond 1 mile from supermarket")
+    if(col == "lalowi1") return("Low income population count beyond 1 mile from supermarket")
+    if(col == "lalowi1share") return("Percentage of tract population that are low income individuals beyond 1 mile from supermarket")
+    if(col == "lakids1") return("Children age 0-17 population count beyond 1 mile from supermarket")
+    if(col == "lakids1share") return("Percentage of tract population that are children age 0-17 beyond 1 mile from supermarket")
+    if(col == "laseniors1") return("Age 65+ population count beyond 1 mile from supermarket")
+    if(col == "laseniors1share") return("Percentage of tract population that are age 65+ beyond 1 mile from supermarket")
+    if(col == "lawhite1") return("White population count beyond 1 mile from supermarket")
+    if(col == "lawhite1share") return("Percentage of tract population that are white beyond 1 mile from supermarket")
+    if(col == "lablack1") return("Black or African American population count beyond 1 mile from supermarket")
+    if(col == "lablack1share") return("Percentage of tract population that are Black or African American beyond 1 mile from supermarket")
+    if(col == "laasian1") return("Asian population count beyond 1 mile from supermarket")
+    if(col == "laasian1share") return("Percentage of tract population that are Asian beyond 1 mile from supermarket")
+    if(col == "lanhopi1") return("Native Hawaiian and Pacific Islander population count beyond 1 mile from supermarket")
+    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian and Pacific Islander beyond 1 mile from supermarket")
+    if(col == "laaian1") return("American Indian or Alaska Native population count beyond 1 mile from supermarket")
+    if(col == "laaian1share") return("Percentage of tract population that are American Indian or Alaska Native beyond 1 mile from supermarket")
+    if(col == "laomultir1") return("Other/Multiple race population count beyond 1 mile from supermarket")
+    if(col == "laomultir1share") return("Percentage of tract population that are Other/Multiple race beyond 1 mile from supermarket")
+    if(col == "lahisp1") return("Hispanic or Latino ethnicity population count beyond 1 mile from supermarket")
+    if(col == "lahisp1share") return("Percentage of tract population that are of Hispanic or Latino ethnicity beyond 1 mile from supermarket")
+    if(col == "lahunv1") return("Housing units without vehicle count beyond 1 mile from supermarket")
+    if(col == "lahunv1share") return("percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket")
+    if(col == "lasnap1") return("Housing units receiving SNAP benefits count beyond 1 mile from supermarket")
+    if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket")
   }
   
   #### CLEAR BUTTON OBSERVER ####
@@ -2697,40 +2763,72 @@ server <- function(input, output, session) {
             info_id <- paste0("legend-info-", c_name)
             info_txt <- var.info(c_name)
             
-            proxy <- proxy %>% 
-              addPolygons(., fillColor = ~pal(x), stroke = FALSE,
-                          fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                          group = layer.titles(c_name), label = "") %>% 
-              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
-                               orientation = "horizontal", shape = "stadium", 
-                               width = 300,   # wider bar
-                               height = 18, bins = 5,
-                               title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
-                                                           htmltools::tags$span(
-                                                             legend.titles(c_name),
-                                                             style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
-                                                           ),
-                                 htmltools::tags$span(
-                                   bs_icon('info-circle-fill'), # circled 'i'
-                                   id    = info_id,
-                                   `data-bs-toggle` = "tooltip",
-                                   `data-bs-placement` = "top",
-                                   title = info_txt,
-                                   style = "cursor:pointer; font-weight:bold; text-align: center;"
-                                 )
-                               ),
-            labelStyle = "text-align: center;",
-            className  = "my-centered-num-legend",
-            position   = "bottomright") %>% 
-      addLayersControl(overlayGroups = groups,
-                       position = "topright",
-                       options = layersControlOptions(collapsed = FALSE))
-          }
-          
-          session$sendCustomMessage(
-            "modeLegendTooltip",
-            list(text = "more about variable")
-          )
+            if (c_name == "PFAS_dw") {
+              proxy <- proxy %>% 
+                addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+                            fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                            group = layer.titles(c_name), label = "") %>% 
+                addLegendFactor(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
+                                 orientation = "horizontal", shape = "circle", 
+                                 title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                             htmltools::tags$span(
+                                                               legend.titles(c_name),
+                                                               style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                             ),
+                                                             htmltools::tags$span(
+                                                               bs_icon('info-circle-fill'), # circled 'i'
+                                                               id    = info_id,
+                                                               `data-bs-toggle` = "tooltip",
+                                                               `data-bs-placement` = "top",
+                                                               title = info_txt,
+                                                               style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                             )
+                                 ),
+                                 labelStyle = "text-align: center;",
+                                 className  = "my-centered-num-legend",
+                                 position   = "bottomright") %>% 
+                addLayersControl(overlayGroups = groups,
+                                 position = "topright",
+                                 options = layersControlOptions(collapsed = FALSE))
+            }
+            
+            else {
+              proxy <- proxy %>% 
+                addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+                            fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                            group = layer.titles(c_name), label = "") %>% 
+                addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
+                                 orientation = "horizontal", shape = "stadium", 
+                                 width = 300,   # wider bar
+                                 height = 18, bins = 5,
+                                 title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                             htmltools::tags$span(
+                                                               legend.titles(c_name),
+                                                               style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                             ),
+                                                             htmltools::tags$span(
+                                                               bs_icon('info-circle-fill'), # circled 'i'
+                                                               id    = info_id,
+                                                               `data-bs-toggle` = "tooltip",
+                                                               `data-bs-placement` = "top",
+                                                               title = info_txt,
+                                                               style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                             )
+                                 ),
+                                 labelStyle = "text-align: center;",
+                                 className  = "my-centered-num-legend",
+                                 position   = "bottomright") %>% 
+                addLayersControl(overlayGroups = groups,
+                                 position = "topright",
+                                 options = layersControlOptions(collapsed = FALSE))
+            }
+            
+            session$sendCustomMessage(
+              "modeLegendTooltip",
+              list(text = "more about variable")
+            )
+            }
+            
         }
       
       ##### map (food environment) #####
@@ -2750,6 +2848,10 @@ server <- function(input, output, session) {
         if (!is.null(pal)) {
           groups <- append(groups, layer.titles(c_name))
           opacity <- if (k == 1) 0.5 else 0.2
+          
+          info_id <- paste0("legend-info-", c_name)
+          info_txt <- var.info(c_name)
+          
           proxy <- proxy %>% 
             addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue", group = layer.titles(c_name),
                         fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
