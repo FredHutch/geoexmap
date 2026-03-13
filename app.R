@@ -1165,11 +1165,11 @@ server <- function(input, output, session) {
   })
   
   hazard_md <- reactive({
-    if (is.null(input$hazard) || length(input$hazard) == 0) {
+    if (is.null(input$hazards) || length(input$hazards) == 0) {
       return("Select one or more natural hazard risk measures to see tips.")
     }
     
-    raw <- nat_dis_list[input$hazard]
+    raw <- nat_dis_list[input$hazards]
     
     is_key <- raw %in% names(nat_dis_key) # split into already markdown vs keys
     
@@ -1182,7 +1182,7 @@ server <- function(input, output, session) {
     all_text <- unique(all_text) # prevent repeated texts
     
     if (length(all_text) == 0) {
-      return("No tips available for selected natural environment measures.")
+      return("No tips available for selected natural hazard risk measures.")
     }
     
     paste(all_text, collapse = "\n")
@@ -2044,24 +2044,24 @@ server <- function(input, output, session) {
     if(col == "Ozone") return("Ozone concentration estimate from Centers for Disease Control and Prevention (CDC) (2023 release)")
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
-    if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to avalanches")
-    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to coastal flooding")
-    if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to cold waves")
-    if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to droughts")
-    if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to earthquakes")
-    if(col == "Hail.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to hail")
-    if(col == "Heat.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to heat waves")
-    if(col == "Hurricane.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to hurricanes")
-    if(col == "Ice.Storm.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to ice storms")
-    if(col == "Landslide.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to landslides")
-    if(col == "Lightning.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to lightning")
-    if(col == "Riverine.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to riverine flooding")
-    if(col == "Strong.Wind.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to strong wind")
-    if(col == "Tornado.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to tornadoes")
-    if(col == "Tsunami.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to tsunamis")
-    if(col == "Volcanic.Activity.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to volcanic activity")
-    if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to wildfires")
-    if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture in 2024 due to winter weather")
+    if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to avalanches from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture  due to coastal flooding from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to cold waves from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to droughts from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to earthquakes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Hail.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hail from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Heat.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to heat waves from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Hurricane.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hurricanes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Ice.Storm.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to ice storms from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Landslide.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to landslides from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Lightning.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to lightning from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to riverine flooding from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Strong.Wind.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to strong wind from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Tornado.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tornadoes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Tsunami.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tsunamis from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to volcanic activity from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to wildfires from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to winter weather from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
     
     if(col == "bluespace") return("Percentage of blue space coverage in a census tract using the global surface water dataset from the European Commission (EC) Joint Research Commission (JRC)/Google and the Copernicus Programme (2024 release)")
     if(col == "social_capital") return("Social capital index, indicating the overall strength of social infrastructures within communities of a census tract using data from Fraser et al. Scientific Reports 2022")
