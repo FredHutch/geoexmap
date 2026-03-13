@@ -33,6 +33,7 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
   dplyr::select(c(GEOID, NAMELSAD, NAMELSADCO))
 
 # polygon data tied to census tracts or counties
+# TODO: map -999 values to NA
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data")
 
 og.data <- data # keep original data for data download/tables
@@ -558,7 +559,7 @@ categories <- accordion(
                                                                  title = "Tips",
                                                                  placement = "right",
                                                                  id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Natural Hazard Risk", icon = bs_icon("tornado"),
+    accordion_panel("Natural Hazard Risk", icon = uiOutput("hazard_icon"),
                     selectInput('hazards', label = htmltools::span("Select variables", 
                                                                  popover(bs_icon("lightbulb"),
                                                                          "Select one or more natural hazard risk measures to see tips.",
@@ -578,14 +579,14 @@ categories <- accordion(
     input_switch('alc', "Alcohol retailers", value = FALSE),
     input_switch('parks', "Parks", value = FALSE),
     input_switch('superfund', "Superfund sites", value = FALSE),
-    accordion_panel("Transportation Noise", icon = bs_icon("volume-up"),#uiOutput("noise_icon"),
+    accordion_panel("Transportation Noise", icon = uiOutput("noise_icon"),#uiOutput("noise_icon"),
                     selectInput('noise', label = htmltools::span("Select variables", 
                                                                  popover(bs_icon("lightbulb"),
                                                                          "Select one or more transportation noise measures to see tips.",
                                                                          title = "Tips",
                                                                          placement = "right",
                                                                          id = "noisepopover")), noiseenv, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Land Use/Land Cover", icon = bs_icon("water"),
+    accordion_panel("Land Use/Land Cover", icon = uiOutput("land_icon"),
                     selectInput('land', label = htmltools::span("Select variables", 
                                                                  popover(bs_icon("lightbulb"),
                                                                          "Select one or more land use measures to see tips.",
@@ -832,7 +833,7 @@ ui <- page_navbar(
                               accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                               accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
                               accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
-              accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
+              accordion_panel(h2("Standalone Data"), selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
               
             )),
   nav_panel("Documentation",
@@ -943,7 +944,7 @@ server <- function(input, output, session) {
   })
   
   output$natural_icon <- renderUI({
-    if ((is.null(input$naturalenv) || identical(input$naturalenv, "")) && (is.null(input$airpol) || identical(input$airpol, "")) && !input$microplastics) {
+    if ((is.null(input$naturalenv) || identical(input$naturalenv, "")) && (is.null(input$airpol) || identical(input$airpol, "")) && (is.null(input$hazards) || identical(input$hazards, "")) && !input$microplastics) {
       bs_icon("sun", class = "text-secondary", title = "No selection yet")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
@@ -959,7 +960,7 @@ server <- function(input, output, session) {
   })
   
   output$built_icon <- renderUI({
-    if ((is.null(input$builtenv) || identical(input$builtenv, "")) && (is.null(input$foodenv) || identical(input$foodenv, "")) && !input$transit && !input$parks && !input$superfund && !input$alc) {
+    if ((is.null(input$builtenv) || identical(input$builtenv, "")) && (is.null(input$foodenv) || identical(input$foodenv, "")) && (is.null(input$land) || identical(input$land, "")) && (is.null(input$noise) || identical(input$noise, "")) && !input$transit && !input$parks && !input$superfund && !input$alc) {
       bs_icon("buildings", class = "text-secondary", title = "No selection yet")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
@@ -985,6 +986,30 @@ server <- function(input, output, session) {
   output$crime_icon <- renderUI({
     if (is.null(input$crime) || identical(input$crime, "")) {
       bs_icon("file-earmark-lock", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$noise_icon <- renderUI({
+    if (is.null(input$noise) || identical(input$noise, "")) {
+      bs_icon("volume-up", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$land_icon <- renderUI({
+    if (is.null(input$land) || identical(input$land, "")) {
+      bs_icon("water", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$hazard_icon <- renderUI({
+    if (is.null(input$hazards) || identical(input$hazards, "")) {
+      bs_icon("tornado", class = "text-secondary", title = "No selection yet")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
     }
@@ -2071,7 +2096,7 @@ server <- function(input, output, session) {
     if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index from the Center for Neighborhood Technology")
     if(col == "Historic.Redlining.Score") return("Historic Home Owners' Loan Corporation (HOLC) score of a census tract from 1-4. 1 = A (most 'desirable' neighborhoods); 4 = D (least 'desirable' neighborhoods)")
     
-    if(col == "pct_Open_Water") return("Percent area in a census tract with open water, generally with less than 25% cover of vegetation or soil from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC)")
+    if(col == "pct_Open_Water") return("Percent area in a census tract with open water, generally with less than 25% cover of vegetation or soil from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
     if(col == "pct_Developed_Open") return("Percent area in a census tract with a mixture of some constructed materials, but mostly vegetation in the form of lawn grasses from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for less than 20% of total cover. These areas most commonly include large-lot single-family housing units, parks, golf courses, and vegetation planted in developed settings for recreation, erosion control, or aesthetic purposes")
     if(col == "pct_Developed_Low") return("Percent area in a census tract with minimally developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 20% to 49% percent of the total cover. These areas most commonly include single-family housing units")
     if(col == "pct_Developed_Medium") return("Percent area in a census tract with moderately developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 50% to 79% of the total cover. These areas most commonly include single-family housing units")
@@ -2777,19 +2802,7 @@ server <- function(input, output, session) {
   #### MAIN OBSERVER LOGIC ####
   observe({
     layer_counter(0)
-    observeEvent(input$legend_info_click, {
-      v <- input$legend_info_click$var
-      
-      showModal(modalDialog(
-        title = paste("About", legend.titles(v)),
-        tagList(
-          p("Data source", v),
-          p("Text from lookup table...")
-        ),
-        easyClose = TRUE,
-        footer = modalButton("Close")
-      ))
-    })
+    
     cat("RESET LAYER COUNTER TO 0\n")
     withProgress(message = "Working...", 
     {plotlyProxy("chart")
@@ -2835,34 +2848,63 @@ server <- function(input, output, session) {
       }
       
       if (input$cancer) {
-        # add svg for icon
-        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hospital-fill" viewBox="0 0 16 16">
-  <path d="M6 0a1 1 0 0 0-1 1v1a1 1 0 0 0-1 1v4H1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h6v-2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5V16h6a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-3V3a1 1 0 0 0-1-1V1a1 1 0 0 0-1-1zm2.5 5.034v1.1l.953-.55.5.867L9 7l.953.55-.5.866-.953-.55v1.1h-1v-1.1l-.953.55-.5-.866L7 7l-.953-.55.5-.866.953.55v-1.1zM2.25 9h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 2 9.75v-.5A.25.25 0 0 1 2.25 9m0 2h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25M2 13.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zM13.25 9h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25M13 11.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm.25 1.75h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25"/>
-</svg> Cancer Programs <br/>'
-        
+        symbol <- makeSymbol(shape = "circle", 
+                              fillColor = "#A6CEE3",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         proxy <- proxy %>% 
           addMarkers(data = cancer.progs,
                      popup = ~Center.or.Hospital.Name,
                      group = "cancer_programs",
-                     icon = makeIcon("/hospital-fill.svg")) %>% 
-          addControl(html = html_legend, position = "topright")
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)
+                     ) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Commission on Cancer (CoC)-accredited programs",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
+                     #color = "#8DD3C7",
+                     #fillColor = "#8DD3C7") %>% 
+          #addLegendImage(html = html_legend, position = "topright")
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "cancer_programs")
       }
       
       if (input$alc) {
-        # svg for icon
-        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shop" viewBox="0 0 16 16">
-  <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zm3 0h-2v3h2z"/>
-</svg> Alcohol Retailers <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#1F78B4",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = alc,
                      popup = ~Licensee,
                      group = "alc_retailers",
-                     icon = makeIcon("/shop.svg")) %>% 
-          addControl(html = html_legend, position = "topright")
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Alcohol retailers",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "alc_retailers")
@@ -2895,94 +2937,209 @@ server <- function(input, output, session) {
       }
       
       if (input$clinics) {
-        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-plus-fill" viewBox="0 0 16 16">
-          <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5z"/>
-            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5zm4.5 6V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5a.5.5 0 0 1 1 0"/>
-              </svg> Clinics <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#B2DF8A",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = clinics,
                      popup = ~NAME,
                      group = "clinics",
-                     icon = makeIcon("/clipboard-plus-fill.svg")) %>% 
-          addControl(html = html_legend, position = "topright")
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Clinics",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "clinics")
       }
       
       if (input$ems) {
-        html_legend <- "EMS Stations </br>"
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#33A02C",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = ems,
                      popup = ~AGENCY,
-                     group = "ems") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "ems",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "EMS Stations",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "ems")
       }
       
       if (input$hospitals) {
-        html_legend <- 'Hospitals <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FB9A99",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = hospitals,
                      popup = ~NAME,
-                     group = "hospitals") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "hospitals",
+                     icon = ~ icons(iconUrl = symbol,
+                                  iconWidth = 20,
+                                  iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Hospitals",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "hospitals")
       }
       
       if (input$pharmacies) {
-        html_legend <- 'Pharmacies <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FB9A99",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         proxy <- proxy %>% 
           addMarkers(data = pharmacies,
                      popup = ~inFacility,
-                     group = "pharmacies") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "pharmacies",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Pharmacies",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "pharmacies")
       }
       
       if (input$wic_clinics) {
-        html_legend <- 'WIC Clinics <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#E31A1C",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = wic.clinics,
                      popup = ~Clinic,
-                     group = "wic_clinics") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "wic_clinics",
+                     icon = ~ icons(iconUrl = symbol,
+                             iconWidth = 20,
+                             iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "WIC clinics",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          ) 
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "wic_clinics")
       }
       
       if (input$wic_retailers) {
-        html_legend <- 'WIC Retailers <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FDBF6F",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = wic.retailers,
                      popup = ~Retailer,
-                     group = "wic_retailers") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "wic_retailers",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "WIC retailers",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "wic_retailers")
       }
       
       if (input$fqhc) {
-        html_legend <- 'Federally Qualified Health Centers (FQHCs)'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FF7F00",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = fqhc,
                      popup = ~Facility,
-                     group = "fqhc") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "fqhc",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>%
+          addLegendImage(
+            images = symbol,
+            labels = "FQHCs",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "fqhc")
