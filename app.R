@@ -833,7 +833,7 @@ ui <- page_navbar(
                               accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                               accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
                               accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
-              accordion_panel(h2("Standalone Data"), selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
+              accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
               
             )),
   nav_panel("Documentation",
