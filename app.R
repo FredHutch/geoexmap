@@ -164,60 +164,64 @@ naturalenv <- c("Ultraviolet radiation index (UVI)" = "UV.Index",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
                 "Radon" = "Radon",
-                "Per- and polyfluoroalkyl substances (PFAS) in drinking water" = "PFAS_dw",
-                "Avalanche risk" = "Avalanche.Risk.Score",
-                "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
-                "Cold wave risk" = "Cold.Wave.Risk.Score",
-                "Drought risk" = "Drought.Risk.Score",
-                "Earthquake risk" = "Earthquake.Risk.Score",
-                "Hail risk" = "Hail.Risk.Score",
-                "Heat wave risk" = "Heat.Wave.Risk.Score",
-                "Hurricane risk" = "Hurricane.Risk.Score",
-                "Ice storm risk" = "Ice.Storm.Risk.Score",
-                "Landslide risk" = "Landslide.Risk.Score",
-                "Lightning risk" = "Lightning.Risk.Score",
-                "Riverine flooding risk" = "Riverine.Flooding.Risk.Score",
-                "Strong wind risk" = "Strong.Wind.Risk.Score",
-                "Tornado risk" = "Tornado.Risk.Score",
-                "Tsunami risk" = "Tsunami.Risk.Score",
-                "Volcanic activity risk" = "Volcanic.Activity.Risk.Score",
-                "Wildfire risk" = "Wildfire.Risk.Score",
-                "Winter weather risk" = "Winter.Weather.Risk.Score"
+                "Per- and polyfluoroalkyl substances (PFAS) in drinking water" = "PFAS_dw"
                 )
+
+hazardenv <- c("Avalanche risk" = "Avalanche.Risk.Score",
+               "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
+               "Cold wave risk" = "Cold.Wave.Risk.Score",
+               "Drought risk" = "Drought.Risk.Score",
+               "Earthquake risk" = "Earthquake.Risk.Score",
+               "Hail risk" = "Hail.Risk.Score",
+               "Heat wave risk" = "Heat.Wave.Risk.Score",
+               "Hurricane risk" = "Hurricane.Risk.Score",
+               "Ice storm risk" = "Ice.Storm.Risk.Score",
+               "Landslide risk" = "Landslide.Risk.Score",
+               "Lightning risk" = "Lightning.Risk.Score",
+               "Riverine flooding risk" = "Riverine.Flooding.Risk.Score",
+               "Strong wind risk" = "Strong.Wind.Risk.Score",
+               "Tornado risk" = "Tornado.Risk.Score",
+               "Tsunami risk" = "Tsunami.Risk.Score",
+               "Volcanic activity risk" = "Volcanic.Activity.Risk.Score",
+               "Wildfire risk" = "Wildfire.Risk.Score",
+               "Winter weather risk" = "Winter.Weather.Risk.Score")
 
 builtenv <- c("Walkability" = "Walkability",
               "Pesticide exposure" = "Pesticide.Exposure",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
-              "Blue space" = "bluespace",
-              "Persons exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
-              "Persons exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
-              "Persons exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
-              "Persons exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
-              "Persons exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
-              "Persons exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
-              "Persons exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
-              "Persons exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
-              "Persons exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
-              "Persons exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
-              "Persons exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
-              "Persons exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db",
-              "Open water" = "pct_Open_Water",
-              "Developed open land" = "pct_Developed_Open",
-              "Low development" = "pct_Developed_Low",
-              "Moderate development" = "pct_Developed_Medium",
-              "High development" = "pct_Developed_High",
-              "Barren land" = "pct_Barren",
-              "Evergreen forest" = "pct_Evergreen_Forest",
-              "Shrubland" = "pct_Shrub",
-              "Grassland" = "pct_Grassland",
-              "Pasture" = "pct_Pasture",
-              "Cropland" = "pct_Crops",
-              "Woody wetlands" = "pct_Woody_Wetlands",
-              "Herbaceous wetlands" = "pct_Herbaceous_Wetlands",
-              "Deciduous forest" = "pct_Deciduous_Forest",
-              "Mixed forest" = "pct_Mixed_Forest",
-              "Perennial ice" = "pct_Perennial_Ice")
+              "Blue space" = "bluespace"
+              )
+
+noiseenv <- c("Persons exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
+               "Persons exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
+               "Persons exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
+               "Persons exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
+               "Persons exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
+               "Persons exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
+               "Persons exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
+               "Persons exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
+               "Persons exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
+               "Persons exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
+               "Persons exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
+               "Persons exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
+
+landuseenv <- c("Open water" = "pct_Open_Water",
+                 "Developed open land" = "pct_Developed_Open",
+                 "Low development" = "pct_Developed_Low",
+                 "Moderate development" = "pct_Developed_Medium",
+                 "High development" = "pct_Developed_High",
+                 "Barren land" = "pct_Barren",
+                 "Evergreen forest" = "pct_Evergreen_Forest",
+                 "Shrubland" = "pct_Shrub",
+                 "Grassland" = "pct_Grassland",
+                 "Pasture" = "pct_Pasture",
+                 "Cropland" = "pct_Crops",
+                 "Woody wetlands" = "pct_Woody_Wetlands",
+                 "Herbaceous wetlands" = "pct_Herbaceous_Wetlands",
+                 "Deciduous forest" = "pct_Deciduous_Forest",
+                 "Mixed forest" = "pct_Mixed_Forest",
+                 "Perennial ice" = "pct_Perennial_Ice")
 
 socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Housing insecurity" = "Housing.Insecurity",
@@ -284,13 +288,22 @@ health_prevention <- df_vars %>%
   dplyr::select(c(11:17)) 
 
 natural_env <- df_vars %>%
-  dplyr::select(c(107:108, 131:134, 141:158, 161)) 
+  dplyr::select(c(107:108, 131:134, 161)) 
+
+hazard_env <- df_vars %>% 
+  dplyr::select(141:158)
 
 air_pol <- df_vars %>% 
   dplyr::select(c(2, 135:139)) 
 
 built_env <- df_vars %>%
-  dplyr::select(c(3:4, 109:110, 112:123, 159, 165:180)) 
+  dplyr::select(c(3:4, 109:110,  159)) 
+
+noise_env <- df_vars %>% 
+  dplyr::select(112:123)
+
+landuse_env <- df_vars %>% 
+  dplyr::select(165:180)
 
 sociodemo <- df_vars %>% 
   dplyr::select(c(34)) 
@@ -359,24 +372,6 @@ nat_dis_key <- list(nat_disaster = "- **Extreme weather events and natural disas
                     temperature = "- **Temperature**: What are ways to help with [heat waves](https://www.cdc.gov/heat-health/about/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fextreme-heat%2Fabout%2Findex.html)? How can you find [extreme heat cooling centers](https://search.wa211.org/search?location=&query=TH-2600.1900-180&query_type=taxonomy&query_label=Extreme+Heat+Cooling+Centers) in your area? What are ways to help with [cold spells](https://www.cdc.gov/winter-weather/safety/stay-safe-during-after-a-winter-storm-safety.html)?")
 
 nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV](https://www.cdc.gov/radiation-health/data-research/facts-stats/ultraviolet-radiation.html)? What are ways to help with [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)?",
-                 "Avalanche.Risk.Score" = "nat_disaster", # use key mappings
-                 "Coastal.Flooding.Risk.Score" = "nat_disaster",
-                 "Cold.Wave.Risk.Score" = "nat_disaster",
-                 "Drought.Risk.Score" = "nat_disaster",
-                 "Earthquake.Risk.Score" = "nat_disaster",
-                 "Hail.Risk.Score" = "nat_disaster",
-                 "Heat.Wave.Risk.Score" = "nat_disaster",
-                 "Hurricane.Risk.Score" = "nat_disaster",
-                 "Ice.Storm.Risk.Score" = "nat_disaster",
-                 "Landslide.Risk.Score" = "nat_disaster",
-                 "Lightning.Risk.Score" = "nat_disaster",
-                 "Riverine.Flooding.Risk.Score" = "nat_disaster",
-                 "Strong.Wind.Risk.Score" = "nat_disaster",
-                 "Tornado.Risk.Score" = "nat_disaster",
-                 "Tsunami.Risk.Score" = "nat_disaster",
-                 "Volcanic.Activity.Risk.Score" = "nat_disaster",
-                 "Wildfire.Risk.Score" = "nat_disaster",
-                 "Winter.Weather.Risk.Score" = "nat_disaster",
                  "Maximum.temperature" = "temperature",
                  "Minimum.temperature" = "temperature",
                  "Average.temperature" = "temperature",
@@ -385,6 +380,25 @@ nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV]
                  "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are [PFAS and ways to reduce your exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)?"
                  )
 
+nat_dis_list <- list("Avalanche.Risk.Score" = "nat_disaster", # use key mappings
+                     "Coastal.Flooding.Risk.Score" = "nat_disaster",
+                     "Cold.Wave.Risk.Score" = "nat_disaster",
+                     "Drought.Risk.Score" = "nat_disaster",
+                     "Earthquake.Risk.Score" = "nat_disaster",
+                     "Hail.Risk.Score" = "nat_disaster",
+                     "Heat.Wave.Risk.Score" = "nat_disaster",
+                     "Hurricane.Risk.Score" = "nat_disaster",
+                     "Ice.Storm.Risk.Score" = "nat_disaster",
+                     "Landslide.Risk.Score" = "nat_disaster",
+                     "Lightning.Risk.Score" = "nat_disaster",
+                     "Riverine.Flooding.Risk.Score" = "nat_disaster",
+                     "Strong.Wind.Risk.Score" = "nat_disaster",
+                     "Tornado.Risk.Score" = "nat_disaster",
+                     "Tsunami.Risk.Score" = "nat_disaster",
+                     "Volcanic.Activity.Risk.Score" = "nat_disaster",
+                     "Wildfire.Risk.Score" = "nat_disaster",
+                     "Winter.Weather.Risk.Score" = "nat_disaster")
+
 built_noise_key <- list(noise = "- **Noise**: What is [noise](https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise) that comes from the environment? What are [health effects of noise](https://doh.wa.gov/community-and-environment/noise)?",
                         land = "- **Land use and land cover**: What is [land use and land cover](https://oceanservice.noaa.gov/facts/lclu.html)?")
 
@@ -392,8 +406,10 @@ built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [
                       "Pesticide.Exposure" = "- **Agricultural pesticide use**: What are [pesticides](https://doh.wa.gov/community-and-environment/contaminants/pesticides)? What are ways to reduce pesticide exposure from [foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and during [usage](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)?",
                       "Green.Space" = "- **Green space**: What is [green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)? What are [health benefits of green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)?",
                       "bluespace" = "- **Blue space**: [Blue space](https://pubmed.ncbi.nlm.nih.gov/32971082/) is any water body such as ponds, lakes, rivers, and oceans. What are [health benefits of blue space](https://www.apa.org/monitor/2020/04/nurtured-nature)?",
-                      "Nighttime.Radiance" = "- **Outdoor light at night**: What is [outdoor light at night](), which is also known as light pollution? What are [health effects of outdoor light at night](https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.)?",
-                      "N.Noise.More.than.LAeq.45.to.50.db" = "noise",
+                      "Nighttime.Radiance" = "- **Outdoor light at night**: What is [outdoor light at night](), which is also known as light pollution? What are [health effects of outdoor light at night](https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.)?"
+                      )
+
+noise_md_list <- list("N.Noise.More.than.LAeq.45.to.50.db" = "noise",
                       "N.Noise.More.than.LAeq.50.to.60.db" = "noise",
                       "N.Noise.More.than.LAeq.60.to.70.db" = "noise",
                       "N.Noise.More.than.LAeq.70.to.80.db" = "noise",
@@ -404,26 +420,27 @@ built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [
                       "Pct.Noise.More.than.LAeq.60.to.70.db" = "noise",
                       "Pct.Noise.More.than.LAeq.70.to.80.db" = "noise",
                       "Pct.Noise.More.than.LAeq.80.to.90.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.90.db" = "noise",
-                      "pct_Open_Water" = "land",
-                      "pct_Developed_Open" = "land",
-                      "pct_Developed_Low" = "land",
-                      "pct_Developed_Medium" = "land",
-                      "pct_Developed_High" = "land",
-                      "pct_Barren" = "land",
-                      "pct_Evergreen_Forest" = "land",
-                      "pct_Shrub" = "land",
-                      "pct_Grassland" = "land",
-                      "pct_Pasture" = "land",
-                      "pct_Crops" = "land",
-                      "pct_Woody_Wetlands" = "land",
-                      "pct_Crops" = "land",
-                      "pct_Woody_Wetlands" = "land",
-                      "pct_Herbaceous_Wetlands" = "land",
-                      "pct_Deciduous_Forest" = "land",
-                      "pct_Mixed_Forest" = "land",
-                      "pct_Perennial_Ice" = "land"
-                      )
+                      "Pct.Noise.More.than.LAeq.90.db" = "noise")
+
+land_md_list <- list("pct_Open_Water" = "land",
+                     "pct_Developed_Open" = "land",
+                     "pct_Developed_Low" = "land",
+                     "pct_Developed_Medium" = "land",
+                     "pct_Developed_High" = "land",
+                     "pct_Barren" = "land",
+                     "pct_Evergreen_Forest" = "land",
+                     "pct_Shrub" = "land",
+                     "pct_Grassland" = "land",
+                     "pct_Pasture" = "land",
+                     "pct_Crops" = "land",
+                     "pct_Woody_Wetlands" = "land",
+                     "pct_Crops" = "land",
+                     "pct_Woody_Wetlands" = "land",
+                     "pct_Herbaceous_Wetlands" = "land",
+                     "pct_Deciduous_Forest" = "land",
+                     "pct_Mixed_Forest" = "land",
+                     "pct_Perennial_Ice" = "land"
+)
 
 food_env_md <- markdown("
                         - **Food environment/healthy food**: How can you find [local healthy foods](https://www.usdalocalfoodportal.com/) in your area such as farmers markets?
@@ -503,7 +520,6 @@ categories <- accordion(
     HTML("<b>Prevention</b>"), icon = uiOutput("prevention_icon"),
     selectInput('prevention', htmltools::span("Select variables", 
                                       popover(bs_icon("lightbulb"),
-                                              # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
                                               "Select one or more prevention measures to see tips.",
                                               title = "Tips",
                                               placement = "right",
@@ -535,13 +551,20 @@ categories <- accordion(
                                                       id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
     input_switch('microplastics', "Microplastics", value = FALSE),
     div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Air pollutants", icon = uiOutput("airpol_icon"),
+    accordion_panel("Air Pollutants", icon = uiOutput("airpol_icon"),
                    selectInput('airpol', htmltools::span("Select variables",
-                                                         popover(bs_icon("question-circle"),
+                                                         popover(bs_icon("lightbulb"),
                                                                  "Select one or more air pollutants to see tips.",
                                                                  title = "Tips",
                                                                  placement = "right",
-                                                                 id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
+                                                                 id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Natural Hazard Risk", icon = bs_icon("tornado"),
+                    selectInput('hazards', label = htmltools::span("Select variables", 
+                                                                 popover(bs_icon("lightbulb"),
+                                                                         "Select one or more natural hazard risk measures to see tips.",
+                                                                         title = "Tips",
+                                                                         placement = "right",
+                                                                         id = "hazardpopover")), hazardenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
     HTML("<b>Built Environment</b>"), icon = uiOutput("built_icon"),
@@ -555,6 +578,20 @@ categories <- accordion(
     input_switch('alc', "Alcohol retailers", value = FALSE),
     input_switch('parks', "Parks", value = FALSE),
     input_switch('superfund', "Superfund sites", value = FALSE),
+    accordion_panel("Transportation Noise", icon = bs_icon("volume-up"),#uiOutput("noise_icon"),
+                    selectInput('noise', label = htmltools::span("Select variables", 
+                                                                 popover(bs_icon("lightbulb"),
+                                                                         "Select one or more transportation noise measures to see tips.",
+                                                                         title = "Tips",
+                                                                         placement = "right",
+                                                                         id = "noisepopover")), noiseenv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Land Use/Land Cover", icon = bs_icon("water"),
+                    selectInput('land', label = htmltools::span("Select variables", 
+                                                                 popover(bs_icon("lightbulb"),
+                                                                         "Select one or more land use measures to see tips.",
+                                                                         title = "Tips",
+                                                                         placement = "right",
+                                                                         id = "landpopover")), landuseenv, selectize = TRUE, multiple = TRUE)),
     accordion_panel(
       "Food Environment", icon = uiOutput("food_icon"),
       selectInput('foodenv', label = htmltools::span("Select variables", 
@@ -592,6 +629,7 @@ categories <- accordion(
 )
 
 # define table categories
+# TODO: update to reflect new categories
 table.cats <- accordion(
   open = FALSE,
   accordion_panel(
@@ -1013,6 +1051,56 @@ server <- function(input, output, session) {
     paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
   })
   
+  noise_md <- reactive({
+    if(is.null(input$noise) || length(input$noise) == 0) {
+      return("Select one or more transportation noise measures to see tips.")
+    }
+    
+    raw <- noise_md_list[input$noise]
+    print(raw)
+    
+    is_key <- raw %in% names(built_noise_key) # split into already markdown vs keys
+
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(built_noise_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected transportation noise measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
+  })
+  
+  land_md <- reactive({
+    if(is.null(input$land) || length(input$land) == 0) {
+      return("Select one or more transportation noise measures to see tips.")
+    }
+    
+    raw <- land_md_list[input$land]
+    print(raw)
+    
+    is_key <- raw %in% names(built_noise_key) # split into already markdown vs keys
+    
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+    
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(built_noise_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected transportation noise measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
+  })
+  
   built_md <- reactive({
     
     if (is.null(input$builtenv) || length(input$builtenv) == 0) { # condition for if all switches are false
@@ -1074,6 +1162,30 @@ server <- function(input, output, session) {
     txts <- c(built_md(), built_switch_md())
     txts <- txts[!vapply(txts, is.null, logical(1))]
     paste(unique(txts), collapse = "\n")
+  })
+  
+  hazard_md <- reactive({
+    if (is.null(input$hazard) || length(input$hazard) == 0) {
+      return("Select one or more natural hazard risk measures to see tips.")
+    }
+    
+    raw <- nat_dis_list[input$hazard]
+    
+    is_key <- raw %in% names(nat_dis_key) # split into already markdown vs keys
+    
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+    
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(nat_dis_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected natural environment measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
   })
   
   nat_md <- reactive({
@@ -1198,10 +1310,31 @@ server <- function(input, output, session) {
     )
   })
   
+  observeEvent(input$noise, {
+    update_popover(
+      "noisepopover",
+      content = markdown(noise_md())
+    )
+  })
+  
+  observeEvent(input$land, {
+    update_popover(
+      "landpopover",
+      content = markdown(land_md())
+    )
+  })
+  
   observeEvent(list(input$naturalenv, input$microplastics), {
     update_popover(
       "natenvpopover",
       content = markdown(nat_popover_md())
+    )
+  })
+  
+  observeEvent(input$hazards, {
+    update_popover(
+      "hazardpopover",
+      content = markdown(hazard_md())
     )
   })
   
@@ -2038,7 +2171,7 @@ server <- function(input, output, session) {
   #### REACTIVE VALUES #### 
   # layer ids for inputs to control number of layers 
   layer_ids <- c("outcomes", "sociodemo", "age", "sex", "race", "socialenv", "prevention", "behaviors", "naturalenv",
-                 "airpol", "builtenv", "incsite", "incstage", "incsex", "mortsite", "mortsex", "foodenv", "crime")
+                 "airpol", "builtenv", "incsite", "incstage", "incsex", "mortsite", "mortsex", "foodenv", "crime", "noise", "land", "hazards")
   
   # track all layers
   prev <- reactiveValues() # previous selected values
@@ -2098,7 +2231,7 @@ server <- function(input, output, session) {
     list(main = list(outcomes = input$outcomes, sociodemographics = input$sociodemo, age = input$age,
                      sex = input$sex, race = input$race, airpollution = input$airpol, socialenvironment = input$socialenv,
                      behaviors = input$behaviors, prevention = input$prevention, naturalenvironment = input$naturalenv,
-                     builtenvironment = input$builtenv),
+                     builtenvironment = input$builtenv, noise = input$noise, landuse = input$land, hazards = input$hazards),
          crime = input$crime,
          food = input$foodenv,
          cancer = list(incidence = c(input$incsite, input$incstage, input$incsex),
@@ -2192,12 +2325,13 @@ server <- function(input, output, session) {
     bindEvent(total_cols())
   
   ## main map (census tract) columns
+  
   map_cols <- reactive({
-    df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env)
+    df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env, noise_env, landuse_env, hazard_env)
     
-    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
+    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv, input$noise, input$land, input$hazards), drop = FALSE]
   }) %>% 
-    bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
+    bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv, input$noise, input$land, input$hazards) # reduce work by server
   
   tab_cols <- reactive({
     df <- og.data
@@ -2229,6 +2363,7 @@ server <- function(input, output, session) {
   })
   
   # census tract table
+  # TODO: update to reflect new categories
   ct_table_cols <- reactive({
     og.data[, 1] %>% 
       st_drop_geometry() %>% 
