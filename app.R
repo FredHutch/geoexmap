@@ -15,6 +15,7 @@ library(markdown)
 library(leaflet)
 library(leaflet.extras)
 library(leaflet.extras2)
+library(leaflegend)
 library(plotly)
 
 library(RColorBrewer)
@@ -32,15 +33,17 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
   dplyr::select(c(GEOID, NAMELSAD, NAMELSADCO))
 
 # polygon data tied to census tracts or counties
+# TODO: map -999 values to NA
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data")
 
-og.data <- data # keep original data for data download
+og.data <- data # keep original data for data download/tables
 
 # change here so that mapped values are NA if 0--to map transparently on the map
 data <- data %>% 
   mutate(across(where(is.numeric), ~na_if(., 0)))
 
-food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env")
+food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env") %>% 
+  mutate(lapop1 = as.numeric(lapop1), lapop1share = as.numeric(lapop1share))
 
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
 
@@ -131,7 +134,7 @@ behaviors <- c("Binge drinking" =  "Binge.Drinking.among.Adults",
 outcomes <- c("Arthritis" = "Arthritis.among.Adults",
               "Asthma" = "Asthma.among.Adults",
               "High blood pressure" = "High.Blood.Pressure.among.Adults",
-              "Cancer" = "Cancer.or.Melanoma.among.Adults",
+              "Cancer prevalence" = "Cancer.or.Melanoma.among.Adults",
               "High cholesterol" = "High.Cholesterol.among.Screened.Adults",
               "Chronic obstructive pulmonary disease" = "COPD.among.Adults",
               "Coronary heart disease" = "Coronary.Heart.Disease.among.Adults",
@@ -150,72 +153,76 @@ prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
                 "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
                 "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75")
 
-airpol <- c("PM2.5" = "Particulate.Matter.2.5",
-            "Wildfire smoke" = "Wildfire.smoke",
-            "Nitrogen dioxide (No2)" = "Nitrogen.dioxide",
-            "Sulfur dioxide (So2)" = "Sulfur.dioxide",
+airpol <- c("Particulate matter <2.5 microns in diameter (PM\U2082.\U0323\U2085)" = "Particulate.Matter.2.5",
+            "Wildfire smoke PM\U2082.\U0323\U2085" = "Wildfire.smoke",
+            "Nitrogen dioxide (NO\U2082)" = "Nitrogen.dioxide",
+            "Sulfur dioxide (SO\U2082)" = "Sulfur.dioxide",
             "Carbon monoxide (CO)" = "Carbon.monoxide",
-            "Ozone (O3)" = "Ozone")
+            "Ozone (O\U2083)" = "Ozone")
 
-naturalenv <- c("UV index" = "UV.Index",
+naturalenv <- c("Ultraviolet radiation index (UVI)" = "UV.Index",
                 "Maximum temperature" = "Maximum.temperature",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
                 "Radon" = "Radon",
-                "PFAS in drinking water" = "PFAS_dw",
-                "Avalanche risk" = "Avalanche.Risk.Score",
-                "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
-                "Cold wave risk" = "Cold.Wave.Risk.Score",
-                "Drought risk" = "Drought.Risk.Score",
-                "Earthquake risk" = "Earthquake.Risk.Score",
-                "Hail risk" = "Hail.Risk.Score",
-                "Heat wave risk" = "Heat.Wave.Risk.Score",
-                "Hurricane risk" = "Hurricane.Risk.Score",
-                "Ice storm risk" = "Ice.Storm.Risk.Score",
-                "Landslide risk" = "Landslide.Risk.Score",
-                "Lightning risk" = "Lightning.Risk.Score",
-                "Riverine flooding risk" = "Riverine.Flooding.Risk.Score",
-                "Strong wind risk" = "Strong.Wind.Risk.Score",
-                "Tornado risk" = "Tornado.Risk.Score",
-                "Tsunami risk" = "Tsunami.Risk.Score",
-                "Volcanic activity risk" = "Volcanic.Activity.Risk.Score",
-                "Wildfire risk" = "Wildfire.Risk.Score",
-                "Winter weather risk" = "Winter.Weather.Risk.Score"
+                "Per- and polyfluoroalkyl substances (PFAS) in drinking water" = "PFAS_dw"
                 )
+
+hazardenv <- c("Avalanche risk" = "Avalanche.Risk.Score",
+               "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
+               "Cold wave risk" = "Cold.Wave.Risk.Score",
+               "Drought risk" = "Drought.Risk.Score",
+               "Earthquake risk" = "Earthquake.Risk.Score",
+               "Hail risk" = "Hail.Risk.Score",
+               "Heat wave risk" = "Heat.Wave.Risk.Score",
+               "Hurricane risk" = "Hurricane.Risk.Score",
+               "Ice storm risk" = "Ice.Storm.Risk.Score",
+               "Landslide risk" = "Landslide.Risk.Score",
+               "Lightning risk" = "Lightning.Risk.Score",
+               "Riverine flooding risk" = "Riverine.Flooding.Risk.Score",
+               "Strong wind risk" = "Strong.Wind.Risk.Score",
+               "Tornado risk" = "Tornado.Risk.Score",
+               "Tsunami risk" = "Tsunami.Risk.Score",
+               "Volcanic activity risk" = "Volcanic.Activity.Risk.Score",
+               "Wildfire risk" = "Wildfire.Risk.Score",
+               "Winter weather risk" = "Winter.Weather.Risk.Score")
 
 builtenv <- c("Walkability" = "Walkability",
               "Pesticide exposure" = "Pesticide.Exposure",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
-              "Blue space" = "bluespace",
-              "Persons exposed to noise LAeq >=45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
-              "Persons exposed to noise LAeq >=45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
-              "Persons exposed to noise LAeq >=50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
-              "Persons exposed to noise LAeq >=50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
-              "Persons exposed to noise LAeq >=60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
-              "Persons exposed to noise LAeq >=60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
-              "Persons exposed to noise LAeq >=70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
-              "Persons exposed to noise LAeq >=70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
-              "Persons exposed to noise LAeq >=80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
-              "Persons exposed to noise LAeq >=80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
-              "Persons exposed to noise LAeq >=90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
-              "Persons exposed to noise LAeq >=90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db",
-              "Open water" = "pct_Open_Water",
-              "Developed open" = "pct_Developed_Open",
-              "Low development" = "pct_Developed_Low",
-              "Moderate development" = "pct_Developed_Medium",
-              "High development" = "pct_Developed_High",
-              "Barren land" = "pct_Barren",
-              "Evergreen forest" = "pct_Evergreen_Forest",
-              "Shrubland" = "pct_Shrub",
-              "Grassland" = "pct_Grassland",
-              "Pasture" = "pct_Pasture",
-              "Cropland" = "pct_Crops",
-              "Woody wetlands" = "pct_Woody_Wetlands",
-              "Herbaceous wetlands" = "pct_Herbaceous_Wetlands",
-              "Deciduous forest" = "pct_Deciduous_Forest",
-              "Mixed forest" = "pct_Mixed_Forest",
-              "Perennial ice" = "pct_Perennial_Ice")
+              "Blue space" = "bluespace"
+              )
+
+noiseenv <- c("Persons exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
+               "Persons exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
+               "Persons exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
+               "Persons exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
+               "Persons exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
+               "Persons exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
+               "Persons exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
+               "Persons exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
+               "Persons exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
+               "Persons exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
+               "Persons exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
+               "Persons exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
+
+landuseenv <- c("Open water" = "pct_Open_Water",
+                 "Developed open land" = "pct_Developed_Open",
+                 "Low development" = "pct_Developed_Low",
+                 "Moderate development" = "pct_Developed_Medium",
+                 "High development" = "pct_Developed_High",
+                 "Barren land" = "pct_Barren",
+                 "Evergreen forest" = "pct_Evergreen_Forest",
+                 "Shrubland" = "pct_Shrub",
+                 "Grassland" = "pct_Grassland",
+                 "Pasture" = "pct_Pasture",
+                 "Cropland" = "pct_Crops",
+                 "Woody wetlands" = "pct_Woody_Wetlands",
+                 "Herbaceous wetlands" = "pct_Herbaceous_Wetlands",
+                 "Deciduous forest" = "pct_Deciduous_Forest",
+                 "Mixed forest" = "pct_Mixed_Forest",
+                 "Perennial ice" = "pct_Perennial_Ice")
 
 socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Housing insecurity" = "Housing.Insecurity",
@@ -226,62 +233,50 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "No high school education" = "No.high.school.diploma",
                "Single parent households" = "Single.parent.households",
                "Housing cost burden" = "Housing.cost.burden",
-               "Crowding" = "Crowding",
+               "Household crowding" = "Crowding",
                "Poverty" = "Poverty",
                "Unemployment" = "Unemployment",
                "Social Vulnerability Index" = "Social.Vulnerability.Index",
                "Environmental Justice Index" = "Environmental.Justice.Index",
-               "Segregation" = "Racial.Residential.Segregation",
+               "Racial residential segregation" = "Racial.Residential.Segregation",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
                "Median household income" = "Median.HH.Income",
-               "Housing and transportation affordability" = "HT_Index",
+               "Housing and Transportation (H+T\U00AE) Affordability Index" = "HT_Index",
                "Historic redlining" = "Historic.Redlining.Score")
 
-crimeenv <- c("Part I Offenses (Count)" = "total_p1",
-              "Part I Offenses (Rate)" = "p1_rate",
-              "Part II Offenses (Count)" = "total_p2",
-              "Part II Offenses (Rate)" = "p2_rate")
+crimeenv <- c("Part I offenses (count)" = "total_p1",
+              "Part I offenses (rate)" = "p1_rate",
+              "Part II offenses (count)" = "total_p2",
+              "Part II offenses (rate)" = "p2_rate")
 
-foodenv <- c("Population (2010)" = "Pop2010",
-             "Occupied Housing Units (2010)" = "OHU2010",
-             "Population > 1 mile from supermarket (total)" = "lapop1",
-             "Population > 1 mile from supermarket (proportion)" = "lapop1share",
+# TODO: take out variables according to feedback
+foodenv <- c("Population > 1 mile from supermarket (total)" = "lapop1",
+             "Population > 1 mile from supermarket (percentage)" = "lapop1share",
              "Low-income population > 1 mile from supermarket (total)" = "lalowi1",
-             "Low-income population > 1 mile from supermarket (proportion)" = "lalowi1share",
+             "Low-income population > 1 mile from supermarket (percentage)" = "lalowi1share",
              "Children age 0-17 > 1 mile from supermarket (total)"  = "lakids1",
-             "Children age 0-17 > 1 mile from supermarket (proportion)" = "lakids1share",
+             "Children age 0-17 > 1 mile from supermarket (percentage)" = "lakids1share",
              "Seniors age 65+ > 1 mile from supermarket (total)" = "laseniors1",
-             "Seniors age 65+ > 1 mile from supermarket (proportion)" = "laseniors1share",
+             "Seniors age 65+ > 1 mile from supermarket (percentage)" = "laseniors1share",
              "White population > 1 mile from supermarket (total)" = "lawhite1",
-             "White population > 1 mile from supermarket (proportion)" = "lawhite1share",
+             "White population > 1 mile from supermarket (percentage)" = "lawhite1share",
              "Black population > 1 mile from supermarket (total)" = "lablack1",
-             "Black population > 1 mile from supermarket (proportion)" = "lablack1share",
+             "Black population > 1 mile from supermarket (percentage)" = "lablack1share",
              "Asian population > 1 mile from supermarket (total)" = "laasian1",
-             "Asian population > 1 mile from supermarket (proportion)" = "laasian1share",
+             "Asian population > 1 mile from supermarket (percentage)" = "laasian1share",
              "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (total)" = "lanhopi1",
-             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (proportion)" = "lanhopi1share",
+             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (percentage)" = "lanhopi1share",
              "American Indian and Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
-             "American Indian and Alaska Native population > 1 mile from supermarket (proportion)" = "laaian1share",
+             "American Indian and Alaska Native population > 1 mile from supermarket (percentage)" = "laaian1share",
              "Other/Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
-             "Other/Multiple race population > 1 mile from supermarket (proportion)" = "laomultir1share",
+             "Other/Multiple race population > 1 mile from supermarket (percentage)" = "laomultir1share",
              "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
-             "Hispanic or Latino population > 1 mile from supermarket (proportion)" = "lahisp1share",
+             "Hispanic or Latino population > 1 mile from supermarket (percentage)" = "lahisp1share",
              "Housing units without a vehicle > 1 mile from supermarket (total)" = "lahunv1",
-             "Housing units without a vehicle > 1 mile from supermarket (proportion)" = "lahunv1share",
+             "Housing units without a vehicle > 1 mile from supermarket (percentage)" = "lahunv1share",
              "Housing units receiving SNAP > 1 mile from supermarket (total)" = "lasnap1",
-             "Housing units receiving SNAP > 1 mile from supermarket (proportion)" = "lasnap1share",
-             "Children age 0-17 (2010)" = "TractKids",
-             "Seniors age 65+ (2010)" = "TractSeniors",
-             "White population (2010)" = "TractWhite",
-             "Black population (2010)" = "TractBlack",
-             "Asian population (2010)" = "TractAsian",
-             "Native Hawaiian and Other Pacific Islander population (2010)" = "TractNHOPI",
-             "American Indian and Alaska Native population (2010)" = "TractAIAN",
-             "Other/Multiple race population (2010)" = "TractOMultir",
-             "Hispanic or Latino population (2010)" = "TractHispanic",
-             "Housing units without a vehicle (2010)" = "TractHUNV",
-             "Housing units receiving SNAP (2010)" = "TractSNAP")
+             "Housing units receiving SNAP > 1 mile from supermarket (percentage)" = "lasnap1share")
 
 # define filters
 health_outcomes <- df_vars %>% 
@@ -294,13 +289,22 @@ health_prevention <- df_vars %>%
   dplyr::select(c(11:17)) 
 
 natural_env <- df_vars %>%
-  dplyr::select(c(107:108, 131:134, 141:158, 161)) 
+  dplyr::select(c(107:108, 131:134, 161)) 
+
+hazard_env <- df_vars %>% 
+  dplyr::select(141:158)
 
 air_pol <- df_vars %>% 
   dplyr::select(c(2, 135:139)) 
 
 built_env <- df_vars %>%
-  dplyr::select(c(3:4, 109:110, 112:123, 159, 165:180)) 
+  dplyr::select(c(3:4, 109:110,  159)) 
+
+noise_env <- df_vars %>% 
+  dplyr::select(112:123)
+
+landuse_env <- df_vars %>% 
+  dplyr::select(165:180)
 
 sociodemo <- df_vars %>% 
   dplyr::select(c(34)) 
@@ -318,7 +322,7 @@ social_env <- df_vars %>%
   dplyr::select(c(5:10, 124:130, 105:106, 111, 140, 160, 162, 163, 164)) 
 
 food_env <- food %>% 
-  dplyr::select(c(11:50)) 
+  dplyr::select(c(11:37)) 
 food_env_inp <- food_env %>% 
   st_drop_geometry()
 
@@ -369,24 +373,6 @@ nat_dis_key <- list(nat_disaster = "- **Extreme weather events and natural disas
                     temperature = "- **Temperature**: What are ways to help with [heat waves](https://www.cdc.gov/heat-health/about/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fextreme-heat%2Fabout%2Findex.html)? How can you find [extreme heat cooling centers](https://search.wa211.org/search?location=&query=TH-2600.1900-180&query_type=taxonomy&query_label=Extreme+Heat+Cooling+Centers) in your area? What are ways to help with [cold spells](https://www.cdc.gov/winter-weather/safety/stay-safe-during-after-a-winter-storm-safety.html)?")
 
 nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV](https://www.cdc.gov/radiation-health/data-research/facts-stats/ultraviolet-radiation.html)? What are ways to help with [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)?",
-                 "Avalanche.Risk.Score" = "nat_disaster", # use key mappings
-                 "Coastal.Flooding.Risk.Score" = "nat_disaster",
-                 "Cold.Wave.Risk.Score" = "nat_disaster",
-                 "Drought.Risk.Score" = "nat_disaster",
-                 "Earthquake.Risk.Score" = "nat_disaster",
-                 "Hail.Risk.Score" = "nat_disaster",
-                 "Heat.Wave.Risk.Score" = "nat_disaster",
-                 "Hurricane.Risk.Score" = "nat_disaster",
-                 "Ice.Storm.Risk.Score" = "nat_disaster",
-                 "Landslide.Risk.Score" = "nat_disaster",
-                 "Lightning.Risk.Score" = "nat_disaster",
-                 "Riverine.Flooding.Risk.Score" = "nat_disaster",
-                 "Strong.Wind.Risk.Score" = "nat_disaster",
-                 "Tornado.Risk.Score" = "nat_disaster",
-                 "Tsunami.Risk.Score" = "nat_disaster",
-                 "Volcanic.Activity.Risk.Score" = "nat_disaster",
-                 "Wildfire.Risk.Score" = "nat_disaster",
-                 "Winter.Weather.Risk.Score" = "nat_disaster",
                  "Maximum.temperature" = "temperature",
                  "Minimum.temperature" = "temperature",
                  "Average.temperature" = "temperature",
@@ -395,6 +381,25 @@ nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV]
                  "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are [PFAS and ways to reduce your exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)?"
                  )
 
+nat_dis_list <- list("Avalanche.Risk.Score" = "nat_disaster", # use key mappings
+                     "Coastal.Flooding.Risk.Score" = "nat_disaster",
+                     "Cold.Wave.Risk.Score" = "nat_disaster",
+                     "Drought.Risk.Score" = "nat_disaster",
+                     "Earthquake.Risk.Score" = "nat_disaster",
+                     "Hail.Risk.Score" = "nat_disaster",
+                     "Heat.Wave.Risk.Score" = "nat_disaster",
+                     "Hurricane.Risk.Score" = "nat_disaster",
+                     "Ice.Storm.Risk.Score" = "nat_disaster",
+                     "Landslide.Risk.Score" = "nat_disaster",
+                     "Lightning.Risk.Score" = "nat_disaster",
+                     "Riverine.Flooding.Risk.Score" = "nat_disaster",
+                     "Strong.Wind.Risk.Score" = "nat_disaster",
+                     "Tornado.Risk.Score" = "nat_disaster",
+                     "Tsunami.Risk.Score" = "nat_disaster",
+                     "Volcanic.Activity.Risk.Score" = "nat_disaster",
+                     "Wildfire.Risk.Score" = "nat_disaster",
+                     "Winter.Weather.Risk.Score" = "nat_disaster")
+
 built_noise_key <- list(noise = "- **Noise**: What is [noise](https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise) that comes from the environment? What are [health effects of noise](https://doh.wa.gov/community-and-environment/noise)?",
                         land = "- **Land use and land cover**: What is [land use and land cover](https://oceanservice.noaa.gov/facts/lclu.html)?")
 
@@ -402,8 +407,10 @@ built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [
                       "Pesticide.Exposure" = "- **Agricultural pesticide use**: What are [pesticides](https://doh.wa.gov/community-and-environment/contaminants/pesticides)? What are ways to reduce pesticide exposure from [foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and during [usage](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)?",
                       "Green.Space" = "- **Green space**: What is [green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)? What are [health benefits of green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)?",
                       "bluespace" = "- **Blue space**: [Blue space](https://pubmed.ncbi.nlm.nih.gov/32971082/) is any water body such as ponds, lakes, rivers, and oceans. What are [health benefits of blue space](https://www.apa.org/monitor/2020/04/nurtured-nature)?",
-                      "Nighttime.Radiance" = "- **Outdoor light at night**: What is [outdoor light at night](), which is also known as light pollution? What are [health effects of outdoor light at night](https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.)?",
-                      "N.Noise.More.than.LAeq.45.to.50.db" = "noise",
+                      "Nighttime.Radiance" = "- **Outdoor light at night**: What is [outdoor light at night](), which is also known as light pollution? What are [health effects of outdoor light at night](https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.)?"
+                      )
+
+noise_md_list <- list("N.Noise.More.than.LAeq.45.to.50.db" = "noise",
                       "N.Noise.More.than.LAeq.50.to.60.db" = "noise",
                       "N.Noise.More.than.LAeq.60.to.70.db" = "noise",
                       "N.Noise.More.than.LAeq.70.to.80.db" = "noise",
@@ -414,26 +421,27 @@ built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [
                       "Pct.Noise.More.than.LAeq.60.to.70.db" = "noise",
                       "Pct.Noise.More.than.LAeq.70.to.80.db" = "noise",
                       "Pct.Noise.More.than.LAeq.80.to.90.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.90.db" = "noise",
-                      "pct_Open_Water" = "land",
-                      "pct_Developed_Open" = "land",
-                      "pct_Developed_Low" = "land",
-                      "pct_Developed_Medium" = "land",
-                      "pct_Developed_High" = "land",
-                      "pct_Barren" = "land",
-                      "pct_Evergreen_Forest" = "land",
-                      "pct_Shrub" = "land",
-                      "pct_Grassland" = "land",
-                      "pct_Pasture" = "land",
-                      "pct_Crops" = "land",
-                      "pct_Woody_Wetlands" = "land",
-                      "pct_Crops" = "land",
-                      "pct_Woody_Wetlands" = "land",
-                      "pct_Herbaceous_Wetlands" = "land",
-                      "pct_Deciduous_Forest" = "land",
-                      "pct_Mixed_Forest" = "land",
-                      "pct_Perennial_Ice" = "land"
-                      )
+                      "Pct.Noise.More.than.LAeq.90.db" = "noise")
+
+land_md_list <- list("pct_Open_Water" = "land",
+                     "pct_Developed_Open" = "land",
+                     "pct_Developed_Low" = "land",
+                     "pct_Developed_Medium" = "land",
+                     "pct_Developed_High" = "land",
+                     "pct_Barren" = "land",
+                     "pct_Evergreen_Forest" = "land",
+                     "pct_Shrub" = "land",
+                     "pct_Grassland" = "land",
+                     "pct_Pasture" = "land",
+                     "pct_Crops" = "land",
+                     "pct_Woody_Wetlands" = "land",
+                     "pct_Crops" = "land",
+                     "pct_Woody_Wetlands" = "land",
+                     "pct_Herbaceous_Wetlands" = "land",
+                     "pct_Deciduous_Forest" = "land",
+                     "pct_Mixed_Forest" = "land",
+                     "pct_Perennial_Ice" = "land"
+)
 
 food_env_md <- markdown("
                         - **Food environment/healthy food**: How can you find [local healthy foods](https://www.usdalocalfoodportal.com/) in your area such as farmers markets?
@@ -457,30 +465,29 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
                "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)*: What is the [Environmental Justice Index](https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html)?",
                "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the [Social Vulnerability Index](https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html)",
                "Median.HH.Income" = "- **Median household income**: What does a [median household income](https://usafacts.org/answers/what-is-the-income-of-a-us-household/country/united-states/) mean?",
-               "HT_Index" = "- **Housing and Transportation (H + T) Affordability Index**: Why is it important to consider [transportation costs with affordability](https://cnt.org/tools/housing-and-transportation-affordability-index)?",
+               "HT_Index" = "- **Housing and Transportation (H + T\U00AE) Affordability Index**: Why is it important to consider [transportation costs with affordability](https://cnt.org/tools/housing-and-transportation-affordability-index)?",
                "Racial.Residential.Segregation" = "- **Residential segregation**: What is the [Dissimilarity Index](https://www.khanacademy.org/test-prep/mcat/social-inequality/social-class/v/residential-segregation), which is a measure of residential segregation?",
                "Historic.Redlining.Score" = "- **Redlining**: What is [redlining](https://education.nationalgeographic.org/resource/mapmaker-redlining-united-states/)?",
                "social_capital" = "- **Social capital**: What is [social capital](https://aspe.hhs.gov/sites/default/files/private/pdf/263491/What-is-social-capital.pdf)?",
                "Population.density" = "- **Urbanicity/rurality**: What are resources to improve health and healthcare in [rural communities](https://doh.wa.gov/public-health-provider-resources/rural-health)?"
                )
 
-#health_access_list <- list()
-
 # -------- UI ELEMENTS --------
 categories <- accordion(
+  id = "accordion",
   open = FALSE,
   accordion_panel(
-    "Sociodemographics", icon = bs_icon("person-vcard"),
+    title = HTML("<b>Sociodemographics</b>"), icon = uiOutput("sociodemo_icon"), #icon = bs_icon("person-vcard"),
     selectInput('sociodemo', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
-    accordion_panel("Race and Ethnicity", selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Sex", selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Age", selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
+    accordion_panel("Race and Ethnicity", icon = uiOutput("race_icon"), selectInput('race', NULL, racev, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Sex", icon = uiOutput("sex_icon"), selectInput('sex', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Age", icon = uiOutput("age_icon"), selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
-    "Health Outcomes", icon = bs_icon("heart-pulse"),
+    HTML("<b>Health Outcomes</b>"), icon = uiOutput("outcomes_icon"),
     selectInput('outcomes', 
                 htmltools::span("Select variables",
                      popover(bs_icon("lightbulb"),
@@ -489,54 +496,54 @@ categories <- accordion(
                              placement = "right",
                              id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
-    accordion_panel("Cancer Incidence",
+    accordion_panel("Cancer Incidence", icon = uiOutput("inc_icon"),
                     selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
                     selectInput('incsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
                     actionButton('incbutton', "Reset filters")),
-    accordion_panel("Cancer Mortality",
+    # options to filter by cancer site, gender
+    accordion_panel("Cancer Mortality", icon = uiOutput("mort_icon"),
                     selectInput('mortsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('mortsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
                     actionButton('mortbutton', "Reset filters"))
   ),
   accordion_panel(
-    "Health Behaviors", icon = bs_icon("person-walking"),
+    HTML("<b>Health Behaviors</b>"), icon = uiOutput("behaviors_icon"),
     selectInput('behaviors', htmltools::span("Select variables", 
                                   popover(bs_icon("lightbulb"),
                                           "Select one or more health behaviors to see tips.",
                                           title = "Tips",
                                           placement = "right",
                                           id = "behavior_popover")), behaviors,
-                 multiple = TRUE, selectize = TRUE)
+                 multiple = TRUE, selectize = TRUE, selected = "")
   ),
   accordion_panel(
-    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Prevention</b>"), icon = uiOutput("prevention_icon"),
     selectInput('prevention', htmltools::span("Select variables", 
                                       popover(bs_icon("lightbulb"),
-                                              # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
                                               "Select one or more prevention measures to see tips.",
                                               title = "Tips",
                                               placement = "right",
                                               id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
-    "Healthcare Access", icon = bs_icon("building-add"),
+    HTML("<b>Healthcare Access</b>"), icon = uiOutput("access_icon"),
     h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
             "Switch on one or more healthcare access features to see tips.",
             title = "Tips",
             placement = "right",
             id = "healthaccpopover"))),
-    input_switch('cancer', "Cancer Programs", value = FALSE),
+    input_switch('cancer', "Commission on Cancer (Coc)-accredited programs ", value = FALSE),
     input_switch('clinics', "Clinics", value = FALSE), 
-    input_switch('ems', "Emergency Medical Stations", value = FALSE),
+    input_switch('ems', "Emergency medical stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('pharmacies', "Pharmacies", value = FALSE),
-    input_switch('wic_clinics', "WIC Clinics", value = FALSE),
-    input_switch('wic_retailers', "WIC Retailers", value = FALSE),
-    input_switch('fqhc', "Federally Qualified Health Centers", value = FALSE)
+    input_switch('wic_clinics', "Nutrition Program for Women, Infancts, and Childeren (WIC) clinics", value = FALSE),
+    input_switch('wic_retailers', "WIC retailers", value = FALSE),
+    input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
   ),
   accordion_panel(
-    "Natural Environment", icon = bs_icon("sun"),
+    HTML("<b>Natural Environment</b>"), icon = uiOutput("natural_icon"),
     selectInput('naturalenv', htmltools::span("Select variables", 
                                               popover(bs_icon("lightbulb"),
                                                       "Select one or more natural environment measures to see tips.",
@@ -545,16 +552,23 @@ categories <- accordion(
                                                       id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
     input_switch('microplastics', "Microplastics", value = FALSE),
     div(id = 'micro_div', selectInput('micro', '', choices = c("Please choose a marine setting" = "", unique(microplastics$Marine.Setting)), selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
+    accordion_panel("Air Pollutants", icon = uiOutput("airpol_icon"),
                    selectInput('airpol', htmltools::span("Select variables",
-                                                         popover(bs_icon("question-circle"),
+                                                         popover(bs_icon("lightbulb"),
                                                                  "Select one or more air pollutants to see tips.",
                                                                  title = "Tips",
                                                                  placement = "right",
-                                                                 id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
+                                                                 id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Natural Hazard Risk", icon = uiOutput("hazard_icon"),
+                    selectInput('hazards', label = htmltools::span("Select variables", 
+                                                                 popover(bs_icon("lightbulb"),
+                                                                         "Select one or more natural hazard risk measures to see tips.",
+                                                                         title = "Tips",
+                                                                         placement = "right",
+                                                                         id = "hazardpopover")), hazardenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
-    "Built Environment", icon = bs_icon("buildings"),
+    HTML("<b>Built Environment</b>"), icon = uiOutput("built_icon"),
     selectInput('builtenv', htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          "Select one or more built environment measures to see tips.",
@@ -565,8 +579,22 @@ categories <- accordion(
     input_switch('alc', "Alcohol retailers", value = FALSE),
     input_switch('parks', "Parks", value = FALSE),
     input_switch('superfund', "Superfund sites", value = FALSE),
+    accordion_panel("Transportation Noise", icon = uiOutput("noise_icon"),#uiOutput("noise_icon"),
+                    selectInput('noise', label = htmltools::span("Select variables", 
+                                                                 popover(bs_icon("lightbulb"),
+                                                                         "Select one or more transportation noise measures to see tips.",
+                                                                         title = "Tips",
+                                                                         placement = "right",
+                                                                         id = "noisepopover")), noiseenv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Land Use/Land Cover", icon = uiOutput("land_icon"),
+                    selectInput('land', label = htmltools::span("Select variables", 
+                                                                 popover(bs_icon("lightbulb"),
+                                                                         "Select one or more land use measures to see tips.",
+                                                                         title = "Tips",
+                                                                         placement = "right",
+                                                                         id = "landpopover")), landuseenv, selectize = TRUE, multiple = TRUE)),
     accordion_panel(
-      "Food Environment", icon = bs_icon("basket"),
+      "Food Environment", icon = uiOutput("food_icon"),
       selectInput('foodenv', label = htmltools::span("Select variables", 
                                  popover(bs_icon("lightbulb"),
                                          food_env_md,
@@ -575,14 +603,14 @@ categories <- accordion(
     )
   ),
   accordion_panel(
-    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Social Environment</b>"), icon = uiOutput("social_icon"),
     selectInput('socialenv', htmltools::span("Select variables", 
                                           popover(bs_icon("lightbulb"),
                                                   "Select one or more social environment measures to see tips.",
                                                   title = "Tips",
                                                   placement = "right",
                                                   id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
-    accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
+    accordion_panel('Crime', icon = uiOutput("crime_icon"),
                     selectInput('crime', htmltools::span("Select variables",
                                                          popover(bs_icon("lightbulb"),
                                                                  crime_md,
@@ -590,31 +618,196 @@ categories <- accordion(
                                                                  placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
-    "Options", icon = bs_icon("gear"),
+    HTML("<b>Options</b>"), icon = bs_icon("gear"),
     input_switch("showbounds", "Show tract boundaries", value = TRUE),
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
-    fileInput("upload", "Upload a shapefile")#,
+    fileInput("upload", "Upload a shapefile", accept = ".shp")#,
     #downloadButton("download", "Download data")
   )
   
 )
 
-table.cats <- categories
+# define table categories
+# TODO: update to reflect new categories
+table.cats <- accordion(
+  open = FALSE,
+  accordion_panel(
+    "Sociodemographics", icon = bs_icon("person-vcard"),
+    selectInput('sociodemo_tab', "Select variables",
+                sociodemographics,
+                selectize = TRUE, multiple = TRUE),
+    accordion_panel("Race and Ethnicity", selectInput('race_tab', NULL, racev, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Sex", selectInput('sex_tab', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Age", selectInput('age_tab', NULL, agev, selectize = TRUE, multiple = TRUE))
+    
+  ),
+  accordion_panel(
+    "Health Outcomes", icon = bs_icon("heart-pulse"),
+    selectInput('outcomes_tab', 
+                htmltools::span("Select variables",
+                                popover(bs_icon("lightbulb"),
+                                        "Select one or more health outcomes to see tips.",
+                                        title = "Tips",
+                                        placement = "right",
+                                        id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
+    # options to filter by cancer site, stage at diagnosis, gender
+    accordion_panel("Cancer Incidence",
+                    selectInput('incsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('incstage_tab', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
+                    selectInput('incsex_tab', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
+                    actionButton('incbutton_tab', "Reset filters")),
+    accordion_panel("Cancer Mortality",
+                    selectInput('mortsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('mortsex_tab', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
+                    actionButton('mortbutton_tab', "Reset filters"))
+  ),
+  accordion_panel(
+    "Health Behaviors", icon = bs_icon("person-walking"),
+    selectInput('behaviors_tab', htmltools::span("Select variables", 
+                                             popover(bs_icon("lightbulb"),
+                                                     "Select one or more health behaviors to see tips.",
+                                                     title = "Tips",
+                                                     placement = "right",
+                                                     id = "behavior_popover")), behaviors,
+                multiple = TRUE, selectize = TRUE)
+  ),
+  accordion_panel(
+    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    selectInput('prevention_tab', htmltools::span("Select variables", 
+                                              popover(bs_icon("lightbulb"),
+                                                      # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
+                                                      "Select one or more prevention measures to see tips.",
+                                                      title = "Tips",
+                                                      placement = "right",
+                                                      id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
+  ),
+  accordion_panel(
+    "Natural Environment", icon = bs_icon("sun"),
+    selectInput('naturalenv_tab', htmltools::span("Select variables", 
+                                              popover(bs_icon("lightbulb"),
+                                                      "Select one or more natural environment measures to see tips.",
+                                                      title = "Tips",
+                                                      placement = "right",
+                                                      id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
+    accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
+                    selectInput('airpol_tab', htmltools::span("Select variables",
+                                                          popover(bs_icon("question-circle"),
+                                                                  "Select one or more air pollutants to see tips.",
+                                                                  title = "Tips",
+                                                                  placement = "right",
+                                                                  id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
+  ),
+  accordion_panel(
+    "Built Environment", icon = bs_icon("buildings"),
+    selectInput('builtenv_tab', htmltools::span("Select variables", 
+                                            popover(bs_icon("lightbulb"),
+                                                    "Select one or more built environment measures to see tips.",
+                                                    title = "Tips",
+                                                    placement = "right",
+                                                    id = "builtenvpopover")), builtenv, selectize = TRUE, multiple = TRUE),
+   accordion_panel(
+      "Food Environment", icon = bs_icon("basket"),
+      selectInput('foodenv_tab', label = htmltools::span("Select variables", 
+                                                     popover(bs_icon("lightbulb"),
+                                                             food_env_md,
+                                                             title = "Tips",
+                                                             placement = "right")), foodenv, selectize = TRUE, multiple = TRUE)
+    )
+  ),
+  accordion_panel(
+    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    selectInput('socialenv', htmltools::span("Select variables", 
+                                             popover(bs_icon("lightbulb"),
+                                                     "Select one or more social environment measures to see tips.",
+                                                     title = "Tips",
+                                                     placement = "right",
+                                                     id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
+    accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
+                    selectInput('crime_tab', htmltools::span("Select variables",
+                                                         popover(bs_icon("lightbulb"),
+                                                                 crime_md,
+                                                                 title = "Tips",
+                                                                 placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
+  )
+)
+
+standalone_tab <- c("Choose dataset" = "",
+                    "Commission on Cancer (CoC)-Accredited Programs" = "cancer.progs",
+                    "Clinics" = "clinics",
+                    "Emergency Medical Stations" = "ems",
+                    "Federally Qualified Health Centers" = "fqhc",
+                    "Hospitals" = "hospitals",
+                    "Pharmacies" = "pharmacies",
+                    "WIC clinics" = "wic.clinics",
+                    "WIC retailers" = "wic.retailers",
+                    "Microplastics" = "microplastics",
+                    "Transit stops" = "transit",
+                    "Parks" = "parks",
+                    "Superfund sites" = "superfund") 
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
+  tags$head( # define style and scrips
+    tags$style(HTML(" 
+    .leaflet-control.my-centered-num-legend {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px 6px;
+    }
+    
+    /* center the SVG bar inside the legend box */
+    .leaflet-control.my-centered-num-legend svg {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* keep label centering without touching fill colors */
+    .leaflet-control.my-centered-num-legend text {
+      text-anchor: middle;
+      fill: #333;              /* text color */
+    }
+  ")),
+    tags$script(HTML("
+    document.addEventListener('shown.bs.modal', function(){}); // no-op to ensure BS is loaded
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle=\"tooltip\"]')
+      );
+      tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    });
+
+    // re-initialize when Leaflet redraws legends:
+    document.addEventListener('DOMNodeInserted', function(e) {
+      if (e.target && e.target.classList &&
+          e.target.classList.contains('leaflet-control')) {
+        var tooltipTriggerList = [].slice.call(
+          e.target.querySelectorAll('[data-bs-toggle=\"tooltip\"]')
+        );
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+          if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+          }
+        });
+      }
+    });
+  "))
+  ),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
   nav_panel("Map",
             layout_sidebar(
               sidebar = sidebar(categories,
                                 width = "400px"),
-              bslib::card(
-                leafletOutput("geoexmap"),
-                   card_footer(popover(bs_icon('question-circle'), title = "Attribution", "here it is"))),
+              
+              leafletOutput("geoexmap"),
               conditionalPanel(
                 condition = "(input.showchart == true ) || (input.clear == null && input.clear == 0)",
                 absolutePanel(
@@ -634,13 +827,13 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download")),
-                              accordion_panel("2010 Census Tracts")),
+              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
+                              accordion_panel("2010 Census Tracts", reactableOutput("food_table"))),
               accordion_panel("County Data", 
-                              accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download")),
-                              accordion_panel("Cancer Incidence"),
-                              accordion_panel("Cancer Mortality")),
-              accordion_panel("Standalone Data")
+                              accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
+                              accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
+                              accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
+              accordion_panel(h2("Standalone Data"), selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
               
             )),
   nav_panel("Documentation",
@@ -667,6 +860,161 @@ server <- function(input, output, session) {
    # update_switch("")
   })
   
+  #### ICONS ####
+  output$sociodemo_icon <- renderUI({
+    # if all values are null or empty, use original icon or no icon
+    if ((is.null(input$sociodemo) || identical(input$sociodemo, "")) && (is.null(input$race) || identical(input$race, "")) && (is.null(input$age) || identical(input$age, "")) && (is.null(input$sex) || identical(input$sex, ""))) {
+      bs_icon("person-vcard", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$race_icon <- renderUI({
+    if (is.null(input$race) || identical(input$race, "")) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$sex_icon <- renderUI({
+    if (is.null(input$sex) || identical(input$sex, "")) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$age_icon <- renderUI({
+    if (is.null(input$age) || identical(input$age, "")) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+
+  output$outcomes_icon <- renderUI({
+    if ((is.null(input$outcomes) || identical(input$outcomes, "")) && (!inc.ready()) && (!mort.ready())) { # if outcomes, cancer incidence and mortality not ready
+      bs_icon("heart-pulse", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$inc_icon <- renderUI({
+    if (!inc.ready()) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$mort_icon <- renderUI({
+    if (!mort.ready()) {
+      NULL
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$behaviors_icon <- renderUI({
+    if (is.null(input$behaviors) || identical(input$behaviors, "")) {
+      bs_icon("person-walking", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$prevention_icon <- renderUI({
+    if (is.null(input$prevention) || identical(input$prevention, "")) {
+      tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+    
+  })
+  
+  output$access_icon <- renderUI({
+    if(!input$cancer && !input$clinics && !input$ems && !input$hospitals && !input$pharmacies && !input$wic_clinics && !input$wic_retailers && !input$fqhc) {
+      bs_icon("building-add", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$natural_icon <- renderUI({
+    if ((is.null(input$naturalenv) || identical(input$naturalenv, "")) && (is.null(input$airpol) || identical(input$airpol, "")) && (is.null(input$hazards) || identical(input$hazards, "")) && !input$microplastics) {
+      bs_icon("sun", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$airpol_icon <- renderUI({
+    if (is.null(input$airpol) || identical(input$airpol, "")) {
+      bs_icon("cloud-haze", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$built_icon <- renderUI({
+    if ((is.null(input$builtenv) || identical(input$builtenv, "")) && (is.null(input$foodenv) || identical(input$foodenv, "")) && (is.null(input$land) || identical(input$land, "")) && (is.null(input$noise) || identical(input$noise, "")) && !input$transit && !input$parks && !input$superfund && !input$alc) {
+      bs_icon("buildings", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$food_icon <- renderUI({
+    if (is.null(input$foodenv) || identical(input$foodenv, "")) {
+      bs_icon("basket", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$social_icon <- renderUI({
+    if ((is.null(input$socialenv) || identical(input$socialenv, "")) && (is.null(input$crime) || identical(input$crime, ""))) {
+      tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$crime_icon <- renderUI({
+    if (is.null(input$crime) || identical(input$crime, "")) {
+      bs_icon("file-earmark-lock", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$noise_icon <- renderUI({
+    if (is.null(input$noise) || identical(input$noise, "")) {
+      bs_icon("volume-up", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$land_icon <- renderUI({
+    if (is.null(input$land) || identical(input$land, "")) {
+      bs_icon("water", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
+  output$hazard_icon <- renderUI({
+    if (is.null(input$hazards) || identical(input$hazards, "")) {
+      bs_icon("tornado", class = "text-secondary", title = "No selection yet")
+    } else {
+      bs_icon("check-circle", class = "text-success", title = "Variables selected")
+    }
+  })
+  
   #### DYNAMIC TIP LOGIC ####
   outcomes_md <- reactive({
     if (is.null(input$outcomes) || length(input$outcomes) == 0) {
@@ -684,7 +1032,6 @@ server <- function(input, output, session) {
   })
   
   behaviors_md <- reactive({
-    #req(input$behaviors)
     if (is.null(input$behaviors) || length(input$behaviors) == 0) {
       return("Select one or more health outcomes to see tips.")
     }
@@ -729,6 +1076,56 @@ server <- function(input, output, session) {
     paste(unlist(airpol_md_list[input$airpol]), collapse = "\n")
   })
   
+  noise_md <- reactive({
+    if(is.null(input$noise) || length(input$noise) == 0) {
+      return("Select one or more transportation noise measures to see tips.")
+    }
+    
+    raw <- noise_md_list[input$noise]
+    print(raw)
+    
+    is_key <- raw %in% names(built_noise_key) # split into already markdown vs keys
+
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(built_noise_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected transportation noise measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
+  })
+  
+  land_md <- reactive({
+    if(is.null(input$land) || length(input$land) == 0) {
+      return("Select one or more transportation noise measures to see tips.")
+    }
+    
+    raw <- land_md_list[input$land]
+    print(raw)
+    
+    is_key <- raw %in% names(built_noise_key) # split into already markdown vs keys
+    
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+    
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(built_noise_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected transportation noise measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
+  })
+  
   built_md <- reactive({
     
     if (is.null(input$builtenv) || length(input$builtenv) == 0) { # condition for if all switches are false
@@ -748,7 +1145,7 @@ server <- function(input, output, session) {
     all_text <- unique(all_text) # prevent repeated texts
     
     if (length(all_text) == 0) {
-      return("No tips available for selected air pollutants.")
+      return("No tips available for selected built environment measures.")
     }
     
     paste(all_text, collapse = "\n")
@@ -790,6 +1187,30 @@ server <- function(input, output, session) {
     txts <- c(built_md(), built_switch_md())
     txts <- txts[!vapply(txts, is.null, logical(1))]
     paste(unique(txts), collapse = "\n")
+  })
+  
+  hazard_md <- reactive({
+    if (is.null(input$hazards) || length(input$hazards) == 0) {
+      return("Select one or more natural hazard risk measures to see tips.")
+    }
+    
+    raw <- nat_dis_list[input$hazards]
+    
+    is_key <- raw %in% names(nat_dis_key) # split into already markdown vs keys
+    
+    dir_text <- unlist(raw[!is_key], use.names = FALSE) # direct markdown
+    
+    key_vals <- unname(unlist(raw[is_key], use.names = FALSE))
+    shared_text <- unlist(nat_dis_key[key_vals], use.names = FALSE)
+    
+    all_text <- c(dir_text, shared_text)
+    all_text <- unique(all_text) # prevent repeated texts
+    
+    if (length(all_text) == 0) {
+      return("No tips available for selected natural hazard risk measures.")
+    }
+    
+    paste(all_text, collapse = "\n")
   })
   
   nat_md <- reactive({
@@ -853,7 +1274,7 @@ server <- function(input, output, session) {
     } 
     
     if (input$ems) {
-      switch_md <- c(switch_md, "- **Emergency Medical Services (EMS) Stations**: Where can you find [EMS stations and trauma care](https://wadoh.maps.arcgis.com/apps/instant/basic/index.html?appid=c7e3f2249bb34175a20849c2d02fc06a) in your area?")
+      switch_md <- c(switch_md, "- **Emergency Medical Services (EMS) stations**: Where can you find [EMS stations and trauma care](https://wadoh.maps.arcgis.com/apps/instant/basic/index.html?appid=c7e3f2249bb34175a20849c2d02fc06a) in your area?")
     } 
     
     if (input$hospitals) {
@@ -874,7 +1295,7 @@ server <- function(input, output, session) {
     }
     
     if (input$cancer) {
-      switch_md <- c(switch_md, "- **Commision on Cancer (CoC)-accredited programs**: How can you find [programs accredited by the CoC](https://www.facs.org/find-a-hospital/?nearMe=off&companyType=CoC)?")
+      switch_md <- c(switch_md, "- **Commission on Cancer (CoC)-accredited programs**: How can you find [programs accredited by the CoC](https://www.facs.org/find-a-hospital/?nearMe=off&companyType=CoC)?")
     }
     
     if (input$fqhc) {
@@ -914,6 +1335,20 @@ server <- function(input, output, session) {
     )
   })
   
+  observeEvent(input$noise, {
+    update_popover(
+      "noisepopover",
+      content = markdown(noise_md())
+    )
+  })
+  
+  observeEvent(input$land, {
+    update_popover(
+      "landpopover",
+      content = markdown(land_md())
+    )
+  })
+  
   observeEvent(list(input$naturalenv, input$microplastics), {
     update_popover(
       "natenvpopover",
@@ -921,7 +1356,14 @@ server <- function(input, output, session) {
     )
   })
   
-  observeEvent(list(input$builtenv, input$transit, input$superfund, input$parks), {
+  observeEvent(input$hazards, {
+    update_popover(
+      "hazardpopover",
+      content = markdown(hazard_md())
+    )
+  })
+  
+  observeEvent(list(input$builtenv, input$transit, input$superfund, input$parks, input$alc), {
     update_popover(
       "builtenvpopover",
       content = markdown(built_popover_md())
@@ -941,132 +1383,40 @@ server <- function(input, output, session) {
       content = markdown(soc_md())
     )
   })
-  # output$outcomes_icon <- renderUI({
-  #   popover(
-  #     bs_icon("question-circle"),
-  #     title = "Tips",
-  #     content = markdown(outcomes_md()),
-  #     placement = "right"
-  #   )
-  # })
-  
-  # dynamic_md <- reactive({
-  #   if
-  # })
   
   #### PALETTE ####
-  # define categories for palettes
-  # "good", "bad", "neutral"
-  # percent variables for legend breaks
-  percent.vars <- c("Food.Stamps", "Food.Insecurity", "Housing.Insecurity", "Utility.Services.Threat",
-                    "Lacking.Reliable.Transportation", "Lack.of.Social.and.Emotional.Support", "Lack.of.Health.Insurance",
-                    "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Taking.Medicine.to.Control.High.Blood.Pressure",
-                    "Cholesterol.Screening", "Mammography.Use.among.Women.50.to.74", "Colorectal.Cancer.Screening.among.Adults.45.to.75",
-                    "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults", "No.Leisure.time.Physical.Activity.among.Adults", 
-                    "Short.Sleep.Duration", "Arthritis.among.Adults", "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "Cancer.or.Melanoma.among.Adults",
-                    "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults", "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults",
-                    "Diagnosed.Diabetes.among.Adults", "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.Older", "Stroke.among.Adults", "Percent.Hispanic.or.Latino",
-                    "Percent.White.NonHispanic", "Percent.Black.NonHispanic", "Percent.American.Indian.Alaska.Native.NonHispanic", "Percent.Asian.NonHispanic", "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic", 
-                    "Percent.Other.Race.NonHispanic", "Percent.Two.or.More.Races.NonHispanic", "Percent.White.Hispanic.or.Latino", "Percent.Black.Hispanic.or.Latino", "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino", 
-                    "Percent.Asian.Hispanic.or.Latino", "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Percent.Other.Race.Hispanic.or.Latino", "Percent.Two.or.More.Races.Hispanic.or.Latino", "Percent.Male", "Percent.Female", 
-                    "Percent.0.to.4.years", "Percent.5.to.9.years", "Percent.10.to.14.years", "Percent.15.to.19.years", "Percent.20.to.24.years", "Percent.25.to.29.years", "Percent.30.to.34.years", "Percent.35.to.39.years", 
-                    "Percent.40.to.44.years", "Percent.45.to.49.years", "Percent.50.to.54.years", "Percent.55.to.59.years", "Percent.60.to.64.years", "Percent.65.to.69.years", "Percent.70.to.74.years", "Percent.75.to.79.years", "Percent.80.to.84.years",
-                    "Percent.85.and.older", "Pct.Noise.More.than.LAeq.45.to.50.db", "Pct.Noise.More.than.LAeq.50.to.60.db", "Pct.Noise.More.than.LAeq.60.to.70.db", "Pct.Noise.More.than.LAeq.70.to.80.db", 
-                    "Pct.Noise.More.than.LAeq.80.to.90.db", "Pct.Noise.More.than.LAeq.90.db", "Unemployment", "No.broadband.internet", "No.high.school.diploma", "Single.parent.households", "Crowding", "Poverty", "Housing.cost.burden", "pct_Open_Water",
-                    "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "pct_Barren", "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
-                    "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice"
-                    )
-  
-  g <- c("Green.Space", "Routine.Checkup.in.the.Past.Year", "Visited.Dentist.in.Past.Year", "Cholesterol.Screening",
-         "Taking.Medicine.to.Control.High.Blood.Pressure", "Mammography.Use.among.Women.50.to.74",
-         "Colorectal.Cancer.Screening.among.Adults.45.to.75", "Walkability", "social_capital", "Median.HH.Income", "HT_Index")
-  b <- c("Particulate.Matter.2.5", "Arthritis.among.Adults", 
-         "Food.Stamps", "Food.Insecurity",
-         "Housing.Insecurity", "Utility.Services.Threat", "Lacking.Reliable.Transportation", 
-         "Lack.Of.Health.Insurance", "Binge.Drinking.among.Adults", "Cigarette.Smoking.among.Adults",
-         "No.Leisure.time.Physical.Activity.among.Adults", "Short.Sleep.Duration",
-         "Asthma.among.Adults", "High.Blood.Pressure.among.Adults", "High.Blood.Pressure.among.Adults",
-         "Cancer.or.Melanoma.among.Adults", "High.Cholesterol.among.Screened.Adults", "COPD.among.Adults",
-         "Coronary.Heart.Disease.among.Adults", "Depression.among.Adults", "Diagnosed.Diabetes.among.Adults",
-         "Obesity.among.Adults", "All.Teeth.Lost.among.Adults.65.and.older", "Stroke.among.Adults",
-         "Radon", "Pesticide.Exposure", "Racial.Residential.Segregation", "N.Noise.More.than.LAeq.45.to.50.db",
-         "N.Noise.More.than.LAeq.50.to.60.db", "N.Noise.More.than.LAeq.60.to.70.db", "N.Noise.More.than.LAeq.70.to.80.db", 
-         "N.Noise.More.than.LAeq.80.to.90.db", "N.Noise.More.than.LAeq.90.db", "Pct.Noise.More.than.LAeq.45.to.50.db",
-         "Pct.Noise.More.than.LAeq.50.to.60.db", "Pct.Noise.More.than.LAeq.60.to.70.db", "Pct.Noise.More.than.LAeq.70.to.80.db", 
-         "Pct.Noise.More.than.LAeq.80.to.90.db", "Pct.Noise.More.than.LAeq.90.db", "Unemployment", "No.broadband.internet",
-         "No.high.school.diploma", "Single.parent.households", "Crowding", "Poverty", "Housing.cost.burden", "Maximum.temperature",
-         "Minimum.temperature", "Average.temperature", "Wildfire.smoke", "Nitrogen.dioxide", "Sulfur.dioxide", "Carbon.monoxide",
-         "Ozone", "Avalanche.Risk.Score", "Coastal.Flooding.Risk.Score", "Cold.Wave.Risk.Score", "Drought.Risk.Score", "Earthquake.Risk.Score",
-         "Hail.Risk.Score", "Heat.Wave.Risk.Score", "Hurricane.Risk.Score", "Ice.Storm.Risk.Score", "Landslide.Risk.Score", "Lightning.Risk.Score", "Riverine.Flooding.Risk.Score",
-         "Strong.Wind.Risk.Score", "Tornado.Risk.Score", "Tsunami.Risk.Score", "Volcanic.Activity.Risk.Score", "Wildfire.Risk.Score", "Winter.Weather.Risk.Score",
-         "Historic.Redlining.Score") 
-  n <- c("Nighttime.Radiance", "Percent.Hispanic.or.Latino",  names(sociodemo), names(sex), names(race), names(age), "Precipitation", "Population.density", "bluespace",
-         "pct_Open_Water", "pct_Developed_Open", "pct_Developed_Low", "pct_Developed_Medium", "pct_Developed_High", "Pct_Barren",
-         "pct_Evergreen_Forest", "pct_Shrub", "pct_Grassland", "pct_Pasture", "pct_Crops", "pct_Woody_Wetlands", "pct_Herbaceous_Wetlands",
-         "pct_Deciduous_Forest", "pct_Mixed_Forest", "pct_Perennial_Ice")
+  # define palette by layer number 
+  layer_base_palette <- function(layer_index) {
+    switch(
+      as.character(layer_index),
+      "1" = colorRampPalette(c("#FFFFFF", "#008B8B"))(5),
+      "2" = colorRampPalette(c("#FFFFFF", "#8B008B"))(5),
+      "3" = colorRampPalette(c("#FFFFFF", "#B8860B"))(5),
+      "4" = gray.colors(5)
+    )
+  }
   
   # define palette by variable
-  geoex.palette <- function(var) {
+  geoex.palette <- function(var, df, layer_index) {
     tryCatch({
       # skip geometry column to avoid error
-      if (var == "geometry" || inherits(df_vars[[var]], "sfc") || var == "GEOID") {
-        message("Skipping geometry column...")
+      if (var == "geometry" || inherits(df[[var]], "sfc") || var == "GEOID") {
         return(NULL)
       }
       
-      domain <- df_vars[[var]]
-      pct.breaks <- c(0, 20, 40, 60, 80, 100)
-      m_f_breaks <- c(0, 50, 100)
+      # base ramp
+      base_ramp <- layer_base_palette(layer_index)
       
-      # first check if percentage--overrides
-      if (var %in% percent.vars) {
-        if (var %in% g) return(colorBin(palette = "YlGn", domain = domain, na.color = "transparent", bins = pct.breaks))
-        else if (var %in% b) return(colorBin(palette = "YlOrRd", domain = domain, na.color = "transparent", bins = pct.breaks))
-        # otherwise var in n
-        else return(colorBin(palette = "Purples", domain = domain, na.color = "transparent", bins = pct.breaks))
-      }
-
-      else if (var %in% g) {
-        return(colorQuantile(
-          palette = "YlGn", domain = domain,
-          na.color = "transparent", n = 5
-        ))
-      } else if (var %in% n) {
-        # TODO: have multiple colors for this, one for each neutral variable
-        # for now, use blue
-        if (var == "Nighttime.Radiance") {
-          return(colorQuantile(
-            palette = c("#2E4057", "#96ADC8", "#D2CCA1", "#D96C06", "#C44536"), domain = domain,
-            na.color="transparent", n = 5
-          ))
-        }  else return(colorQuantile(
-              palette = "Blues", domain = domain,
-              na.color = "transparent", n = 5
-        ))
-        # else return(colorBin(
-        #   palette = "Blues", domain = domain,
-        #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
-        #   na.color = "transparent", bins = breaks
-        # ))
-
-      } else if (var == "PFAS_dw") {
+      domain <- df[[var]] 
+      
+      if (var == "PFAS_dw") {
         return(colorFactor(
           palette = c("#780000", "#fdf0d5"), domain = domain,
-          levels = c(FALSE, TRUE)
+          levels = c(TRUE, FALSE)
         ))
       }
-      # otherwise, var is in "bad"
-      else {
-        # return(colorBin(
-        #   palette = "YlOrRd", domain = domain,
-        #   #na.color = "transparent", bins = ggplot2::cut_number(domain, n = 5, closed = "left")
-        #   na.color = "transparent", bins = BAMMtools::getJenksBreaks(domain, 6)
-        # ))
-        return(colorQuantile(
-          palette = "YlOrRd", domain = domain,
-          na.color = "transparent", n = 5
-        ))
-      }
+      
+      return(colorNumeric(palette = base_ramp, domain = domain, na.color = "transparent"))
     },
     
     error = function(e) {
@@ -1075,25 +1425,264 @@ server <- function(input, output, session) {
     })
   }
   
-  #### LEGEND TITLES ####
+  #### LEGEND AND LABELS ####
   # defines legend titles based on defined column
+  #TODO: fix title sub and superscripts to work with leaflegend
   legend.titles <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
-    if(col == "Green.Space") return("Normalized Difference Vegetation Index")
-    if(col == "Nighttime.Radiance") return("Light at Night (nW/cm<sup>2</sup>/sr)")
-    if(col == "Food.Stamps") return("SNAP benefits (%)")
+    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> concentrations in 2022 ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
+    if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
+    if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
+    if(col == "Food.Insecurity") return("Food insecurity in 2023 (%)")
+    if(col == "Housing.Insecurity") return("Housing insecurity in 2023 (%)")
+    if(col == "Utility.Services.Threat") return("Utility services threat in 2023 (%)")
+    if(col == "Lacking.Reliable.Transportation") return("Lack of reliable transportation in 2023 (%)")
+    if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support in 2023 (%)")
+    if(col == "Lack.of.Health.Insurance") return("No health insurance in 2021 (%)")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in past year in 2023 (%)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in past year in 2023 (%)")
+    if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Taking blood pressure medication in 2023 (%)")
+    if(col == "Cholesterol.Screening") return("Cholesterol screening in 2023 (%)")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer  in 2023 (%)")
+    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Colorectal cancer screening in 2023 (%)")
+    if(col == "Binge.Drinking.among.Adults") return("Binge drinking in 2023 (%)")
+    if(col == "Cigarette.Smoking.among.Adults") return("Cigarette smoking in 2023 (%)")
+    if(col == "No.Leisure.time.Physical.Activity.among.Adults") return("No physical activity in 2023 (%)")
+    if(col == "Short.Sleep.Duration") return("Short sleep duration in 2023 (%)")
+    if(col == "Arthritis.among.Adults") return("Arthritis in 2023 (%)")
+    if(col == "Asthma.among.Adults") return("Asthma in 2023 (%)")
+    if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure in 2023 (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence among adults in 2023 (%)")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol in 2023 (%)")
+    if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease in 2023 (%)")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease in 2023 (%)")
+    if(col == "Depression.among.Adults") return("Depression in 2023 (%)")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Diabetes in 2023 (%)")
+    if(col == "Obesity.among.Adults") return("Obesity in 2023 (%)")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("All teeth lost in 2023 (%)")
+    if(col == "Stroke.among.Adults") return("Stroke in 2023 (%)")
+    
+    if(col == "Total.Population") return("Population in 2023 (total)")
+    if(col == "Hispanic.or.Latino") return("Hispanic or Latino population in 2023 (total)")
+    if(col == "Percent.Hispanic.or.Latino") return("Hispanic or Latino population in 2023 (%)")
+    if(col == "White.NonHispanic") return("Non-Hispanic White population in 2023 (total)")
+    if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population in 2023 (%)")
+    if(col == "Black.NonHispanic") return("Non-Hispanic Black population in 2023 (total)")
+    if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population in 2023 (%)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population in 2023 (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population in 2023 (%)")
+    if(col == "Asian.NonHispanic") return("Non-Hispanic Asian population in 2023 (total)")
+    if(col == "Percent.Asian.NonHispanic") return("Non-Hispanic Asian population in 2023 (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population in 2023 (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population in 2023 (%)")
+    if(col == "Other.Race.NonHispanic") return("Non-Hispanic other race population in 2023 (total)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic other race population in 2023 (%)")
+    if(col == "Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population in 2023 (total)")
+    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population in 2023 (%)")
+    
+    # hispanic or latino subcats
+    if(col == "White.Hispanic.or.Latino") return("Hispanic or Latino White population in 2023 (total)")
+    if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White population in 2023 (%)")
+    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black population in 2023 (total)")
+    if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black population in 2023 (%)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native population in 2023 (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native population in 2023 (%)")
+    if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian population in 2023 (total)")
+    if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian population in 2023 (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander population in 2023 (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander population in 2023 (%)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race population in 2023 (total)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race population in 2023 (%)")
+    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races population in 2023 (total)")
+    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races population in 2023 (%)")
+    
+    # sex
+    if(col == "Total.Male.Population") return("Male population in 2023 (total)")
+    if(col == "Total.Female.Population") return("Female population in 2023 (total)")
+    if(col == "Percent.Male") return("Male population in 2023 (%)")
+    if(col == "Percent.Female") return("Female population in 2023 (%)")
+    
+    # age
+    if(col == "Total.0.to.4.years") return("0-4 years population in 2024 (total)")
+    if(col == "Percent.0.to.4.years") return("0-4 years population in 2024 (%)")
+    if(col == "Total.5.to.9.years") return("5-9 years poulation in 2024 (total)")
+    if(col == "Percent.5.to.9.years") return("5-9 years population in 2024 (%)")
+    if(col == "Total.10.to.14.years") return("10-14 years population in 2024 (total)")
+    if(col == "Percent.10.to.14.years") return("10-14 years population in 2024 (%)")
+    if(col == "Total.15.to.19.years") return("15-19 years population in 2024 (total)")
+    if(col == "Percent.15.to.19.years") return("15-19 years population in 2024 (%)")
+    if(col == "Total.20.to.24.years") return("20-24 years population in 2024 (total)")
+    if(col == "Percent.20.to.24.years") return("20-24 years population in 2024 (%)")
+    if(col == "Total.25.to.29.years") return("25-29 years population in 2024 (total)")
+    if(col == "Percent.25.to.29.years") return("25-29 years population in 2024 (%)")
+    if(col == "Total.30.to.34.years") return("30-34 years population in 2024 (total)")
+    if(col == "Percent.30.to.34.years") return("30-34 years population in 2024 (%)")
+    if(col == "Total.35.to.39.years") return("35-39 years population in 2024 (total)")
+    if(col == "Percent.35.to.39.years") return("35-39 years population in 2024 (%)")
+    if(col == "Total.40.to.44.years") return("40-44 years population in 2024 (total)")
+    if(col == "Percent.40.to.44.years") return("40-44 years population in 2024 (%)")
+    if(col == "Total.45.to.49.years") return("45-49 years population in 2024 (total)")
+    if(col == "Percent.45.to.49.years") return("45-49 years population in 2024 (%)")
+    if(col == "Total.50.to.54.years") return("50-54 years population in 2024 (total)")
+    if(col == "Percent.50.to.54.years") return("50-54 years population in 2024 (%)")
+    if(col == "Total.55.to.59.years") return("55-59 years population in 2024 (total)")
+    if(col == "Percent.55.to.59.years") return("55-59 years population in 2024 (%)")
+    if(col == "Total.60.to.64.years") return("60-64 years population in 2024 (total)")
+    if(col == "Percent.60.to.64.years") return("60-64 years population in 2024 (%)")
+    if(col == "Total.65.to.69.years") return("65-69 years population in 2024 (total)")
+    if(col == "Percent.65.to.69.years") return("65-69 years population in 2024 (%)")
+    if(col == "Total.70.to.74.years") return("70-74 years population in 2024 (total)")
+    if(col == "Percent.70.to.74.years") return("70-74 years population in 2024 (%)")
+    if(col == "Total.75.to.79.years") return("75-79 years population in 2024 (total)")
+    if(col == "Percent.75.to.79.years") return("75-79 years population in 2024 (%)")
+    if(col == "Total.80.to.84.years") return("80-84 years population in 2024 (total)")
+    if(col == "Percent.80.to.84.years") return("80-84 years population in 2024 (%)")
+    if(col == "Total.85.and.older") return("85+ years population in 2024 (total)")
+    if(col == "Percent.85.and.older") return("85+ years population in 2024 (%)")
+    
+    if(col == "Social.Vulnerability.Index") return("SVI in 2022")
+    if(col == "Environmental.Justice.Index") return("EJI in 2019")
+    if(col == "Unemployment") return("Unemployment in 2021 (%)")
+    
+    if(col == "UV.Index") return("UVI in 2024")
+    
+    if(col == "Radon") return(HTML("Radon gas concentration in 2021 (Bq/m<sup>3</sup>)"))
+    
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lbs/mi<sup>2</sup>)"))
+    
+    if(col == "Racial.Residential.Segregation") return("Racial residential segregation in 2020")
+    
+    # transportation noise model
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB in 2020 (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB in 2020 (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB in 2020 (%)")
+    
+    if(col == "Walkability") return("Walkability score in 2019")
+    
+    if(col == "No.broadband.internet") return("No internet in 2021 (%)")
+    if(col == "No.high.school.diploma") return("No high school diploma in 2021 (%)")
+    if(col == "Single.parent.households") return("Single parent households in 2021 (%)")
+    if(col == "Crowding") return("Crowding among households in 2021 (%)")
+    if(col == "Poverty") return("Poverty in 2021 (%)")
+    if(col == "Housing.cost.burden") return("Housing cost burden in 2021 (%)")
+    
+    if(col == "Dew.point") return(paste0("Dew point in 2020 ", "(\U00B0", "F)"))
+    if(col == "Maximum.temperature") return(paste0("Maximum temperature in 2020 ", "(\U00B0", "F)"))
+    if(col == "Minimum.temperature") return(paste0("Minimum temperature in 2020 ", "(\U00B0", "F)"))
+    if(col == "Average.temperature") return(paste0("Average temperature in 2020 ", "(\U00B0", "F)"))
+    if(col == "Precipitation") return("Precipitation in 2020 (in.)")
+    
+    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> in 2020 ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) in 2020 (ppb)")))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb) in 2020 "))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020 "))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb) in 2020 "))
+    
+    if(col == "Population.density") return("Population density in 2023 (population per square mile)")
+    if(col == "Avalanche.Risk.Score") return("Avalanche risk value in 2024 ($)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value in 2024 ($)")
+    if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value in 2024 ($)")
+    if(col == "Drought.Risk.Score") return("Drought risk value in 2024 ($)")
+    if(col == "Earthquake.Risk.Score") return("Earthquake risk value in 2024 ($)")
+    if(col == "Hail.Risk.Score") return("Hail risk value in 2024 ($)")
+    if(col == "Heat.Wave.Risk.Score") return("Heat wave risk value in 2024 ($)")
+    if(col == "Hurricane.Risk.Score") return("Hurricane risk value in 2024 ($)")
+    if(col == "Ice.Storm.Risk.Score") return("Ice storm risk value in 2024 ($)")
+    if(col == "Landslide.Risk.Score") return("Landslide risk value in 2024 ($)")
+    if(col == "Lightning.Risk.Score") return("Lightning risk value in 2024 ($)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Riverine flooding risk value in 2024 ($)")
+    if(col == "Strong.Wind.Risk.Score") return("Strong wind risk value in 2024 ($)")
+    if(col == "Tornado.Risk.Score") return("Tornado risk value in 2024 ($)")
+    if(col == "Tsunami.Risk.Score") return("Tsunami risk value in 2024 ($)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Volcanic activity risk value in 2024 ($)")
+    if(col == "Wildfire.Risk.Score") return("Wildfire risk value in 2024 ($)")
+    if(col == "Winter.Weather.Risk.Score") return("Winter weather risk value in 2024 ($)")
+    
+    if(col == "bluespace") return("Blue space coverage in 2021 (%)")
+    if(col == "social_capital") return("Social capital in 2022")
+    
+    if(col == "PFAS_dw") return("PFAS in drinking water in 2021")
+    if(col == "Median.HH.Income") return("Median household income in 2023 ($)")
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index in 2022")
+    if(col == "Historic.Redlining.Score") return("Historic redlining score")
+    
+    if(col == "pct_Open_Water") return("Open water in 2024 (%)")
+    if(col == "pct_Developed_Open") return("Developed open land in 2024 (%)")
+    if(col == "pct_Developed_Low") return("Minimally developed land in 2024 (%)")
+    if(col == "pct_Developed_Medium") return("Moderately developed land in 2024 (%)")
+    if(col == "pct_Developed_High") return("Highly developed land in 2024 (%)")
+    if(col == "pct_Barren") return("Barren land in 2024 (%)")
+    if(col == "pct_Evergreen_Forest") return("Evergreen forest in 2024 (%)")
+    if(col == "pct_Shrub") return("Shrubland in 2024 (%)")
+    if(col == "pct_Grassland") return("Grassland in 2024 (%)")
+    if(col == "pct_Pasture") return("Pasture in 2024 (%)")
+    if(col == "pct_Crops") return("Cropland in 2024 (%)")
+    if(col == "pct_Woody_Wetlands") return("Woody wetlands in 2024 (%)")
+    if(col == "pct_Herbaceous_Wetlands") return("Herbaceous wetlands in 2024 (%)")
+    if(col == "pct_Deciduous_Forest") return("Deciduous forest in 2024 (%)")
+    if(col == "pct_Mixed_Forest") return("Mixed forest in 2024 (%)")
+    if(col == "pct_Perennial_Ice") return("Perennial ice in 2024 (%)")
+    
+    if(col == "total_p1") return("Part I offenses in 2023 (total)")
+    if(col == "p1_rate") return("Part I offenses in 2023 (per 1,000 population)")
+    
+    if(col == "total_p2") return("Part II offenses in 2023 (total)")
+    if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
+    
+    # TODO: add legend titles for food environment columns
+    if(col == "lapop1") return("Low access population at 1 mile in 2019 (total)")
+    if(col == "lapop1share") return("Low access population at 1 mile in 2019 (percentage)")
+    if(col == "lalowi1") return("Low access, low income population at 1 mile in 2019 (total)")
+    if(col == "lalowi1share") return("Low access, low income population at 1 mile in 2019 (percentage)")
+    if(col == "lakids1") return("Low access, age 0-17 at 1 mile in 2019 (total)")
+    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile in 2019 (percentage)")
+    if(col == "laseniors1") return("Low access, age 65+ at 1 mile in 2019 (total)")
+    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile in 2019 (percentage)")
+    if(col == "lawhite1") return("Low access, White population at 1 mile in 2019 (total)")
+    if(col == "lawhite1share") return("Low access, White population at 1 mile in 2019 (percentage)")
+    if(col == "lablack1") return("Low access, Black population at 1 mile in 2019 (total)")
+    if(col == "lablack1share") return("Low access, Black population at 1 mile in 2019 (percentage)")
+    if(col == "laasian1") return("Low access, Asian population at 1 mile in 2019 (total)")
+    if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (percentage)")
+    if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile in 2019 (total)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile in 2019 (percentage)")
+    if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (total)")
+    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (percentage)")
+    if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile in 2019 (total)")
+    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile in 2019 (percentage)")
+    if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile in 2019 (total)")
+    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile in 2019 (percentage)")
+    if(col == "lahunv1") return("Low access, households without vehicle at 1 mile in 2019 (total)")
+    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile in 2019 (percentage)")
+    if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile in 2019 (total)")
+    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile in 2019 (percentage)")
+  }
+  
+  layer.titles <- function(col) {
+    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI)")
+    if(col == "Nighttime.Radiance") return(HTML("Light at Night (nW/cm<sup>2</sup>/sr)"))
+    if(col == "Food.Stamps") return("SNAP benefits  (%)")
     if(col == "Food.Insecurity") return("Food insecurity (%)")
     if(col == "Housing.Insecurity") return("Housing insecurity (%)")
     if(col == "Utility.Services.Threat") return("Utility services threat (%)")
     if(col == "Lacking.Reliable.Transportation") return("Lack of reliable transportation (%)")
-    if(col == "Lack.Of.Health.Insurance") return("No health insurance (%)")
     if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support (%)")
     if(col == "Lack.of.Health.Insurance") return("No health insurance (%)")
     if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in past year (%)")
     if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in past year (%)")
     if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Taking blood pressure medication (%)")
     if(col == "Cholesterol.Screening") return("Cholesterol screening (%)")
-    if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer (%)")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer  (%)")
     if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Colorectal cancer screening (%)")
     if(col == "Binge.Drinking.among.Adults") return("Binge drinking (%)")
     if(col == "Cigarette.Smoking.among.Adults") return("Cigarette smoking (%)")
@@ -1102,8 +1691,8 @@ server <- function(input, output, session) {
     if(col == "Arthritis.among.Adults") return("Arthritis (%)")
     if(col == "Asthma.among.Adults") return("Asthma (%)")
     if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure (%)")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer or Melanoma Among Adults")
-    if(col == "High.Cholesterol.among.Screened.Adults") return("High Cholesterol (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer or melanoma among adults (%)")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease (%)")
     if(col == "Depression.among.Adults") return("Depression (%)")
@@ -1113,38 +1702,38 @@ server <- function(input, output, session) {
     if(col == "Stroke.among.Adults") return("Stroke (%)")
     
     if(col == "Total.Population") return("Population (total)")
-    if(col == "Hispanic.or.Latino") return("Hispanic or Latino (total)")
-    if(col == "Percent.Hispanic.or.Latino") return("Hispanic or Latino (%)")
-    if(col == "White.NonHispanic") return("White Non-Hispanic (total)")
-    if(col == "Percent.White.NonHispanic") return("White Non-Hispanic (%)")
-    if(col == "Black.NonHispanic") return("Black Non-Hispanic (total)")
-    if(col == "Percent.Black.NonHispanic") return("Black Non-Hispanic (%)")
-    if(col == "American.Indian.Alaska.Native.NonHispanic") return("American Indian and Alaska Native Non-Hispanic (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("American Indian and Alaska Native Non-Hispanic (%)")
-    if(col == "Asian.NonHispanic") return("Asian Non-Hispanic (total)")
-    if(col == "Percent.Asian.NonHispanic") return("Asian Non-Hispanic (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Native Hawaiian and Other Pacific Islander Non-Hispanic (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Native Hawaiian and Other Pacific Islander Non-Hispanic (%)")
-    if(col == "Other.Race.NonHispanic") return("Other Race Non-Hispanic (total)")
-    if(col == "Percent.Other.Race.NonHispanic") return("Other Race Non-Hispanic (%)")
-    if(col == "Two.or.More.Races.NonHispanic") return("Two or More Races Non-Hispanic (total)")
-    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Two or More Races Non-Hispanic (%)")
+    if(col == "Hispanic.or.Latino") return("Hispanic or Latino population (total)")
+    if(col == "Percent.Hispanic.or.Latino") return("Hispanic or Latino population (%)")
+    if(col == "White.NonHispanic") return("Non-Hispanic White population (total)")
+    if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population (%)")
+    if(col == "Black.NonHispanic") return("Non-Hispanic Black population (total)")
+    if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population (%)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population (%)")
+    if(col == "Asian.NonHispanic") return("Non-Hispanic Asian population (total)")
+    if(col == "Percent.Asian.NonHispanic") return("Non-Hispanic Asian population (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population (%)")
+    if(col == "Other.Race.NonHispanic") return("Non-Hispanic other race population (total)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic other race population (%)")
+    if(col == "Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population (total)")
+    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population (%)")
     
     # hispanic or latino subcats
-    if(col == "White.Hispanic.or.Latino") return("White Hispanic or Latino (total)")
-    if(col == "Percent.White.Hispanic.or.Latino") return("White Hispanic or Latino (%)")
-    if(col == "Black.Hispanic.or.Latino") return("Black Hispanic or Latino (total)")
-    if(col == "Percent.Black.Hispanic.or.Latino") return("Black Hispanic or Latino (%)")
-    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("American Indian and Alaska Native Hispanic or Latino (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("American Indian and Alaska Native Hispanic or Latino (%)")
-    if(col == "Asian.Hispanic.or.Latino") return("Asian Hispanic or Latino (total)")
-    if(col == "Percent.Asian.Hispanic.or.Latino") return("Asian Hispanic or Latino (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Native Hawaiian and Other Pacific Islander Hispanic or Latino (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Native Hawaiian and Other Pacific Islander Hispanic or Latino (%)")
-    if(col == "Other.Race.Hispanic.or.Latino") return("Other Race Hispanic or Latino (total)")
-    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Other Race Hispanic or Latino (%)")
-    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Two or More Races Hispanic or Latino (total)")
-    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Two or More Races Hispanic or Latino (%)")
+    if(col == "White.Hispanic.or.Latino") return("Hispanic or Latino White (total)")
+    if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White (%)")
+    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black(total)")
+    if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black (%)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (%)")
+    if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (total)")
+    if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (%)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (total)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (%)")
+    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino (total)")
+    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races (%)")
     
     # sex
     if(col == "Total.Male.Population") return("Male (total)")
@@ -1196,25 +1785,25 @@ server <- function(input, output, session) {
     
     if(col == "UV.Index") return("UV index (UVI)")
     
-    if(col == "Radon") return("Radon gas concentration (Bq/m<sup>3</sup>)")
+    if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>)"))
     
-    if(col == "Pesticide.Exposure") return("Pesticide exposure")
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lbs/mi<sup>2</sup>)"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
     
     # transportation noise model
-    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to 45-50 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to 50-60 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to 60-70 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to 70-80 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to 80-90 dB LAeq of noise (%)")
-    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (total)")
-    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to >90 dB LAeq of noise (%)")
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Population exposed to noise levels LAeq \U2265 45-50 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Population exposed to noise levels LAeq \U2265 50-60 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Population exposed to noise levels LAeq \U2265 60-70 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Population exposed to noise levels LAeq \U2265 70-80 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Population exposed to noise levels LAeq \U2265 80-90 dB (%)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (total)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Population exposed to noise levels LAeq \U2265 90 dB (%)")
     
     if(col == "Walkability") return("Walkability")
     
@@ -1231,11 +1820,11 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)"))
-    if(col == "Nitrogen.dioxide") return(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)"))
-    if(col == "Sulfur.dioxide") return("Sulfur dioxide (SO<sub>2</sub>) (ppb)")
-    if(col == "Carbon.monoxide") return("Carbon monoxide (CO) (ppm)")
-    if(col == "Ozone") return("Ozone (O<sub>3</sub>) (ppb)")
+    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) (ppb)")))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb)"))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
     
     if(col == "Population.density") return("Population density (persons per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
@@ -1262,7 +1851,7 @@ server <- function(input, output, session) {
     
     if(col == "PFAS_dw") return("Water tested positive for PFAS")
     if(col == "Median.HH.Income") return("Median household income ($)")
-    if(col == "HT_Index") return("Housing and Transportation &copy; Index")
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index")
     if(col == "Historic.Redlining.Score") return("Historic redlining")
     
     if(col == "pct_Open_Water") return("Open water (%)")
@@ -1281,7 +1870,282 @@ server <- function(input, output, session) {
     if(col == "pct_Deciduous_Forest") return("Deciduous forest (%)")
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
-      
+    
+    if(col == "total_p1") return("Part I offenses in 2023 (total)")
+    if(col == "p1_rate") return("Part I offenses in 2023 (per 1,000 population)")
+    
+    if(col == "total_p2") return("Part II offenses in 2023 (total)")
+    if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
+    
+    # TODO: add legend titles for food environment columns
+    # TODO: multiple x100 to get percentage, not proportion
+    if(col == "lapop1") return("Low access population at 1 mile (total)")
+    if(col == "lapop1share") return("Low access population at 1 mile (percentage)")
+    if(col == "lalowi1") return("Low access, low income population at 1 mile (total)")
+    if(col == "lalowi1share") return("Low access, low income population at 1 mile (percentage)")
+    if(col == "lakids1") return("Low access, age 0-17 at 1 mile (total)")
+    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile (percentage)")
+    if(col == "laseniors1") return("Low access, age 65+ at 1 mile (total)")
+    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile (percentage)")
+    if(col == "lawhite1") return("Low access, White population at 1 mile (total)")
+    if(col == "lawhite1share") return("Low access, White population at 1 mile (percentage)")
+    if(col == "lablack1") return("Low access, Black population at 1 mile (total)")
+    if(col == "lablack1share") return("Low access, Black population at 1 mile (percentage)")
+    if(col == "laasian1") return("Low access, Asian population at 1 mile (total)")
+    if(col == "laasian1share") return("Low access, Asian population at 1 mile (percentage)")
+    if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (total)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (percentage)")
+    if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile (total)")
+    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile (percentage)")
+    if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile (total)")
+    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile (percentage)")
+    if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile (total)")
+    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile (percentage)")
+    if(col == "lahunv1") return("Low access, households without vehicle at 1 mile (total)")
+    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile (percentage)")
+    if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile (total)")
+    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile (percentage)")
+    
+    
+  }
+  
+  var.info <- function(col) {
+    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
+    if(col == "Green.Space") return("Green space vegetation health and intensity in a census tract measured using the Normalized Difference Vegetation Index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
+    if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN), also known as nighttime radiance or light pollution, from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
+    if(col == "Food.Stamps") return("Estimate of the percentage of adults in a census tract who reported receiving food stamps, also called SNAP, the Supplemental Nutrition Assistance Program, on an EBT card from CDC PLACES (2025 release)")
+    if(col == "Food.Insecurity") return("Estimate of the percentage of adults in a census tract who reported that the food that they bought always/usually/sometimes did not last, and they didn’t have money to get more from CDC PLACES (2025 release)")
+    if(col == "Housing.Insecurity") return("Estimate of the percentage of adults in a census tract who reported they were not able to pay mortgage, rent, or utility bill in the past 12 months from CDC PLACES (2025 release)")
+    if(col == "Utility.Services.Threat") return("Estimate of the percentage of adults in a census tract who reported that an electric, gas, oil, or water company threatened to shut off services at any time during the prior 12 months from CDC PLACES (2025 release)")
+    if(col == "Lacking.Reliable.Transportation") return("Estimate of the percentage of adults in a census tract who reported a lack of reliable transportation keeping them from medical appointments, meetings, work, or from getting things needed for daily living in the past 12 months from CDC PLACES (2025 release)")
+    if(col == "Lack.of.Social.and.Emotional.Support") return("Estimate of the percentage of adults in a census tract who report sometimes, rarely, or never getting the social and emotional support needed from CDC PLACES (2025 release)")
+    if(col == "Lack.of.Health.Insurance") return("Estimate of the percentage of adults aged 18-64 in a census tract who report having no current health insurance coverage from CDC PLACES (2025 release)")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Estimate of the percentage of adults in a census tract who report having been to a doctor for a routine checkup (e.g., a general physical exam, not an exam for a specific injury, illness, or condition) in the previous year from CDC PLACES (2025 release)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Estimate of the percentage of adults in a census tract who report having been to the dentist or dental clinic in the past year from CDC PLACES (2025 release)")
+    if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Estimate of the percentage of adults in a census tract with high blood pressure who reported currently taking medicine for high blood pressure from CDC PLACES (2025 release)")
+    if(col == "Cholesterol.Screening") return("Estimate of the percentage of adults in a census tract who report having their cholesterol checked within the previous 5 years from CDC PLACES (2025 release)")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Estimate of the percentage of women in a census tract 50-74 years who report having had a mammogram within the previous 2 years from CDC PLACES (2025 release)")
+    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Estimate of the percentage of adults in a census tract who report having one of the following: a fecal occult blood test (FOBT) within the previous year, a fecal immunochemical test (FIT)-DNA test within the previous 3 years, a sigmoidoscopy within the previous 5 years, a sigmoidoscopy within the previous 10 years with a FIT in the past year, a colonoscopy within the previous 10 years, or a CT colonography (virtual colonoscopy) within the previous 5 years from CDC PLACES (2025 release)")
+    if(col == "Binge.Drinking.among.Adults") return("Estimate of the percentage of adults in a census tract who report having \U2265 5 drinks (men) or \U2265 4 drinks (women) on \U2265 1 occasion during the previous 30 days from CDC PLACES (2025 release)")
+    if(col == "Cigarette.Smoking.among.Adults") return("Estimate of the percentage of adults in a census tract who report having smoked \U2265 100 cigarettes in their lifetime and currently smoke every day or some days from CDC PLACES (2025 release)")
+    if(col == "No.Leisure.time.Physical.Activity.among.Adults") return("Estimate of the percentage of adults in a census tract who reported 'no' to the question: 'During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise?' from CDC PLACES (2025 release)")
+    if(col == "Short.Sleep.Duration") return("Estimate of the percentage of adults in a census tract who report usually getting insufficient sleep duration (\U003C 7 hours, on average, during a 24-hour period) from CDC PLACES (2025 release)")
+    if(col == "Arthritis.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor or other health professional that you have some form of arthritis, rheumatoid arthritis, gout, lupus, or fibromyalgia?' from CDC PLACES (2025 release)")
+    if(col == "Asthma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to both of the questions, 'Have you ever been told by a doctor, nurse, or other health professional that you have asthma?' and 'Do you still have asthma?' from CDC PLACES (2025 release)")
+    if(col == "High.Blood.Pressure.among.Adults") return("Estimate of the percentage of adults in a census tract who reported ever having been told by a doctor, nurse, or other health professional that they have high blood pressure from CDC PLACES (2025 release)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had melanoma or any other types of cancer?' and 'no' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had skin cancer that is not melanoma?' from CDC PLACES (2025 release)")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been screened for high cholesterol and told by a doctor, nurse, or other health professional that they had high cholesterol from CDC PLACES (2025 release)")
+    if(col == "COPD.among.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been told by a doctor, nurse, or other health professional they had chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they had angina or coronary heart disease")
+    if(col == "Depression.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to having ever been told by a doctor, nurse, or other health professional they had a depressive disorder, including depression, major depression, dysthymia, or minor depression")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Estimate of the percentage of adults in a census tract who report being told by a doctor or other health professional that they have diabetes (other than diabetes during pregnancy for female respondents)")
+    if(col == "Obesity.among.Adults") return("Estimate of the percentage of adults in a census tract who have a body mass index (BMI) \U2265 30.0 kg/m\U00B2 from CDC PLACES (2025 release)")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("Estimate of the percentage of adults in a census tract \U2265 65 years who report having lost all of their natural teeth due to tooth decay and gum disease from CDC PLACES (2025 release)")
+    if(col == "Stroke.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they have had a stroke from CDC PLACES (2025 release)")
+    
+    if(col == "Total.Population") return("Total number of individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Hispanic.or.Latino") return("Total number of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Hispanic.or.Latino") return("Percentage of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "White.NonHispanic") return("Total number of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.White.NonHispanic") return("Percentage of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Black.NonHispanic") return("Total number of Non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Black.NonHispanic") return("Percentage of Non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Total number of Non-Hispanic American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Percentage of Non-Hispanic American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Asian.NonHispanic") return("Total number of Non-Hispanic Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Asian.NonHispanic") return("Percentage of Non-Hispanic Asian individuals in a census tract using American Community Survey 5-year data (2019-2023) using American Community Survey 5-year data (2019-2023)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Total number of Non-Hispanic Native Hawaiian and other Pacific Islander individuals in a census tract")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Percentage of Non-Hispanic Native Hawaiian and other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Other.Race.NonHispanic") return("Total number of Non-Hispanic other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Percentage of Non-Hispanic other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Two.or.More.Races.NonHispanic") return("Total number of Non-Hispanic two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Total number of Non-Hispanic two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    
+    # hispanic or latino subcats
+    if(col == "White.Hispanic.or.Latino") return("Total number of Hispanic or Latino White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.White.Hispanic.or.Latino") return("Percentage of Hispanic or Latino White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Black.Hispanic.or.Latino") return("Total number of Hispanic or Latino Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Black.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Total number of Hispanic or Latino American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Percentage of Hispanic or Latino American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Asian.Hispanic.or.Latino") return("Total number of Hispanic or Latino Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Asian.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Total number of Hispanic or Latino Native Hawaiian and other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Native Hawaiian and other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Total number of Hispanic or Latino other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Percentage of Hispanic or Latino other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Total number of Hispanic or Latino two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Percentage of Hispanic or Latino two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    
+    # sex
+    if(col == "Total.Male.Population") return("Total number of male individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.Female.Population") return("Total number of female individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Male") return("Percentage of male individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Female") return("Percentage of female individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    
+    # age
+    if(col == "Total.0.to.4.years") return("Total number of individuals 0-4 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.0.to.4.years") return("Percentage of individuals 0-4 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.5.to.9.years") return("Total number of individuals 5-9 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.5.to.9.years") return("Percentage of individuals 5-9 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.10.to.14.years") return("Total number of individuals 10-14 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.10.to.14.years") return("Percentage of individuals 10-14 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.15.to.19.years") return("Total number of individuals 15-19 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.15.to.19.years") return("Percentage of individuals 15-19 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.20.to.24.years") return("Total number of individuals 20-24 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.20.to.24.years") return("Percentage of individuals 20-24 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.25.to.29.years") return("Total number of individuals 25-29 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.25.to.29.years") return("Percentage of individuals 25-29 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.30.to.34.years") return("Total number of individuals 30-34 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.30.to.34.years") return("Percentage of individuals 30-34 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.35.to.39.years") return("Total number of individuals 35-39 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.35.to.39.years") return("Percentage of individuals 35-39 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.40.to.44.years") return("Total number of individuals 40-44 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.40.to.44.years") return("Percentage of individuals 40-44 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.45.to.49.years") return("Total number of individuals 45-49 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.45.to.49.years") return("Percentage of individuals 45-49 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.50.to.54.years") return("Total number of individuals 50-54 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.50.to.54.years") return("Percentage of individuals 50-54 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.55.to.59.years") return("Total number of individuals 55-59 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.55.to.59.years") return("Percentage of individuals 55-59 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.60.to.64.years") return("Total number of individuals 60-64 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.60.to.64.years") return("Percentage of individuals 60-64 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.65.to.69.years") return("Total number of individuals 65-69 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.65.to.69.years") return("Percentage of individuals 65-69 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.70.to.74.years") return("Total number of individuals 70-74 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.70.to.74.years") return("Percentage of individuals 70-74 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.75.to.79.years") return("Total number of individuals 75-79 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.75.to.79.years") return("Percentage of individuals 75-79 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.80.to.84.years") return("Total number of individuals 80-84 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.80.to.84.years") return("Percentage of individuals 80-84 years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Total.85.and.older") return("Total number of individuals 85+ years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.85.and.older") return("Percentage of individuals 85+ years old in a census tract using American Community Survey 5-year data (2019-2023)")
+    
+    if(col == "Social.Vulnerability.Index") return("Social vulnerability of a census tract, defined as the degree to which a community exhibits certain social conditions, including high poverty, low percentage of vehicle access, or crowded households, among others, which may affect a community's ability to prevent human suffering and financial loss in the event of a disaster, using the Centers for Disease Control and Prevention (CDC)/Agency for Toxic Substances and Disease Registry (ATSDR) Social Vulnerability Index (2022 release)")
+    if(col == "Environmental.Justice.Index") return("Environmental Justice Index score of a census tract, which ranks the cumulative impacts of environmental injustice on health, using the Centers for Disease Control and Prevention (CDC)/Agency for Toxic Substances and Disease Registry (ATSDR) Environmental Justice Index (2024 release)")
+    if(col == "Unemployment") return("Estimate of the percentage of individuals in a census tract who are 16-64 years old in the labor force and unemployed from CDC PLACES (2023 release)")
+    
+    if(col == "UV.Index") return("Ultraviolet radiation index from Tropospheric Emission Monitoring Internet Service (TEMIS) satellite data (2024)")
+    
+    if(col == "Radon") return("Radon gas concentration using data from Li et al. Proc Natl Acad Sci 2024")
+    
+    if(col == "Pesticide.Exposure") return("Agricultural pesticide use data from the Washington State Department of Health Washington Tracking Network (WTN) (2023 release)")
+    
+    if(col == "Racial.Residential.Segregation") return("Racial residential segregation, calculated using Duncan's multi-group dissimilarity index with 2020 race data by block group from the National Historical Geographic Information Systems (NHGIS) data portal")
+    
+    # transportation noise model
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 45-50 dB from Seto and Huang medRxiv 2023")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Percentage of individuals in a census tract exposed to noise levels LAeq \U2265 45-50 dB from Seto and Huang medRxiv 2023")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 50-60 dB from Seto and Huang medRxiv 2023")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 50-60 dB from Seto and Huang medRxiv 2023")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 60-70 dB from Seto and Huang medRxiv 2023")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 60-70 dB from Seto and Huang medRxiv 2023")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 70-80 dB from Seto and Huang medRxiv 2023")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 70-80 dB from Seto and Huang medRxiv 2023")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 80-90 dB from Seto and Huang medRxiv 2023")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 80-90 dB from Seto and Huang medRxiv 2023")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 90 dB from Seto and Huang medRxiv 2023")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 90 dB from Seto and Huang medRxiv 2023")
+    
+    if(col == "Walkability") return("Walkability of a census tract using Environmental Protection Agency (EPA) data (2021 release)")
+    
+    if(col == "No.broadband.internet") return("Estimate of the percentage of households without any type of broadband internet subscription from CDC PLACES (2023 release)")
+    if(col == "No.high.school.diploma") return("Estimate of the percentage of adults aged 25+ who have not completed 4 years of high school education or equivalent from CDC PLACES (2023 release)")
+    if(col == "Single.parent.households") return("Estimate of the percentage of households with a female or male householder with no spouse/partner present with children of the householder under 18 years from CDC PLACES (2023 release)")
+    if(col == "Crowding") return("Estimate of the percentage of occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room from CDC PLACES (2023 release)")
+    if(col == "Poverty") return("Estimate of the percentage of individuals in a census tract living below 150% of the poverty threshold from CDC PLACES (2023 release)")
+    if(col == "Housing.cost.burden") return("Estimate of the percentage of households with annual income less than $75,000 that spend 30% or more of their household income on housing from CDC PLACES (2023 release)")
+    
+    if(col == "Dew.point") return("Mean dew point temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
+    if(col == "Maximum.temperature") return("Maximum temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
+    if(col == "Minimum.temperature") return("Minimum temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
+    if(col == "Average.temperature") return("Average temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
+    if(col == "Precipitation") return("Precipitation (in.)")
+    
+    if(col == "Wildfire.smoke") return("Wildfire smoke concentration estimate from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023 release)")
+    if(col == "Nitrogen.dioxide") return("Nitrogen dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
+    if(col == "Sulfur.dioxide") return("Sulfur dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
+    if(col == "Carbon.monoxide") return("Carbon monoxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
+    if(col == "Ozone") return("Ozone concentration estimate from Centers for Disease Control and Prevention (CDC) (2023 release)")
+    
+    if(col == "Population.density") return("Population density in 2023 (population per square mile)")
+    if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to avalanches from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture  due to coastal flooding from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to cold waves from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to droughts from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to earthquakes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Hail.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hail from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Heat.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to heat waves from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Hurricane.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hurricanes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Ice.Storm.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to ice storms from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Landslide.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to landslides from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Lightning.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to lightning from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to riverine flooding from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Strong.Wind.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to strong wind from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Tornado.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tornadoes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Tsunami.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tsunamis from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to volcanic activity from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to wildfires from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to winter weather from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    
+    if(col == "bluespace") return("Percentage of blue space coverage in a census tract using the global surface water dataset from the European Commission (EC) Joint Research Commission (JRC)/Google and the Copernicus Programme (2024 release)")
+    if(col == "social_capital") return("Social capital index, indicating the overall strength of social infrastructures within communities of a census tract using data from Fraser et al. Scientific Reports 2022")
+    
+    if(col == "PFAS_dw") return("Whether PFAS has been found in water within a census tract using data from the Environmental Protection Agency (EPA) Unregulated Contaminant Monitoring Rule (UCMR) 5 (2025 release)")
+    if(col == "Median.HH.Income") return("Median income of households within a census tract using data from American Community Survey 5-year data (2019-2023). Values are censored for tracts with a median household income of over $250,000") # TODO: reword this
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index from the Center for Neighborhood Technology")
+    if(col == "Historic.Redlining.Score") return("Historic Home Owners' Loan Corporation (HOLC) score of a census tract from 1-4. 1 = A (most 'desirable' neighborhoods); 4 = D (least 'desirable' neighborhoods)")
+    
+    if(col == "pct_Open_Water") return("Percent area in a census tract with open water, generally with less than 25% cover of vegetation or soil from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
+    if(col == "pct_Developed_Open") return("Percent area in a census tract with a mixture of some constructed materials, but mostly vegetation in the form of lawn grasses from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for less than 20% of total cover. These areas most commonly include large-lot single-family housing units, parks, golf courses, and vegetation planted in developed settings for recreation, erosion control, or aesthetic purposes")
+    if(col == "pct_Developed_Low") return("Percent area in a census tract with minimally developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 20% to 49% percent of the total cover. These areas most commonly include single-family housing units")
+    if(col == "pct_Developed_Medium") return("Percent area in a census tract with moderately developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 50% to 79% of the total cover. These areas most commonly include single-family housing units")
+    if(col == "pct_Developed_High") return("Percent area in a census tract with highly developed land, where people reside or work in high numbers from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Examples include apartment complexes, row houses and commercial/industrial. Impervious surfaces account for 80% to 100% of the total cover")
+    if(col == "pct_Barren") return("Percent area in a census tract with bedrock, desert pavement, scarps, talus, slides, volcanic material, glacial debris, sand dunes, strip mines, gravel pits and other accumulations of earthen material from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
+    if(col == "pct_Evergreen_Forest") return("Percent area in a census tract with areas dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). More than 75% of the tree species maintain their leaves all year. Canopy is never without green foliage")
+    if(col == "pct_Shrub") return("Percent area in a census tract dominated by shrubs; less than 5 meters tall with shrub canopy typically greater than 20% of total vegetation from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). This class includes true shrubs, young trees in an early successional stage or trees stunted from environmental conditions")
+    if(col == "pct_Grassland") return("Percent area in a census tract dominated by gramanoid or herbaceous vegetation, generally greater than 80% of total vegetation from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). These areas are not subject to intensive management such as tilling, but can be utilized for grazing")
+    if(col == "pct_Pasture") return("Percent area in a census tract with areas of grasses, legumes, or grass-legume mixtures planted for livestock grazing or the production of seed or hay crops, typically on a perennial cycle from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Pasture/hay vegetation accounts for greater than 20% of total vegetation")
+    if(col == "pct_Crops") return("Percent area in a census tract with areas used for the production of annual crops, such as corn, soybeans, vegetables, tobacco, and cotton, and also perennial woody crops such as orchards and vineyards from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Crop vegetation accounts for greater than 20% of total vegetation. This class also includes all land being actively tilled")
+    if(col == "pct_Woody_Wetlands") return("Percent area in a census tract where forest or shrubland vegetation accounts for greater than 20% of vegetative cover and the soil or substrate is periodically saturated with or covered with water from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
+    if(col == "pct_Herbaceous_Wetlands") return("Percent area in a census tract where perennial herbaceous vegetation accounts for greater than 80% of vegetative cover and the soil or substrate is periodically saturated with or covered with water from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
+    if(col == "pct_Deciduous_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). More than 75% of the tree species shed foliage simultaneously in response to seasonal change")
+    if(col == "pct_Mixed_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Neither deciduous nor evergreen species are greater than 75% of total tree cover")
+    if(col == "pct_Perennial_Ice") return("Percent area in a census tract characterized by a perennial cover of ice and/or snow, generally greater than 25% of total cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
+    
+    if(col == "total_p1") return("Total Part I offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
+    if(col == "p1_rate") return("Total Part I offenses per 1,000 population in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
+    
+    if(col == "total_p2") return("Total Part II offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
+    if(col == "p2_rate") return("Total Part II offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
+    
+    # TODO: add legend titles for food environment columns
+    if(col == "lapop1") return("Population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lapop1share") return("Percentage of tract population that are beyond 1 mile from supermarket")
+    if(col == "lalowi1") return("Low income population count beyond 1 mile from supermarket")
+    if(col == "lalowi1share") return("Percentage of tract population that are low income individuals beyond 1 mile from supermarket")
+    if(col == "lakids1") return("Children age 0-17 population count beyond 1 mile from supermarket")
+    if(col == "lakids1share") return("Percentage of tract population that are children age 0-17 beyond 1 mile from supermarket")
+    if(col == "laseniors1") return("Age 65+ population count beyond 1 mile from supermarket")
+    if(col == "laseniors1share") return("Percentage of tract population that are age 65+ beyond 1 mile from supermarket")
+    if(col == "lawhite1") return("White population count beyond 1 mile from supermarket")
+    if(col == "lawhite1share") return("Percentage of tract population that are white beyond 1 mile from supermarket")
+    if(col == "lablack1") return("Black or African American population count beyond 1 mile from supermarket")
+    if(col == "lablack1share") return("Percentage of tract population that are Black or African American beyond 1 mile from supermarket")
+    if(col == "laasian1") return("Asian population count beyond 1 mile from supermarket")
+    if(col == "laasian1share") return("Percentage of tract population that are Asian beyond 1 mile from supermarket")
+    if(col == "lanhopi1") return("Native Hawaiian and Pacific Islander population count beyond 1 mile from supermarket")
+    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian and Pacific Islander beyond 1 mile from supermarket")
+    if(col == "laaian1") return("American Indian or Alaska Native population count beyond 1 mile from supermarket")
+    if(col == "laaian1share") return("Percentage of tract population that are American Indian or Alaska Native beyond 1 mile from supermarket")
+    if(col == "laomultir1") return("Other/Multiple race population count beyond 1 mile from supermarket")
+    if(col == "laomultir1share") return("Percentage of tract population that are Other/Multiple race beyond 1 mile from supermarket")
+    if(col == "lahisp1") return("Hispanic or Latino ethnicity population count beyond 1 mile from supermarket")
+    if(col == "lahisp1share") return("Percentage of tract population that are of Hispanic or Latino ethnicity beyond 1 mile from supermarket")
+    if(col == "lahunv1") return("Housing units without vehicle count beyond 1 mile from supermarket")
+    if(col == "lahunv1share") return("percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket")
+    if(col == "lasnap1") return("Housing units receiving SNAP benefits count beyond 1 mile from supermarket")
+    if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket")
   }
   
   #### CLEAR BUTTON OBSERVER ####
@@ -1306,11 +2170,22 @@ server <- function(input, output, session) {
     updateSelectInput(session, "mortsex", selected = "")
     updateSelectInput(session, "foodenv", selected = character(0))
     
+    updateSelectInput(session, "crime", selected = character(0))
+    
     # reset switches if needed
     update_switch("transit", value = FALSE)
     update_switch("showcounties", value = FALSE)
     update_switch("showcities", value = FALSE)
     update_switch("microplastics", value = FALSE)
+    
+    update_switch("cancer", value = FALSE)
+    update_switch("clinics", value = FALSE)
+    update_switch("ems", value = FALSE)
+    update_switch("hospitals", value = FALSE)
+    update_switch("pharmacies", value = FALSE)
+    update_switch("wic_clinics", value = FALSE)
+    update_switch("wic_retailers", value = FALSE)
+    update_switch("fqhc", value = FALSE)
     
     # clear the map
     leafletProxy("geoexmap") %>%
@@ -1318,22 +2193,348 @@ server <- function(input, output, session) {
       clearShapes()
   })
   
-  #### REACTIVE VALUES ####  
-  map_cols <- reactive({
-    df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env)
-    
-    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv), drop = FALSE]
-  }) %>% 
-    bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv) # reduce work by server
+  #### REACTIVE VALUES #### 
+  # layer ids for inputs to control number of layers 
+  layer_ids <- c("outcomes", "sociodemo", "age", "sex", "race", "socialenv", "prevention", "behaviors", "naturalenv",
+                 "airpol", "builtenv", "incsite", "incstage", "incsex", "mortsite", "mortsex", "foodenv", "crime", "noise", "land", "hazards")
   
+  # track all layers
+  prev <- reactiveValues() # previous selected values
+  prev_total <- reactiveVal(0)
+  
+  last_changed <- reactiveVal(character(0)) # one value for last changed
+  
+  done_init <- reactiveVal(FALSE)
+  
+  # helpers <- define if incidence and mortality is "ready" to be counted as a layer
+  inc.ready <- reactive({
+    site <- input$incsite
+    stage <- input$incstage
+    sex <- input$incsex
+    
+    all(!is.null(site),
+        !is.null(stage),
+        !is.null(sex),
+        nzchar(site %||% ""),
+        nzchar(stage %||% ""),
+        nzchar(sex %||% ""))
+  })
+  
+  mort.ready <- reactive({
+    site <- input$mortsite
+    sex <- input$mortsex
+    
+    all(!is.null(site),
+        !is.null(sex),
+        nzchar(site %||% ""),
+        nzchar(sex %||% ""))
+  })
+  
+  layer_counter <- reactiveVal(0) # global layer counter for color schemes
+  
+  # keep track of total layers
+  total_cols <- reactive({
+    tot <- 0
+    n_map <- if (is.null(map_cols())) 0 else max(ncol(map_cols()) - 1, 0)
+    n_food <- if (is.null(food_env_cols())) 0 else max(ncol(food_env_cols()) - 1, 0)
+    n_crime <- if (is.null(crime_cols())) 0 else max(ncol(crime_cols()) - 1, 0)
+    
+    if (mort.ready()) {
+      tot <- tot + 1
+    }
+    
+    if (inc.ready()) {
+      tot <- tot + 1
+    }
+    
+    tot <- tot + n_map + n_food + n_crime
+    tot
+  })
+  
+  # track data layer selection
+  layer_selection_state <- reactive({
+    list(main = list(outcomes = input$outcomes, sociodemographics = input$sociodemo, age = input$age,
+                     sex = input$sex, race = input$race, airpollution = input$airpol, socialenvironment = input$socialenv,
+                     behaviors = input$behaviors, prevention = input$prevention, naturalenvironment = input$naturalenv,
+                     builtenvironment = input$builtenv, noise = input$noise, landuse = input$land, hazards = input$hazards),
+         crime = input$crime,
+         food = input$foodenv,
+         cancer = list(incidence = c(input$incsite, input$incstage, input$incsex),
+                       mortality = c(input$mortsite, input$mortsex)))
+  })
+  
+  # track last changed input
+  observeEvent(input$socialenv, {last_changed("socialenv")})
+  observeEvent(input$crime, {last_changed("crime")})
+  observeEvent(input$outcomes,  {last_changed("outcomes")})
+  observeEvent(input$sociodemo,  {last_changed("sociodemo")})
+  observeEvent(input$age,  {last_changed("age")})
+  observeEvent(input$sex,  {last_changed("sex")})
+  observeEvent(input$race,  {last_changed("race")})
+  observeEvent(input$prevention,  {last_changed("prevention")})
+  observeEvent(input$behaviors,  {last_changed("behaviors")})
+  observeEvent(input$naturalenv,  {last_changed("naturalenv")})
+  observeEvent(input$airpol,  {last_changed("airpol")})
+  observeEvent(input$builtenv,  {last_changed("builtenv")})
+  observeEvent(input$foodenv, {last_changed("foodenv")})
+  observeEvent(input$incsite,  {last_changed("incsite")})
+  observeEvent(input$incstage,  {last_changed("incstage")})
+  observeEvent(input$incsex,  {last_changed("incsex")})
+  observeEvent(input$mortsite,  {last_changed("mortsite")})
+  observeEvent(input$mortsex,  {last_changed("mortsex")})
+  
+  
+  # enforce 3 max layers
+  observe({
+    layer_counter(0)
+    tot <- total_cols()
+    ptot <- prev_total()
+    
+    if (ptot <= 3 && tot > 3) {
+      print("entered if prev <= 3 && tot > 3\n")
+      exceed <- last_changed()
+      
+      if (exceed %in% c("incsite", "incstage", "incsex") && inc.ready()) {
+        shinyjs::click("incbutton")
+        showNotification("You can only display up to 3 tract or county layers. Cancer incidence selections cleared.", type = "warning", duration = 5)
+        return(NULL)
+      }
+      
+      if (exceed %in% c("mortsite", "mortsex") && mort.ready()) {
+        shinyjs::click("mortbutton")
+        showNotification("You can only display up to 3 tract or county layers. Cancer mortality selections cleared.", type = "warning", duration = 5)
+        return(NULL)
+      }
+      
+      if (!is.null(exceed)) {
+        cur_vals  <- input[[exceed]]
+        if (is.null(cur_vals)) cur_vals <- character(0) else cur_vals <- as.character(cur_vals)
+        old_vals  <- prev[[exceed]]
+        
+        # values newly added (in cur but not in old)
+        added <- setdiff(cur_vals, old_vals)
+        
+        # if there is a newly added value, drop it
+        if (length(added) > 0) {
+          keep <- setdiff(cur_vals, added[1])
+          
+          updateSelectInput(
+            session,
+            inputId  = exceed,
+            selected = keep
+          )
+        } else {
+          # fallback: revert entirely
+          updateSelectInput(
+            session,
+            inputId  = exceed,
+            selected = old_vals
+          )
+        }
+      }
+      
+      showNotification("You can only display up to 3 tract or county layers.",
+                       type = "warning",
+                       duration = 5)
+    } else {
+      for (id in layer_ids) {
+        vals <- input[[id]]
+        
+        if (is.null(vals) || length(vals) == 0) vals <- ""
+        prev[[id]] <- vals
+        
+      }
+      prev_total(tot)
+    }
+  }) %>% 
+    bindEvent(total_cols())
+  
+  ## main map (census tract) columns
+  
+  map_cols <- reactive({
+    df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env, noise_env, landuse_env, hazard_env)
+    
+    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv, input$noise, input$land, input$hazards), drop = FALSE]
+  }) %>% 
+    bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv, input$noise, input$land, input$hazards) # reduce work by server
+  
+  tab_cols <- reactive({
+    df <- og.data
+    
+    df[, c(input$outcomes_tab, input$sociodemo_tab, input$age_tab, input$sex_tab, input$race_tab, input$socialenv_tab, input$prevention_tab, input$behaviors_tab, input$naturalenv_tab, input$airpol_tab, input$builtenv_tab)]
+  })
+  
+  # food env
   food_env_cols <- reactive({
     cbind(food_env) %>% 
       dplyr::select(!!!input$foodenv)
   })
   
+  food_env_cols_tab <- reactive({
+    df <- food
+    
+    df[, c(input$foodenv_tab)]
+  })
+  
+  # county crime
   crime_cols <- reactive({
     df <- crime
     df[, c(input$crime)]
+  })
+  
+  crime_cols_tab <- reactive({
+    df <- crime
+    df[, c(input$crime_tab)]
+  })
+  
+  # census tract table
+  # TODO: update to reflect new categories
+  ct_table_cols <- reactive({
+    og.data[, 1] %>% 
+      st_drop_geometry() %>% 
+      merge(tract.bounds, by = "GEOID") %>% 
+      cbind(tab_cols()) %>% 
+      dplyr::select(-contains("geom")) %>% 
+      st_drop_geometry()
+  })
+  
+  ct_food_table_cols <- reactive({
+    food[, 1] %>% 
+      st_drop_geometry() %>% 
+      cbind(food_env_cols_tab()) %>% 
+      dplyr::select(-contains('geom')) %>% 
+      st_drop_geometry()
+  })
+  
+  # county tables
+  cnty_crime_table_cols <- reactive({
+    selected_crime <- crime_cols_tab() %>%  # selected columns from crime
+      st_drop_geometry()
+    
+    crime_df <- crime %>%  
+      dplyr::select(-contains("geom"))
+    
+    selected_col_names <- names(selected_crime) # selected column names
+    
+    all_cols <- names(crime_df) # vector of column names
+    
+    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)) # find if p1 is in any column names
+    
+    if (is_p1) {
+      p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
+      selected_idx <- which(all_cols == p1_col)
+      crime_df[, all_cols[1:selected_idx]] %>% 
+        dplyr::select(-contains("geom")) %>% 
+        st_drop_geometry()
+    } else {
+      p2_col <- selected_col_names[grepl("_p2$|^p2_", selected_col_names, ignore.case = TRUE)]
+      
+      p1_index <- which(all_cols == "p1_rate")  
+      selected_idx <- which(all_cols == p2_col)
+      
+      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%
+        dplyr::select(-contains("geom")) %>% 
+        st_drop_geometry()
+    }
+  })
+  
+  cnty_wscr_table_inc <- reactive({
+    req(input$incsite_tab != "", input$incstage_tab != "", input$incsex_tab != "")
+    wscr.inc %>% 
+      filter(Cancer.Site == input$incsite_tab,
+             Stage.At.Diagnosis == input$incstage_tab,
+             Gender == input$incsex_tab)
+  })
+  
+  cnty_wscr_table_mort <- reactive({
+    req(input$mortsite_tab != "", input$mortstage_tab != "", input$mortsex_tab != "")
+    wscr.mort %>% 
+      filter(Cancer.Site == input$mortsite_tab,
+             Stage.At.Diagnosis == input$mortstage_tab,
+             Gender == input$mortsex_tab)
+  })
+  
+  # Helper: no filter if input is "All" or NULL, filter otherwise
+  filter_if_needed <- function(df, col, val) {
+    if (is.null(val) || val == "All" || val == "") df else df[df[[col]] == val, , drop = FALSE]
+  }
+  
+  # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage_tab)
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
+    # Instead of filtering by mortsex, select all sites available for either sex (or All)
+    if (!is.null(input$incsex_tab) && input$incsex_tab != "All") {
+      df <- df[df$Gender %in% c("All", input$incsex_tab), , drop = FALSE]
+    }
+    sites <- sort(unique(df$Cancer.Site))
+    updateSelectInput(session, "incsite_tab", choices = c("Please choose a site" = "", sites),
+                      selected = isolate(input$incsite_tab))
+  })
+  
+  # On mortsite or mortsex change, update stages
+  # TODO: CHANGE FUNCTIONALITY TO MATCH THOSE OF MAP
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
+    if (!is.null(input$incsex_tab) && input$incsex_tab != "All") {
+      df <- df[df$Gender %in% c("All", input$incsex_tab), , drop = FALSE]
+    }
+    stages <- sort(unique(df$Stage.At.Diagnosis))
+    updateSelectInput(session, "incstage_tab", choices = c("Please choose a stage" = "", stages),
+                      selected = isolate(input$incstage_tab))
+  })
+  
+  # On mortsite or mortstage change, update sexes
+  observe({
+    df <- wscr.inc
+    df <- filter_if_needed(df, "Cancer.Site", input$incsite_tab)
+    df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage_tab)
+    genders <- sort(unique(df$Gender))
+    updateSelectInput(session, "incsex_tab", choices = c("Please choose a sex" = "", genders),
+                      selected = isolate(input$incsex_tab))
+  })
+  
+  observeEvent(input$incbutton_tab, {
+    updateSelectInput(session, "incsite_tab", selected = "")
+    updateSelectInput(session, "incstage_tab", selected = "")
+    updateSelectInput(session, "incsex_tab", selected = "")
+  })
+  
+  # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
+  observe({
+    df <- wscr.mort
+    # Instead of filtering by mortsex, select all sites available for either sex (or All)
+    if (!is.null(input$mortsex_tab) && input$mortsex_tab != "" && input$mortsex_tab != "All") {
+      df <- df[df$Gender %in% c("All", input$mortsex_tab), , drop = FALSE]
+    }
+    sites <- sort(unique(df$Cancer.Site))
+    updateSelectInput(session, "mortsite_tab", choices = c("Please choose a site" = "", sites),
+                      selected = isolate(input$mortsite_tab))
+  })
+  
+  # On mortsite or mortstage change, update sexes
+  observe({
+    df <- wscr.mort
+    df <- filter_if_needed(df, "Cancer.Site", input$mortsite_tab)
+    genders <- sort(unique(df$Gender))
+    updateSelectInput(session, "mortsex_tab", choices = c("Please choose a sex" = "", genders),
+                      selected = isolate(input$mortsex_tab))
+  })
+  
+  observeEvent(input$mortbutton_tab, {
+    updateSelectInput(session, "mortsite_tab", selected = "")
+    updateSelectInput(session, "mortsex_tab", selected = "")
+  })
+  
+  # point tables
+  tab_point_data <- reactive({
+    switch(input$standalone,
+           "cancer.progs" = cancer.progs,
+           "clinics" = clinics, "ems" = ems, "fqhc" = fqhc, "hospitals" = hospitals,
+           "pharmacies" = pharmacies, "wic.clinics" = wic.clinics, "wic.retailers" = wic.retailers,
+           "microplastics" = microplastics, "transit" = transit, "parks" = parks, "superfund" = superfund)
   })
   
   #### OBSERVERS FOR WSCR DATA ####
@@ -1345,20 +2546,12 @@ server <- function(input, output, session) {
              Gender == input$incsex) 
   })
   
-  # Helper: no filter if input is "All" or NULL, filter otherwise
-  filter_if_needed <- function(df, col, val) {
-    if (is.null(val) || val == "All" || val == "") df else df[df[[col]] == val, , drop = FALSE]
-  }
-  
   # On mortstage or mortsex change, update sites with a *union* of sites available for selected sex
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Stage.At.Diagnosis", input$incstage)
-    df <- filter_if_needed(df, "Cancer.Site", input$incsite)
-    # Instead of filtering by mortsex, select all sites available for either sex (or All)
-    if (!is.null(input$incsex) && input$incsex != "All") {
-      df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
-    }
+    df <- filter_if_needed(df, "Gender", input$incsex)
+
     sites <- sort(unique(df$Cancer.Site))
     updateSelectInput(session, "incsite", choices = c("Please choose a site" = "", sites),
                       selected = isolate(input$incsite))
@@ -1368,9 +2561,8 @@ server <- function(input, output, session) {
   observe({
     df <- wscr.inc
     df <- filter_if_needed(df, "Cancer.Site", input$incsite)
-    if (!is.null(input$incsex) && input$incsex != "All") {
-      df <- df[df$Gender %in% c("All", input$incsex), , drop = FALSE]
-    }
+    df <- filter_if_needed(df, "Gender", input$incsex)
+
     stages <- sort(unique(df$Stage.At.Diagnosis))
     updateSelectInput(session, "incstage", choices = c("Please choose a stage" = "", stages),
                       selected = isolate(input$incstage))
@@ -1393,7 +2585,7 @@ server <- function(input, output, session) {
     
     leafletProxy("geoexmap") %>% 
       clearGroup("cancerincidence") %>% 
-      clearControls()
+      removeControl("cancerincidence")
   })
   
   filtered.mort <- reactive({
@@ -1436,7 +2628,7 @@ server <- function(input, output, session) {
     
     leafletProxy("geoexmap") %>% 
       clearGroup("cancermortality") %>% 
-      clearControls()
+      removeControl("cancermortality")
   })
   
   # if microplastics switch is true, then show filtering criteria for microplastics
@@ -1458,76 +2650,58 @@ server <- function(input, output, session) {
     active_variables = character(0)
   )
   
-  # census tract table
-  ct_table_cols <- reactive({
-    og.data[, 1] %>% 
-      st_drop_geometry() %>% 
-      merge(tract.bounds, by = "GEOID") %>% 
-      cbind(map_cols()) %>% 
-      dplyr::select(-contains("geom")) %>% 
-      st_drop_geometry()
-    })
-  
-  #ct_food_table_cols <- reactive({})
-  
-  # county tables
-  cnty_crime_table_cols <- reactive({
-    selected_crime <- crime_cols() %>%  # selected columns from crime
-      st_drop_geometry()
-    
-    crime_df <- crime %>%  
-      dplyr::select(-contains("geom"))
-    
-    selected_col_names <- names(selected_crime) # selected column names
-    
-    all_cols <- names(crime_df) # vector of column names
-    
-    is_p1 <- any(grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)) # find if p1 is in any column names
-    
-    if (is_p1) {
-      p1_col <- selected_col_names[grepl("_p1$|^p1_", selected_col_names, ignore.case = TRUE)]
-      selected_idx <- which(all_cols == p1_col)
-      crime_df[, all_cols[1:selected_idx]] %>% 
-         dplyr::select(-contains("geom")) %>% 
-         st_drop_geometry()
-    } else {
-      p2_col <- selected_col_names[grepl("_p2$|^p2_", selected_col_names, ignore.case = TRUE)]
-      
-      p1_index <- which(all_cols == "p1_rate")  
-      selected_idx <- which(all_cols == p2_col)
-      
-      crime_df[, all_cols[c(1, 2, (p1_index + 1):selected_idx)]] %>%
-         dplyr::select(-contains("geom")) %>% 
-         st_drop_geometry()
-    }
-  })
-  
-  # cnty_wscr_table_cols <- reactive({
-  #   
-  # })
-  
-  # point tables
-  # ...
-  
-  #### DOWNLOAD HANDLER ####
-  output$download <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
-    content = function(file) {
-      st_write(map_cols(), file)
-    }
-  )
+  #### DOWNLOAD HANDLERS ####
+  # output$download <- downloadHandler(
+  #   filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
+  #   content = function(file) {
+  #     st_write(map_cols(), file)
+  #   }
+  # )
   
   output$downloadcttab <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_2020_tract_download.csv")},
+    filename = function() {"geoexmap_2020_tract_download.zip"},
     content = function(file) {
-      st_write(ct_table_cols(), file)
-    }
+      tmpdir <- tempdir()
+      
+      data <- ct_table_cols()
+      layer_name <- "geoexmap_2020_tract_download"
+      
+      shp_path <- file.path(tmpdir, paste0(layer_name, ".shp"))
+      
+      st_write(obj = data, dsn = shp_path, driver = "ESRI Shapefile", delete_dsn = TRUE)
+      
+      shp_files <- list.files(tmpdir, pattern = paste0("^", layer_name, "\\."), full.names = TRUE)
+      
+      old_wd <- getwd()
+      on.exit(setwd(old_wd), add = TRUE)
+      setwd(tmpdir)
+      
+      zipfile_tmp <- "geoexmap_2020_tract_download.zip"
+      zip(zipfile_tmp, files = basename(shp_files))
+      
+      file.copy(file.path(tmpdir, zipfile_tmp), file, overwrite = TRUE)
+    },
+    contentType = "application/zip"
   )
   
   output$downloadcntycrime <- downloadHandler(
-    filename = function() {paste0(Sys.Date(), "geoexmap_county_crime_download.csv")},
+    filename = function() {paste0(Sys.Date(), "_geoexmap_county_crime_download.csv")},
     content = function(file) {
-      st_write(crime_cols(), file)
+      st_write(crime_cols_tab(), file)
+    }
+  )
+  
+  output$downloadcntyinc <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "_geoexmap_county_cancer_inc_download.csv")},
+    content = function(file) {
+      st_write(cnty_wscr_table_inc(), file)
+    }
+  )
+  
+  output$downloadcntymort <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "_geoexmap_county_cancer_mort_download.csv")},
+    content = function(file) {
+      st_write(cnty_wscr_table_mort(), file)
     }
   )
   
@@ -1562,117 +2736,13 @@ server <- function(input, output, session) {
                             zaxis = list(title = gsub("\\.", " ", names(plotly.dat)[3])))) %>% 
         config()
     } else {
-      
+      #TODO: add to render UI to choose at least 1 variable
     }
 
   })
   
-  #### ACTIVE VARIABLE PANEL ####
-  # create the variable panel HTML
-  create_variable_panel <- function(variables) {
-    if (length(variables) == 0) {
-      return("")
-    }
-    
-    # clickable variable items
-    variable_items <- sapply(variables, function(var) {
-      # shortened display name if needed
-      display_name <- if(nchar(var) > 25) paste0(substr(var, 1, 22), "...") else var
-      
-      paste0(
-        '<div class="variable-item" onclick="Shiny.setInputValue(\'remove_variable\', \'', var, '\', {priority: \'event\'});" ',
-        'title="Click to remove: ', var, '">',
-        '<span class="variable-name">', display_name, '</span>',
-        '<span class="remove-icon">×</span>',
-        '</div>'
-      )
-    })
-    
-    # combine full panel HTML
-    panel_html <- paste0(
-      '<div id="variable-panel" style="
-        background: rgba(255, 255, 255, 0.9);
-        border: 2px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 10px;
-        max-width: 250px;
-        max-height: 300px;
-        overflow-y: auto;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      ">',
-      '<div style="font-weight: bold; margin-bottom: 8px; color: #333;">Active Variables</div>',
-      paste(variable_items, collapse = ""),
-      '</div>',
-      '<style>
-        .variable-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 5px 8px;
-          margin: 2px 0;
-          background: #f8f9fa;
-          border: 1px solid #dee2e6;
-          border-radius: 3px;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-        .variable-item:hover {
-          background: #e9ecef;
-          border-color: #adb5bd;
-        }
-        .variable-name {
-          flex: 1;
-          font-size: 12px;
-          color: #495057;
-        }
-        .remove-icon {
-          color: #dc3545;
-          font-weight: bold;
-          font-size: 16px;
-          margin-left: 5px;
-        }
-        .variable-item:hover .remove-icon {
-          color: #c82333;
-        }
-      </style>'
-    )
-    
-    return(panel_html)
-  }
+  # TODO: add visual cue for accordion panels to indicate values are chosen
   
-  # handle individual variable removal
-  observeEvent(input$remove_variable, {
-    var_to_remove <- input$remove_variable
-    
-    if (!is.null(var_to_remove) && var_to_remove != "") {
-      # lookup table for variable categories
-      variable_lookup <- list(
-        list(data = health_outcomes, input_id = "outcomes", update_fn = updateSelectInput),
-        list(data = sociodemo, input_id = "sociodemo", update_fn = updateSelectInput),
-        list(data = age, input_id = "age", update_fn = updateSelectInput),
-        list(data = sex, input_id = "sex", update_fn = updateSelectInput),
-        list(data = race, input_id = "race", update_fn = updateSelectInput),
-        list(data = social_env, input_id = "socialenv", update_fn = updateSelectInput),
-        list(data = health_prevention, input_id = "prevention", update_fn = updateSelectInput),
-        list(data = health_behaviors, input_id = "behaviors", update_fn = updateSelectInput),
-        list(data = natural_env, input_id = "naturalenv", update_fn = updateSelectInput),
-        list(data = air_pol, input_id = "airpol", update_fn = updateSelectInput),
-        list(data = built_env, input_id = "builtenv", update_fn = updateSelectInput),
-        list(data = food_env_inp, input_id = "foodenv", update_fn = updateVarSelectInput)
-      )
-      
-      # find the matching category and update
-      for (category in variable_lookup) {
-        if (var_to_remove %in% colnames(category$data)) {
-          current_selection <- input[[category$input_id]]
-          new_selection <- setdiff(current_selection, var_to_remove)
-          category$update_fn(session, category$input_id, selected = new_selection)
-          break
-        }
-      }
-    }
-  })
   
   #### INITIAL MAP RENDER ####
   output$geoexmap <- renderLeaflet({
@@ -1702,28 +2772,42 @@ server <- function(input, output, session) {
               ))
     })
   
+  output$food_table <- renderReactable({
+    validate(need(base::ncol(food_env_cols_tab()) > 1, "Please select a food environment variable."))
+    
+    reactable(food_env_cols_tab())
+  })
+  
   output$cnty_crime_table <- renderReactable({
-    validate(need(base::ncol(crime_cols()) > 1, "Please select a variable."))
+    validate(need(base::ncol(crime_cols_tab()) > 1, "Please select a crime variable."))
     
     reactable(cnty_crime_table_cols())
   })
   
+  output$cnty_mort_table <- renderReactable({
+    validate(need(base::nrow(cnty_wscr_table_mort()) > 1, "Please select variables for cancer mortality."))
+    reactable(cnty_wscr_table_mort())
+  })
+  
+  output$cnty_inc_table <- renderReactable({
+    validate(need(base::nrow(cnty_wscr_table_inc()) > 1, "Please select variables for cancer incidence."))
+    reactable(cnty_wscr_table_inc())
+  })
+  
+  output$standalone_table <- renderReactable({
+    req(tab_point_data())
+    reactable(tab_point_data())
+  })
+  
   #### MAIN OBSERVER LOGIC ####
   observe({
-    # if (ncol(map_cols()) == 4) {
-    #   print("Disabling select inputs...")
-    #   shinyjs::disable("outcomes")
-    #   shinyjs::disable("sociodemo")
-    #   shinyjs::disable("socialenv")
-    #   shinyjs::disable("behaviors")
-    #   shinyjs::disable("prevention")
-    #   shinyjs::disable("naturalenv")
-    #   shinyjs::disable("builtenv")
-    # }
+    layer_counter(0)
     
-    withProgress(message = "Plotting...", 
+    cat("RESET LAYER COUNTER TO 0\n")
+    withProgress(message = "Working...", 
     {plotlyProxy("chart")
       
+      # TODO: change to accommodate all variables, not just main map cols
       current_vars <- colnames(map_cols())
       current_vars <- current_vars[!current_vars %in% c("geom")]
       values$active_variables <- current_vars
@@ -1734,27 +2818,16 @@ server <- function(input, output, session) {
         clearMarkers() %>% 
         addProviderTiles(providers$CartoDB.Positron)
       
-      # update the variable panel
-      if (length(current_vars) > 0) {
-        panel_html <- create_variable_panel(current_vars)
-        custom_attribution <- "My data citation &copy; Me, 2025"
-        proxy <- proxy %>% addControl(
-            html = panel_html,
-            position = "bottomright",
-            layerId = "variable_panel"
-          ) 
-      }
-      # for each chosen column, define the palette, and add polygons
+      # TODO: 
+      # TODO: dynamic labels for tracts
       label = ""
       
       ##### point control flow #####
       if (input$transit) {
-        print("Adding points")
-        
         html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bus-front" viewBox="0 0 16 16">
   <path d="M5 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0m8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-6-1a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2zm1-6c-1.876 0-3.426.109-4.552.226A.5.5 0 0 0 3 4.723v3.554a.5.5 0 0 0 .448.497C4.574 8.891 6.124 9 8 9s3.426-.109 4.552-.226A.5.5 0 0 0 13 8.277V4.723a.5.5 0 0 0-.448-.497A44 44 0 0 0 8 4m0-1c-1.837 0-3.353.107-4.448.22a.5.5 0 1 1-.104-.994A44 44 0 0 1 8 2c1.876 0 3.426.109 4.552.226a.5.5 0 1 1-.104.994A43 43 0 0 0 8 3"/>
   <path d="M15 8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1V2.64c0-1.188-.845-2.232-2.064-2.372A44 44 0 0 0 8 0C5.9 0 4.208.136 3.064.268 1.845.408 1 1.452 1 2.64V4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v3.5c0 .818.393 1.544 1 2v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14h6v1.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2c.607-.456 1-1.182 1-2zM8 1c2.056 0 3.71.134 4.822.261.676.078 1.178.66 1.178 1.379v8.86a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5V2.64c0-.72.502-1.301 1.178-1.379A43 43 0 0 1 8 1"/>
-</svg> Transit stops<br/>'
+</svg> Transit stops (zoom in to see stops)<br/>'
         
         clusterOptions <- markerClusterOptions(disableClusteringAtZoom = 14)
         
@@ -1775,34 +2848,63 @@ server <- function(input, output, session) {
       }
       
       if (input$cancer) {
-        # add svg for icon
-        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hospital-fill" viewBox="0 0 16 16">
-  <path d="M6 0a1 1 0 0 0-1 1v1a1 1 0 0 0-1 1v4H1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h6v-2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5V16h6a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-3V3a1 1 0 0 0-1-1V1a1 1 0 0 0-1-1zm2.5 5.034v1.1l.953-.55.5.867L9 7l.953.55-.5.866-.953-.55v1.1h-1v-1.1l-.953.55-.5-.866L7 7l-.953-.55.5-.866.953.55v-1.1zM2.25 9h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 2 9.75v-.5A.25.25 0 0 1 2.25 9m0 2h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25M2 13.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zM13.25 9h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25M13 11.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25zm.25 1.75h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25"/>
-</svg> Cancer Programs <br/>'
-        
+        symbol <- makeSymbol(shape = "circle", 
+                              fillColor = "#A6CEE3",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         proxy <- proxy %>% 
           addMarkers(data = cancer.progs,
                      popup = ~Center.or.Hospital.Name,
                      group = "cancer_programs",
-                     icon = makeIcon("/hospital-fill.svg")) %>% 
-          addControl(html = html_legend, position = "topright")
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)
+                     ) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Commission on Cancer (CoC)-accredited programs",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
+                     #color = "#8DD3C7",
+                     #fillColor = "#8DD3C7") %>% 
+          #addLegendImage(html = html_legend, position = "topright")
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "cancer_programs")
       }
       
       if (input$alc) {
-        # svg for icon
-        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shop" viewBox="0 0 16 16">
-  <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zm3 0h-2v3h2z"/>
-</svg> Alcohol Retailers <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#1F78B4",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = alc,
                      popup = ~Licensee,
                      group = "alc_retailers",
-                     icon = makeIcon("/shop.svg")) %>% 
-          addControl(html = html_legend, position = "topright")
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Alcohol retailers",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "alc_retailers")
@@ -1835,94 +2937,209 @@ server <- function(input, output, session) {
       }
       
       if (input$clinics) {
-        html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-plus-fill" viewBox="0 0 16 16">
-          <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5z"/>
-            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5zm4.5 6V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5a.5.5 0 0 1 1 0"/>
-              </svg> Clinics <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#B2DF8A",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = clinics,
                      popup = ~NAME,
                      group = "clinics",
-                     icon = makeIcon("/clipboard-plus-fill.svg")) %>% 
-          addControl(html = html_legend, position = "topright")
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Clinics",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "clinics")
       }
       
       if (input$ems) {
-        html_legend <- "EMS Stations </br>"
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#33A02C",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = ems,
                      popup = ~AGENCY,
-                     group = "ems") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "ems",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "EMS Stations",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "ems")
       }
       
       if (input$hospitals) {
-        html_legend <- 'Hospitals <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FB9A99",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = hospitals,
                      popup = ~NAME,
-                     group = "hospitals") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "hospitals",
+                     icon = ~ icons(iconUrl = symbol,
+                                  iconWidth = 20,
+                                  iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Hospitals",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "hospitals")
       }
       
       if (input$pharmacies) {
-        html_legend <- 'Pharmacies <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FB9A99",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         proxy <- proxy %>% 
           addMarkers(data = pharmacies,
                      popup = ~inFacility,
-                     group = "pharmacies") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "pharmacies",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "Pharmacies",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "pharmacies")
       }
       
       if (input$wic_clinics) {
-        html_legend <- 'WIC Clinics <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#E31A1C",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = wic.clinics,
                      popup = ~Clinic,
-                     group = "wic_clinics") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "wic_clinics",
+                     icon = ~ icons(iconUrl = symbol,
+                             iconWidth = 20,
+                             iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "WIC clinics",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          ) 
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "wic_clinics")
       }
       
       if (input$wic_retailers) {
-        html_legend <- 'WIC Retailers <br/>'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FDBF6F",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = wic.retailers,
                      popup = ~Retailer,
-                     group = "wic_retailers") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "wic_retailers",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>% 
+          addLegendImage(
+            images = symbol,
+            labels = "WIC retailers",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "wic_retailers")
       }
       
       if (input$fqhc) {
-        html_legend <- 'Federally Qualified Health Centers (FQHCs)'
+        symbol <- makeSymbol(shape = "circle", 
+                             fillColor = "#FF7F00",
+                             color = "black",
+                             opacity = 1,
+                             fillOpacity = 0.8,
+                             height = 20,
+                             width = 20, 'stroke-width' = 1)
         
         proxy <- proxy %>% 
           addMarkers(data = fqhc,
                      popup = ~Facility,
-                     group = "fqhc") %>% 
-          addControl(html = html_legend, position = "topright")
+                     group = "fqhc",
+                     icon = ~ icons(iconUrl = symbol,
+                                    iconWidth = 20,
+                                    iconHeight = 20)) %>%
+          addLegendImage(
+            images = symbol,
+            labels = "FQHCs",
+            width = 20,
+            height = 20,
+            orientation = "vertical",
+            position = 'topright',
+            labelStyle = "font-size: 12px;"
+          )
       } else {
         proxy <- proxy %>% 
           clearGroup(group = "fqhc")
@@ -1937,162 +3154,338 @@ server <- function(input, output, session) {
         pal <- colorFactor("OrRd", domain = levels(micro_data_conc), ordered = TRUE)
         proxy <- proxy %>% 
           addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text),
-                           radius = 4,
-                           fillOpacity = 0.8) %>% 
+                           radius = 4, fillOpacity = 0.8, popup = ~paste("<b>Region:</b>", Region, "<b><br>Sampling method:</b>", Sampling.Method,
+                                                                         "<b><br>Date of collection:</b>", Date..MM.DD.YYYY.)) %>% 
           addLegend(pal = pal,
                     values = ~micro_data$Concentration.class.text,
                     title = "Microplastics Concentration")
       }
       
-      ##### map (food environment) #####
-      for (c in colnames(food_env_cols())) {
-        pal <- geoex.palette(c)
-        
-        if (!is.null(pal)) {
-          proxy <- proxy %>% 
-            addPolygons(data = food_env_cols(), fillColor = ~pal(food_env_cols()[[c]]), stroke = TRUE, weight = 0.9, color = "blue",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-            addLegend(pal = pal, values = ~food_env_cols()[[c]], title = legend.titles(c))
-        }
-      }
-      
       ##### map (main data) #####
-      # x - data vector
-      # col - column name
-      get_pal_labs <- function(x, col) {
-        # first check if percentage--overrides others
-        if (col %in% percent.vars) {
-          print("percentage")
-          if (col != "Percent.Male" & col != "Percent.Female") {
-            # pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2)
-            # return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
-            pal_labs <- c(0, 20, 40, 60, 80, 100)
-            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1]) # first lag is NA
-          } else {
-            pal_labs <- round(quantile(x, seq(0, 1, 0.5), na.rm = TRUE), digits = 2)
-            return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+        groups <- character(0)
+      
+        for (i in seq_along(colnames(map_cols()))) {
+          c_name <- colnames(map_cols())[i]
+          x <- map_cols()[[c_name]]
+          k <- NULL
+          
+          if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+            k <- isolate(layer_counter()) + 1
+            layer_counter(k) # set the new layer count
+            print(paste("LAYER COUNTER", layer_counter()))
           }
           
-        }
-        
-        # get around PFAS label
-        else if (!is.logical(x)) {
-          pal_labs <- round(quantile(x, seq(0, 1, 0.2), na.rm = TRUE), digits = 2) # will need to change for some vars
-          return(paste(lag(pal_labs), pal_labs, sep = " - ")[-1])
+          pal <- geoex.palette(c_name, df_vars, layer_index = layer_counter())
           
-        } else {
-          return(c(TRUE, FALSE))
+          
+          if (!is.null(pal)){
+            opacity <- if (k == 1) 0.5 else 0.2
+            
+            groups <- append(groups, layer.titles(c_name))
+            print(groups)
+            
+            info_id <- paste0("legend-info-", c_name)
+            info_txt <- var.info(c_name)
+            
+            if (c_name == "PFAS_dw") {
+              proxy <- proxy %>% 
+                addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+                            fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                            group = layer.titles(c_name), label = "") %>% 
+                addLegendFactor(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
+                                 orientation = "horizontal", shape = "circle", 
+                                 title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                             htmltools::tags$span(
+                                                               legend.titles(c_name),
+                                                               style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                             ),
+                                                             htmltools::tags$span(
+                                                               bs_icon('info-circle-fill'), # circled 'i'
+                                                               id    = info_id,
+                                                               `data-bs-toggle` = "tooltip",
+                                                               `data-bs-placement` = "top",
+                                                               title = info_txt,
+                                                               style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                             )
+                                 ),
+                                 labelStyle = "text-align: center;",
+                                 className  = "my-centered-num-legend",
+                                 position   = "bottomright") %>% 
+                addLayersControl(overlayGroups = groups,
+                                 position = "topright",
+                                 options = layersControlOptions(collapsed = FALSE))
+            }
+            
+            else {
+              proxy <- proxy %>% 
+                addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+                            fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                            group = layer.titles(c_name), label = "") %>% 
+                addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
+                                 orientation = "horizontal", shape = "stadium", 
+                                 width = 300,   # wider bar
+                                 height = 18, bins = 5,
+                                 title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                             htmltools::tags$span(
+                                                               legend.titles(c_name),
+                                                               style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                             ),
+                                                             htmltools::tags$span(
+                                                               bs_icon('info-circle-fill'), # circled 'i'
+                                                               id    = info_id,
+                                                               `data-bs-toggle` = "tooltip",
+                                                               `data-bs-placement` = "top",
+                                                               title = info_txt,
+                                                               style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                             )
+                                 ),
+                                 labelStyle = "text-align: center;",
+                                 className  = "my-centered-num-legend",
+                                 position   = "bottomright") %>% 
+                addLayersControl(overlayGroups = groups,
+                                 position = "topright",
+                                 options = layersControlOptions(collapsed = FALSE))
+            }
+            
+            session$sendCustomMessage(
+              "modeLegendTooltip",
+              list(text = "more about variable")
+            )
+            }
+            
         }
-      }
       
-      for (c in colnames(map_cols())) {
-        print(c)
-        pal <- geoex.palette(c)
+      ##### map (food environment) #####
+      for (i in seq_along(colnames(food_env_cols()))) {
+        c_name <- colnames(food_env_cols())[i]
+        x <- food_env_cols()[[c_name]]
+        k <- NULL
         
-        if (!is.null(pal)){
-          x <- map_cols()[[c]]
-          pal_colors <- unique(pal(sort(map_cols()[[c]]))) # hex codes
-          print(length(pal_colors))
-          print(length(get_pal_labs(map_cols()[[c]], c)))
-          
-          # get labels from function
-          pal_labs <- get_pal_labs(x, c)
-          
-          # reconstruct breaks from labels
-          parts  <- strsplit(pal_labs, " - ", fixed = TRUE)
-          lower  <- as.numeric(vapply(parts, `[[`, character(1L), 1L))
-          upper  <- as.numeric(vapply(parts, `[[`, character(1L), 2L))
-          mids   <- (lower + upper) / 2
-          
-          # evaluate the palette at the midpoints: one color per label
-          pal_colors <- pal(mids)
-          print(length(pal_colors))
-          print(length(pal_labs))
+        if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          k <- isolate(layer_counter()) + 1
+          layer_counter(k) # set the new layer count
+          print(paste("LAYER COUNTER", layer_counter()))
+        }
 
+        pal <- geoex.palette(c_name, food, layer_index = layer_counter())
+        
+        if (!is.null(pal)) {
+          groups <- append(groups, layer.titles(c_name))
+          opacity <- if (k == 1) 0.5 else 0.2
+          
+          info_id <- paste0("legend-info-", c_name)
+          info_txt <- var.info(c_name)
+          
           proxy <- proxy %>% 
-            addPolygons(., fillColor = ~pal(x), stroke = input$showbounds, weight = 0.75, color = "black",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                        label = "") %>% 
-            addLegend(colors = pal_colors, labels = get_pal_labs(x, c), title = legend.titles(c))
-            #addLegend(pal = pal, values = map_cols()[[c]], title = legend.titles(c))
+            addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue", group = layer.titles(c_name),
+                        fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 300,   # wider bar
+                             height = 18, bins = 5,
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           legend.titles(c_name),
+                                                           style = "flex:0 1 auto; text-align:center;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'),                    # circled 'i'
+                                                           id    = info_id,
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = info_txt,
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center; font-weight: bold"
+                                                         )
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+          #addLegend(pal = pal, values = x, title = legend.titles(c_name))
         }
       }
       
       ##### map (crime) #####
-      for (c in colnames(crime_cols())) {
-        print(c)
-        pal <- geoex.palette(c)
+      #observe({
+        for (i in seq_along(colnames(crime_cols()))) {
+          c_name <- colnames(crime_cols())[i]
+          x <- crime_cols()[[c_name]]
+          k <- NULL
+          
+          if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+            k <- layer_counter() + 1
+            layer_counter(k) # set the new layer count
+            print(paste("LAYER COUNTER", layer_counter()))
+          }
+          
+          pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
+          
+          if (!is.null(pal)){
+            groups <- append(groups, layer.titles(c_name))
+            opacity <- if (k == 1) 0.5 else 0.2
+            
+            proxy <- proxy %>% 
+              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = layer.titles(c_name),
+                          fillOpacity = opacity, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+              #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
+              #addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
+              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+                               orientation = "horizontal", shape = "stadium", 
+                               width = 300,   # wider bar
+                               height = 18, bins = 5,
+                               title = htmltools::tags$div(
+                                 legend.titles(c_name),
+                                 style = "text-align: center; width: 100%; font-weight: bold;"
+                               ),
+                               labelStyle = "text-align: center; font-weight: bold;",
+                               className  = "my-centered-num-legend",
+                               position   = "bottomright") %>% 
+              addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
+                               position = "topright",
+                               options = layersControlOptions(collapsed = FALSE))
+          }
+        }#}) %>% 
+        #bindEvent(input$crime)
+      
+      ##### map (WSCR incidence) #####
+      #observe({
+      if (inc.ready()) {
+        geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
+          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
         
-        if (!is.null(pal)){
-          proxy <- proxy %>% 
-            addPolygons(data = crime_cols(), fillColor = ~pal(crime_cols()[[c]]), weight = 0.75, color = "black",
-                        fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                        label = c) %>% 
-            addLegend(pal = pal, values = ~crime_cols()[[c]], title = legend.titles(c)) 
+        if (nrow(geo.inc) > 0) {
+          k <- layer_counter() + 1
+          layer_counter(k)
+          print(paste("LAYER COUNTER", layer_counter()))
+          
+          opacity <- if (k == 1) 0.5 else 0.2
+          
+          pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.inc, layer_index = layer_counter())
+          #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
+          val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
+          groups <- append(groups, "Cancer incidence")
+          proxy <- proxy %>%
+            addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                        popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>% 
+            addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 300,   # wider bar
+                             height = 18, bins = 5,
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2025:"),
+                                                           style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'),
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = "Data from the Washington State Cancer Registry",
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                         )
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups,
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+            #addLegend(layerId = "cancerincidence", pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:")) 
         }
+        
+      } else {
+        proxy <- proxy %>%
+          clearGroup("Cancer incidence") 
       }
       
-      ##### map (WSCR incidence) #####
-      observe({
-        if (!is.null(filtered.inc()) && nrow(filtered.inc()) > 0) {
-          geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
-            mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-          print(geo.inc)
-          if (nrow(geo.inc) > 0) {
-            pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
-            val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
-            proxy <- proxy %>%
-              addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                         "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancerincidence", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(pal = pal, values = val, title = paste(unique(geo.inc$Cancer.Site), "Cancer Incidence Rate per 100,000:"))
-          }
+      ##### map (WSCR mortality) #####
+      #observe({
+      if (mort.ready()) {
+        geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
+          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+        
+        if (nrow(geo.mort) > 0) {
+          k <- layer_counter() + 1
+          layer_counter(k)
+          print(paste("LAYER COUNTER", layer_counter()))
           
-        } else {
-          proxy <- proxy %>%
-            clearGroup("cancerincidence")
-        }
-      })
-      
-      ##### map (WSCR incidence) #####
-      observe({
-        if (!is.null(filtered.mort()) && nrow(filtered.mort()) > 0) {
-          geo.mort <- base::merge(county.bounds, filtered.mort(), by.x = "NAME", by.y = "counties") %>% 
-            mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
-          print(geo.mort)
-          if (nrow(geo.mort) > 0) {
-            pal <- colorNumeric("YlOrRd", domain = geo.mort$Age.Adj..Rate.per.100.000, n = 5)
-            val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
-            proxy <- proxy %>%
-              addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                          popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                         "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
-                          group = "cancermortality", weight = 0.75, color = "black", fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegend(pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
-          }
+          opacity <- if (k == 1) 0.5 else 0.2
           
-        } else {
+          pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.mort, layer_index = layer_counter())
+          val <- sort(geo.mort$Age.Adj..Rate.per.100.000)
+          groups <- append(groups, "Cancer mortality")
           proxy <- proxy %>%
-            clearGroup("cancermortality")
+            addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
+                        popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>%
+            addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 300,   # wider bar
+                             height = 18, bins = 5,
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2023:"),
+                                                           style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'),
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = "Data from the Washington State Cancer Registry",
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                         )
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups,
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+            #addLegend(layerId = "cancermortality", pal = pal, values = val, title = paste(unique(geo.mort$Cancer.Site), "Cancer Mortality Rate per 100,000:"))
         }
-      })
+        
+      } else {
+        proxy <- proxy %>%
+          clearGroup("Cancer mortality")
+      }
       
       if (length(current_vars) == 0) {
         # remove panel if no variables
         proxy %>% 
           removeControl(layerId = "variable_panel")
       }
-      
+      ##### shapefile bounds #####
       if (input$showcounties) {
         html_legend = ''
         proxy <- proxy %>% 
-          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#85BDBF", fill = FALSE) 
+          addPolygons(data = county.bounds, stroke = TRUE, weight = 2, color = "#0f4c5c", fill = FALSE,
+                      group = "countybounds") 
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("countybounds")
       }
       
       if (input$showcities) {
         proxy <- proxy %>% 
-          addPolygons(data = city.bounds, stroke = TRUE, weight = 2, color = "#57737A", fill = FALSE)
+          addPolygons(data = city.bounds, stroke = TRUE, weight = 2, color = "#e36414", fill = FALSE,
+                      group = "citybounds")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("citybounds")
+      }
+      
+      if (input$showbounds) {
+        proxy <- proxy %>% 
+          addPolygons(data = tract.bounds, stroke = TRUE, weight = 1, color = "grey", fill = FALSE,
+                      group = "tractbounds")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("tractbounds")
       }
       
       proxy <- proxy %>% 
@@ -2100,9 +3493,9 @@ server <- function(input, output, session) {
       
     })  
   }) %>% 
-    bindEvent(list(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$airpol, input$socialenv, input$crime, input$behaviors, input$prevention, input$naturalenv, input$micro, input$builtenv, input$transit, input$alc, input$superfund,
-                   input$parks, input$cancer, input$clinics, input$ems, input$hospitals, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
-                   input$upload, input$foodenv))
+    bindEvent(layer_selection_state(), input$transit, input$alc, input$superfund, input$parks, input$micro, input$cancer, input$clinics, input$ems, input$hospitals, 
+                   input$pharmacies, input$wic_clinics, input$wic_retailers, input$fqhc, input$showcities, input$showcounties, input$showbounds, 
+                   input$upload) 
 }
 
 # -------- CREATE SHINY APP --------
