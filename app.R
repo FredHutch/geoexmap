@@ -798,8 +798,8 @@ ui <- page_navbar(
         });
       }
     });
-  "),
-                includeHTML("google-analytics.html"))
+  ")),
+    includeHTML("google-analytics.html")
   ),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
