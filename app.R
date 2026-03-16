@@ -750,7 +750,7 @@ standalone_tab <- c("Choose dataset" = "",
 # -------- UI LAYOUT --------
 ui <- page_navbar(
   shinyjs::useShinyjs(),
-  tags$head( # define style and scrips
+  tags$head( # define style and scripts
     tags$style(HTML(" 
     .leaflet-control.my-centered-num-legend {
       background: white;
@@ -798,7 +798,8 @@ ui <- page_navbar(
         });
       }
     });
-  "))
+  "),
+                includeHTML("google-analytics.html"))
   ),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   nav_spacer(),
