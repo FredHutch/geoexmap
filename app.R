@@ -252,7 +252,6 @@ crimeenv <- c("Part I offenses (count)" = "total_p1",
               "Part II offenses (count)" = "total_p2",
               "Part II offenses (rate)" = "p2_rate")
 
-# TODO: take out variables according to feedback
 foodenv <- c("Population > 1 mile from supermarket (total)" = "lapop1",
              "Population > 1 mile from supermarket (percentage)" = "lapop1share",
              "Low-income population > 1 mile from supermarket (total)" = "lalowi1",
@@ -627,6 +626,7 @@ categories <- accordion(
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
     # TODO: fix upload handler
+    # TODO: disclaimer about uploaded data?
     fileInput("upload", "Upload a shapefile", accept = ".shp")#,
     #downloadButton("download", "Download data")
   )
@@ -834,19 +834,24 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
-                              accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"))),
-              accordion_panel("County Data", 
-                              accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
-                              accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
-                              accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
-              accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
-              
+              accordion(
+                accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
+                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"))),
+                accordion_panel("County Data", 
+                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
+                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
+                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
+                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
+              )
+
             )),
   nav_panel("Documentation",
             h2("Version History"),
             h2("Technical Documentation"),
             a("geoexmap_technical_documentation.pdf", target = "_blank", href = "geoexmap_technical_documentation.pdf")),
+  nav_panel("About", fluidPage(
+    
+  )),
   nav_panel("Contact us",
             h3("Questions or comments?"),
             a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org")),
@@ -2677,29 +2682,7 @@ server <- function(input, output, session) {
     content = function(file) {
       st_write(ct_table_cols(), file)
     }
-    # filename = function() {"geoexmap_2020_tract_download.zip"},
-    # content = function(file) {
-    #   tmpdir <- tempdir()
-    #   
-    #   data <- ct_table_cols()
-    #   layer_name <- "geoexmap_2020_tract_download"
-    #   
-    #   shp_path <- file.path(tmpdir, paste0(layer_name, ".shp"))
-    #   
-    #   st_write(obj = data, dsn = shp_path, driver = "ESRI Shapefile", delete_dsn = TRUE)
-    #   
-    #   shp_files <- list.files(tmpdir, pattern = paste0("^", layer_name, "\\."), full.names = TRUE)
-    #   
-    #   old_wd <- getwd()
-    #   on.exit(setwd(old_wd), add = TRUE)
-    #   setwd(tmpdir)
-    #   
-    #   zipfile_tmp <- "geoexmap_2020_tract_download.zip"
-    #   zip(zipfile_tmp, files = basename(shp_files))
-    #   
-    #   file.copy(file.path(tmpdir, zipfile_tmp), file, overwrite = TRUE)
-    # },
-    # contentType = "application/zip"
+    
   )
   
   output$downloadcntycrime <- downloadHandler(
