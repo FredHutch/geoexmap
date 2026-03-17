@@ -2673,29 +2673,33 @@ server <- function(input, output, session) {
   
   # TODO: csv download instead of dbf
   output$downloadcttab <- downloadHandler(
-    filename = function() {"geoexmap_2020_tract_download.zip"},
+    filename = function() {paste0(Sys.Date(), "_geoexmap_2020_tract_download.csv")},
     content = function(file) {
-      tmpdir <- tempdir()
-      
-      data <- ct_table_cols()
-      layer_name <- "geoexmap_2020_tract_download"
-      
-      shp_path <- file.path(tmpdir, paste0(layer_name, ".shp"))
-      
-      st_write(obj = data, dsn = shp_path, driver = "ESRI Shapefile", delete_dsn = TRUE)
-      
-      shp_files <- list.files(tmpdir, pattern = paste0("^", layer_name, "\\."), full.names = TRUE)
-      
-      old_wd <- getwd()
-      on.exit(setwd(old_wd), add = TRUE)
-      setwd(tmpdir)
-      
-      zipfile_tmp <- "geoexmap_2020_tract_download.zip"
-      zip(zipfile_tmp, files = basename(shp_files))
-      
-      file.copy(file.path(tmpdir, zipfile_tmp), file, overwrite = TRUE)
-    },
-    contentType = "application/zip"
+      st_write(ct_table_cols(), file)
+    }
+    # filename = function() {"geoexmap_2020_tract_download.zip"},
+    # content = function(file) {
+    #   tmpdir <- tempdir()
+    #   
+    #   data <- ct_table_cols()
+    #   layer_name <- "geoexmap_2020_tract_download"
+    #   
+    #   shp_path <- file.path(tmpdir, paste0(layer_name, ".shp"))
+    #   
+    #   st_write(obj = data, dsn = shp_path, driver = "ESRI Shapefile", delete_dsn = TRUE)
+    #   
+    #   shp_files <- list.files(tmpdir, pattern = paste0("^", layer_name, "\\."), full.names = TRUE)
+    #   
+    #   old_wd <- getwd()
+    #   on.exit(setwd(old_wd), add = TRUE)
+    #   setwd(tmpdir)
+    #   
+    #   zipfile_tmp <- "geoexmap_2020_tract_download.zip"
+    #   zip(zipfile_tmp, files = basename(shp_files))
+    #   
+    #   file.copy(file.path(tmpdir, zipfile_tmp), file, overwrite = TRUE)
+    # },
+    # contentType = "application/zip"
   )
   
   output$downloadcntycrime <- downloadHandler(
