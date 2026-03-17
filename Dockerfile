@@ -8,6 +8,8 @@ RUN R -e 'install.packages(c("shiny", "tidyverse", "sf", "leaflet", "leaflet.ext
 # Copy app to /srv/shiny-server/
 COPY app.R /srv/shiny-server/
 
+COPY google-analytics.html /srv/shiny-server/
+
 # Copy www to /srv/shiny-server/
 COPY www/* /srv/shiny-server/www/
 
