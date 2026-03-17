@@ -39,19 +39,22 @@ data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_
 og.data <- data # keep original data for data download/tables
 
 # change here so that mapped values are NA if 0--to map transparently on the map
-data <- data %>% 
-  mutate(across(where(is.numeric), ~na_if(., 0)))
+#data <- data %>% 
+#  mutate(across(where(is.numeric), ~na_if(., 0)))
 
 food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env") %>% 
   mutate(lapop1 = as.numeric(lapop1), lapop1share = as.numeric(lapop1share))
 
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
 
+# TODO: fix wscr mortality (anal cancer)
+# TODO: sentence case for wscr data
 wscr.inc <- fread("Data_Processed/wscr_inc.csv")
 wscr.mort <- fread("Data_Processed/wscr_mort.csv") %>% 
   mutate(Stage.At.Diagnosis = "Invasive")
 
 # point data
+# TODO: clean up data (make more consistent)
 transit <- st_read("Data_Processed/complete/geoexmap_data.gpkg",
                    layer = "transit")
 
@@ -496,6 +499,7 @@ categories <- accordion(
                              placement = "right",
                              id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
+    # TODO: add an info symbol with: These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available.
     accordion_panel("Cancer Incidence", icon = uiOutput("inc_icon"),
                     selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
@@ -623,6 +627,7 @@ categories <- accordion(
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
+    # TODO: fix upload handler
     fileInput("upload", "Upload a shapefile", accept = ".shp")#,
     #downloadButton("download", "Download data")
   )
@@ -631,6 +636,7 @@ categories <- accordion(
 
 # define table categories
 # TODO: update to reflect new categories
+# TODO: modify sizing of headings, wording
 table.cats <- accordion(
   open = FALSE,
   accordion_panel(
@@ -820,6 +826,7 @@ ui <- page_navbar(
                   bottom = "300px",
                   height = "200px",
                   width = "400px",
+                  # TODO: add explanation for graph 
                   wellPanel(actionButton("clear", label = "X"),
                             plotlyOutput("chart"))
                 ))
@@ -829,7 +836,7 @@ ui <- page_navbar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
               accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
-                              accordion_panel("2010 Census Tracts", reactableOutput("food_table"))),
+                              accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"))),
               accordion_panel("County Data", 
                               accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                               accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
@@ -850,6 +857,7 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  # TODO: rintrojs for swipe through tutorial
   showModal(modalDialog(
     title = "Welcome to geoexmap!",
     HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>. 
@@ -1017,6 +1025,7 @@ server <- function(input, output, session) {
   })
   
   #### DYNAMIC TIP LOGIC ####
+  # TODO: open webpages in new tab
   outcomes_md <- reactive({
     if (is.null(input$outcomes) || length(input$outcomes) == 0) {
       return("Select one or more health outcomes to see tips.")
@@ -2162,8 +2171,11 @@ server <- function(input, output, session) {
     updateSelectInput(session, "prevention", selected = character(0))
     updateSelectInput(session, "behaviors", selected = character(0))
     updateSelectInput(session, "naturalenv", selected = character(0))
+    updateSelectInput(session, "hazards", selected = character(0))
     updateSelectInput(session, "airpol", selected = character(0))
     updateSelectInput(session, "builtenv", selected = character(0))
+    updateSelectInput(session, "noise", selected = character(0))
+    updateSelectInput(session, "land", selected = character(0))
     updateSelectInput(session, "incsite", selected = "")
     updateSelectInput(session, "incstage", selected = "")
     updateSelectInput(session, "incsex", selected = "")
@@ -2652,6 +2664,7 @@ server <- function(input, output, session) {
   )
   
   #### DOWNLOAD HANDLERS ####
+  # TODO: add map download button
   # output$download <- downloadHandler(
   #   filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
   #   content = function(file) {
@@ -2659,6 +2672,7 @@ server <- function(input, output, session) {
   #   }
   # )
   
+  # TODO: csv download instead of dbf
   output$downloadcttab <- downloadHandler(
     filename = function() {"geoexmap_2020_tract_download.zip"},
     content = function(file) {
@@ -2705,6 +2719,8 @@ server <- function(input, output, session) {
       st_write(cnty_wscr_table_mort(), file)
     }
   )
+  
+  # TODO: add download for standalone data
   
   #### PLOTLY RENDER ####
   output$chart <- renderPlotly({
@@ -2762,6 +2778,8 @@ server <- function(input, output, session) {
   })
   
   #### TABLE RENDER ####
+  # TODO: add button to clear tables (either in category or all categories)
+  # TODO: add year for variables displayed
   output$ct_table <- renderReactable({
     validate(need(base::ncol(ct_table_cols()) > 3, "Please select a variable."))
     
@@ -2824,11 +2842,12 @@ server <- function(input, output, session) {
       label = ""
       
       ##### point control flow #####
+      # TODO: name and address popups for points where available
       if (input$transit) {
         html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bus-front" viewBox="0 0 16 16">
   <path d="M5 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0m8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-6-1a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2zm1-6c-1.876 0-3.426.109-4.552.226A.5.5 0 0 0 3 4.723v3.554a.5.5 0 0 0 .448.497C4.574 8.891 6.124 9 8 9s3.426-.109 4.552-.226A.5.5 0 0 0 13 8.277V4.723a.5.5 0 0 0-.448-.497A44 44 0 0 0 8 4m0-1c-1.837 0-3.353.107-4.448.22a.5.5 0 1 1-.104-.994A44 44 0 0 1 8 2c1.876 0 3.426.109 4.552.226a.5.5 0 1 1-.104.994A43 43 0 0 0 8 3"/>
   <path d="M15 8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1V2.64c0-1.188-.845-2.232-2.064-2.372A44 44 0 0 0 8 0C5.9 0 4.208.136 3.064.268 1.845.408 1 1.452 1 2.64V4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v3.5c0 .818.393 1.544 1 2v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14h6v1.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2c.607-.456 1-1.182 1-2zM8 1c2.056 0 3.71.134 4.822.261.676.078 1.178.66 1.178 1.379v8.86a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5V2.64c0-.72.502-1.301 1.178-1.379A43 43 0 0 1 8 1"/>
-</svg> Transit stops (zoom in to see stops)<br/>'
+</svg> Transit stops (zoom to see stops)<br/>'
         
         clusterOptions <- markerClusterOptions(disableClusteringAtZoom = 14)
         
@@ -3148,6 +3167,7 @@ server <- function(input, output, session) {
       
       if (input$microplastics) {
         # duplicate to avoid error with retrieving cols from reactive dataset
+        # TODO: reorder microplastics legend (Very Low to High)
         micro_data <- micro.dat()
         micro_data_conc <- factor(micro_data$Concentration.class.text,
                               levels = c("Very Low", "Low", "Medium", "High"),
@@ -3163,6 +3183,7 @@ server <- function(input, output, session) {
       }
       
       ##### map (main data) #####
+      # TODO: combine before plotting, make snappier
         groups <- character(0)
       
         for (i in seq_along(colnames(map_cols()))) {
@@ -3489,6 +3510,7 @@ server <- function(input, output, session) {
           clearGroup("tractbounds")
       }
       
+      # TODO: fix print (making white box appear on map)
       proxy <- proxy %>% 
         addEasyprint(options = easyprintOptions(filename = "geoexmap_output", hideControlContainer = FALSE))
       
