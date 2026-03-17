@@ -807,7 +807,26 @@ ui <- page_navbar(
     includeHTML("google-analytics.html")
   ),
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
+  selected = "Map",
   nav_spacer(),
+  nav_panel("About", fluidPage(
+    HTML(
+      "<h5>Thank you for visiting the Geospatial Exposome Map (geo<b>ex</b>map).</h5><br>
+      <h6>geo<b>ex</b>map was developed by the Fred Hutch Cancer Center <a href='https://www.geoexlab.com/'>Geospatial Exposome Lab</a> as an open-source geospatial web app to support community outreach and engagement work in reducing cancer burden in Washington State, the catchment area for the Fred Hutch Cancer Center.</h6><br>
+      <h6><b>Key highlights:</b></h6><br>
+      <ul>
+        <li>Through integrating <a href='https://aacrjournals.org/cebp/article/33/4/451/742073/Geospatial-Science-for-the-Environmental'>geospatial science (location-based technologies) with the exposome (the totality of environmental exposures that we experience throughout our lives)</a>, geo<b>ex</b>map enables the visualization of numerous neighborhood-level health and environmental data to better characterize and understand the <b>Washington State catchment area population, health disparities, and underserved communities.</b></li>
+        <li>geo<b>ex</b>map contains information from datasets at the census tract (or neighborhood) and county levels for factors in the domains of sociodemographics, prevention, healthcare access, and the <b>exposome</b> (natural environment, built environment, and social environment).</li>
+        <li>geo<b>ex</b>map includes <b>user-centered functionalities</b> for mapping, customizable graphs and tables, neighborhood search, and documentation. </li>
+        <li>To promote <b>disease prevention and control</b> efforts, actionable and practical tips are provided with links to evidence-based strategies for exposure mitigation of modifiable risk factors (e.g., access to free radon test kits) as well as resources for health and well-being. </li>
+        <li>geo<b>ex</b>map was designed with <b>reproducible</b> and <b>scalable</b> methods that can be adopted by other cancer centers and institutions, created using open-source software (R Shiny, leaflet) and publicly available geospatial data. See our <a href='https://github.com/FredHutch/geoexmap'>GitHub repository.</a></li>
+      </ul>
+      <br>
+      <h6> Feel free to contact us with any questions, suggestions, and feedback at <a href='mailto:geoexmap@fredhutch.org'>geoexmap@fredhutch.org</a></h6><br>
+      <h6>geo<b>ex</b>map is supported by funding from the Dillon Family Foundation. </h6>
+      "
+    )
+  )),
   nav_panel("Map",
             layout_sidebar(
               sidebar = sidebar(categories,
@@ -834,7 +853,7 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion(
+              accordion(open = FALSE,
                 accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
                                 accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"))),
                 accordion_panel("County Data", 
@@ -849,9 +868,6 @@ ui <- page_navbar(
             h2("Version History"),
             h2("Technical Documentation"),
             a("geoexmap_technical_documentation.pdf", target = "_blank", href = "geoexmap_technical_documentation.pdf")),
-  nav_panel("About", fluidPage(
-    
-  )),
   nav_panel("Contact us",
             h3("Questions or comments?"),
             a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org")),
