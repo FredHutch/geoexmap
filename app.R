@@ -33,7 +33,6 @@ tract.bounds <- st_read("Geo/2020/wa_tracts_2020.gpkg") %>%
   dplyr::select(c(GEOID, NAMELSAD, NAMELSADCO))
 
 # polygon data tied to census tracts or counties
-# TODO: map -999 values to NA
 data <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "geoexmap_data")
 
 og.data <- data # keep original data for data download/tables
@@ -2758,21 +2757,21 @@ server <- function(input, output, session) {
 
   })
   
-  # TODO: add visual cue for accordion panels to indicate values are chosen
-  
   
   #### INITIAL MAP RENDER ####
   output$geoexmap <- renderLeaflet({
-    map <- leaflet(map_cols()) %>% 
+    map <- leaflet() %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
       addSearchOSM() %>% 
+      addEasyprint(options = easyprintOptions(filename = "geoexmap_output", hideControlContainer = FALSE)) %>% 
       addEasyButton(easyButton(
         icon = 'fa-remove',
         title = "Remove all variables",
         onClick = JS("function(btn, map){
                      Shiny.setInputValue('clear_all_vars', Math.random());
-        }")
+        }")#,
+        #style = "background-color: red; color: white; border: none; padding: 10px;"
       ))
       return(map)
   })
@@ -2833,9 +2832,9 @@ server <- function(input, output, session) {
       
       proxy <- leafletProxy("geoexmap", data = map_cols()) %>% 
         clearControls() %>% 
-        clearShapes() %>% 
-        clearMarkers() %>% 
-        addProviderTiles(providers$CartoDB.Positron)
+        clearShapes() #%>% 
+        # clearMarkers() %>% 
+        # addProviderTiles(providers$CartoDB.Positron)
       
       # TODO: 
       # TODO: dynamic labels for tracts
@@ -3189,6 +3188,7 @@ server <- function(input, output, session) {
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
           x <- map_cols()[[c_name]]
+          n <- length(map_cols())
           k <- NULL
           
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
@@ -3196,9 +3196,12 @@ server <- function(input, output, session) {
             layer_counter(k) # set the new layer count
             print(paste("LAYER COUNTER", layer_counter()))
           }
+          step <- if (n > 0) 1 / n else 1
+          
+          # increment progress bar
+          incProgress(step, detail = paste("Adding", layer.titles(c_name)))
           
           pal <- geoex.palette(c_name, df_vars, layer_index = layer_counter())
-          
           
           if (!is.null(pal)){
             opacity <- if (k == 1) 0.5 else 0.2
@@ -3211,10 +3214,10 @@ server <- function(input, output, session) {
             
             if (c_name == "PFAS_dw") {
               proxy <- proxy %>% 
-                addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+                addPolygons(data = map_cols(), fillColor = ~pal(x), stroke = FALSE,
                             fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                             group = layer.titles(c_name), label = "") %>% 
-                addLegendFactor(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
+                addLegendFactor(pal = pal, values = x, fillOpacity = opacity, 
                                  orientation = "horizontal", shape = "circle", 
                                  title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                              htmltools::tags$span(
@@ -3240,10 +3243,10 @@ server <- function(input, output, session) {
             
             else {
               proxy <- proxy %>% 
-                addPolygons(., fillColor = ~pal(x), stroke = FALSE,
+                addPolygons(data = map_cols(), fillColor = ~pal(x), stroke = FALSE,
                             fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
                             group = layer.titles(c_name), label = "") %>% 
-                addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, # TODO: add conditional for PFAS
+                addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                  orientation = "horizontal", shape = "stadium", 
                                  width = 300,   # wider bar
                                  height = 18, bins = 5,
@@ -3282,6 +3285,7 @@ server <- function(input, output, session) {
         c_name <- colnames(food_env_cols())[i]
         x <- food_env_cols()[[c_name]]
         k <- NULL
+        n <- length(food_env_cols())
         
         if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
           k <- isolate(layer_counter()) + 1
@@ -3290,6 +3294,11 @@ server <- function(input, output, session) {
         }
 
         pal <- geoex.palette(c_name, food, layer_index = layer_counter())
+        
+        step <- if (n > 0) 1 / n else 1
+        
+        # increment progress bar
+        incProgress(step, detail = paste("Adding", layer.titles(c_name)))
         
         if (!is.null(pal)) {
           groups <- append(groups, layer.titles(c_name))
@@ -3334,6 +3343,7 @@ server <- function(input, output, session) {
         for (i in seq_along(colnames(crime_cols()))) {
           c_name <- colnames(crime_cols())[i]
           x <- crime_cols()[[c_name]]
+          n <- length(crime_cols())
           k <- NULL
           
           if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
@@ -3343,6 +3353,10 @@ server <- function(input, output, session) {
           }
           
           pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
+          step <- if (n > 0) 1 / n else 1
+          
+          # increment progress bar
+          incProgress(step, detail = paste("Adding", layer.titles(c_name)))
           
           if (!is.null(pal)){
             groups <- append(groups, layer.titles(c_name))
@@ -3509,11 +3523,8 @@ server <- function(input, output, session) {
         proxy <- proxy %>% 
           clearGroup("tractbounds")
       }
-      
-      # TODO: fix print (making white box appear on map)
-      proxy <- proxy %>% 
-        addEasyprint(options = easyprintOptions(filename = "geoexmap_output", hideControlContainer = FALSE))
-      
+     
+      # Sys.sleep(3)
     })  
   }) %>% 
     bindEvent(layer_selection_state(), input$transit, input$alc, input$superfund, input$parks, input$micro, input$cancer, input$clinics, input$ems, input$hospitals, 
