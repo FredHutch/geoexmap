@@ -1417,7 +1417,7 @@ server <- function(input, output, session) {
         ))
       }
       
-      return(colorNumeric(palette = base_ramp, domain = domain, na.color = "transparent"))
+      return(colorNumeric(palette = base_ramp, domain = domain, na.color = "#5D5D5D"))
     },
     
     error = function(e) {
