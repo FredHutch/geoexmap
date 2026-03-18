@@ -639,102 +639,65 @@ categories <- accordion(
 table.cats <- accordion(
   open = FALSE,
   accordion_panel(
-    "Sociodemographics", icon = bs_icon("person-vcard"),
+    title = HTML("<b>Sociodemographics</b>"), icon = bs_icon("person-vcard", class = "text-secondary"), #icon = bs_icon("person-vcard"),
     selectInput('sociodemo_tab', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
-    accordion_panel("Race and Ethnicity", selectInput('race_tab', NULL, racev, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Sex", selectInput('sex_tab', NULL, sexv, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Age", selectInput('age_tab', NULL, agev, selectize = TRUE, multiple = TRUE))
+    accordion_panel("Race and Ethnicity", icon = uiOutput("race_icon"), selectInput('race_tab', NULL, racev, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Sex", icon = uiOutput("sex_icon"), selectInput('sex_tab', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Age", icon = uiOutput("age_icon"), selectInput('age_tab', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
-    "Health Outcomes", icon = bs_icon("heart-pulse"),
-    selectInput('outcomes_tab', 
-                htmltools::span("Select variables",
-                                popover(bs_icon("lightbulb"),
-                                        "Select one or more health outcomes to see tips.",
-                                        title = "Tips",
-                                        placement = "right",
-                                        id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
+    HTML("<b>Health Outcomes</b>"), icon = bs_icon("heart-pulse", class = "text-secondary"),
+    selectInput('outcomes_tab', "Select variables", outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
+    # TODO: add an info symbol with: These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available.
     accordion_panel("Cancer Incidence",
                     selectInput('incsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage_tab', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
                     selectInput('incsex_tab', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
                     actionButton('incbutton_tab', "Reset filters")),
+    # options to filter by cancer site, gender
     accordion_panel("Cancer Mortality",
                     selectInput('mortsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('mortsex_tab', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
                     actionButton('mortbutton_tab', "Reset filters"))
   ),
   accordion_panel(
-    "Health Behaviors", icon = bs_icon("person-walking"),
-    selectInput('behaviors_tab', htmltools::span("Select variables", 
-                                             popover(bs_icon("lightbulb"),
-                                                     "Select one or more health behaviors to see tips.",
-                                                     title = "Tips",
-                                                     placement = "right",
-                                                     id = "behavior_popover")), behaviors,
-                multiple = TRUE, selectize = TRUE)
+    HTML("<b>Health Behaviors</b>"), icon = bs_icon("person-walking", class = "text-secondary"),
+    selectInput('behaviors_tab', "Select variables", behaviors,
+                multiple = TRUE, selectize = TRUE, selected = "")
   ),
   accordion_panel(
-    "Prevention", icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
-    selectInput('prevention_tab', htmltools::span("Select variables", 
-                                              popover(bs_icon("lightbulb"),
-                                                      # tags$img(src = "/tips [4].png", height = "32px", width = "32px"),
-                                                      "Select one or more prevention measures to see tips.",
-                                                      title = "Tips",
-                                                      placement = "right",
-                                                      id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
+    HTML("<b>Prevention</b>"), icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    selectInput('prevention_tab', "Select variables", prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
-    "Natural Environment", icon = bs_icon("sun"),
-    selectInput('naturalenv_tab', htmltools::span("Select variables", 
-                                              popover(bs_icon("lightbulb"),
-                                                      "Select one or more natural environment measures to see tips.",
-                                                      title = "Tips",
-                                                      placement = "right",
-                                                      id = "natenvpopover")), naturalenv, selectize = TRUE, multiple = TRUE),
-    accordion_panel("Air pollutants", icon = bs_icon("cloud-haze"),
-                    selectInput('airpol_tab', htmltools::span("Select variables",
-                                                          popover(bs_icon("question-circle"),
-                                                                  "Select one or more air pollutants to see tips.",
-                                                                  title = "Tips",
-                                                                  placement = "right",
-                                                                  id = "airpopover")), airpol, selectize = TRUE, multiple = TRUE))
+    HTML("<b>Natural Environment</b>"), icon = bs_icon("sun", class = "text-secondary"),
+    selectInput('naturalenv_tab', "Select variables", naturalenv, selectize = TRUE, multiple = TRUE),
+    accordion_panel("Air Pollutants", icon = bs_icon("cloud-haze", class = "text-secondary"),
+                    selectInput('airpol_tab', "Select variables", airpol, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Natural Hazard Risk", icon = bs_icon("tornado", class = "text-secondary"),
+                    selectInput('hazards_tab', "Select variables", hazardenv, selectize = TRUE, multiple = TRUE))
   ),
   accordion_panel(
-    "Built Environment", icon = bs_icon("buildings"),
-    selectInput('builtenv_tab', htmltools::span("Select variables", 
-                                            popover(bs_icon("lightbulb"),
-                                                    "Select one or more built environment measures to see tips.",
-                                                    title = "Tips",
-                                                    placement = "right",
-                                                    id = "builtenvpopover")), builtenv, selectize = TRUE, multiple = TRUE),
-   accordion_panel(
-      "Food Environment", icon = bs_icon("basket"),
-      selectInput('foodenv_tab', label = htmltools::span("Select variables", 
-                                                     popover(bs_icon("lightbulb"),
-                                                             food_env_md,
-                                                             title = "Tips",
-                                                             placement = "right")), foodenv, selectize = TRUE, multiple = TRUE)
+    HTML("<b>Built Environment</b>"), icon = bs_icon("buildings", class = "text-secondary"),
+    selectInput('builtenv_tab', "Select variables", builtenv, selectize = TRUE, multiple = TRUE),
+    accordion_panel("Transportation Noise", icon = bs_icon("volume-up", class = "text-secondary"),
+                    selectInput('noise_tab', "Select variables", noiseenv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Land Use/Land Cover", icon = bs_icon("water", class = "text-secondary"),
+                    selectInput('land_tab', "Select variables", landuseenv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel(
+      "Food Environment", icon = bs_icon("basket", class = "text-secondary"),
+      selectInput('foodenv_tab', "Select variables", foodenv, selectize = TRUE, multiple = TRUE)
     )
   ),
   accordion_panel(
-    "Social Environment", icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
-    selectInput('socialenv', htmltools::span("Select variables", 
-                                             popover(bs_icon("lightbulb"),
-                                                     "Select one or more social environment measures to see tips.",
-                                                     title = "Tips",
-                                                     placement = "right",
-                                                     id = "socenvpopover")), socialenv, selectize = TRUE,  multiple = TRUE),
-    accordion_panel('Crime', icon = bs_icon('file-earmark-lock'),
-                    selectInput('crime_tab', htmltools::span("Select variables",
-                                                         popover(bs_icon("lightbulb"),
-                                                                 crime_md,
-                                                                 title = "Tips",
-                                                                 placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
+    HTML("<b>Social Environment</b>"), icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    selectInput('socialenv_tab', "Select variables", socialenv, selectize = TRUE,  multiple = TRUE),
+    accordion_panel('Crime', icon = bs_icon("file-earmark-lock", class = "text-secondary"),
+                    selectInput('crime_tab', "Select variables", crimeenv, selectize = TRUE, multiple = TRUE))
   )
 )
 
@@ -2395,7 +2358,7 @@ server <- function(input, output, session) {
   tab_cols <- reactive({
     df <- og.data
     
-    df[, c(input$outcomes_tab, input$sociodemo_tab, input$age_tab, input$sex_tab, input$race_tab, input$socialenv_tab, input$prevention_tab, input$behaviors_tab, input$naturalenv_tab, input$airpol_tab, input$builtenv_tab)]
+    df[, c(input$outcomes_tab, input$sociodemo_tab, input$age_tab, input$sex_tab, input$race_tab, input$socialenv_tab, input$prevention_tab, input$behaviors_tab, input$naturalenv_tab, input$hazards_tab, input$airpol_tab, input$builtenv_tab, input$land_tab, input$noise_tab)]
   })
   
   # food env
