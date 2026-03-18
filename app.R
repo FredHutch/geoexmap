@@ -818,8 +818,9 @@ ui <- page_navbar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
               accordion(open = FALSE,
-                accordion_panel("Census Tract Data", accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv")),
-                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"))),
+                accordion_panel("Census Tract Data", 
+                                accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv"), actionButton('clear2020', "Clear variables")),
+                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"), downloadButton('downloadfoodtab', "Download .csv"), actionButton('clear2010', "Clear variables"))),
                 accordion_panel("County Data", 
                                 accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
                                 accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
@@ -2665,6 +2666,14 @@ server <- function(input, output, session) {
     
   )
   
+  output$downloadfoodtab <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "_geoexmap_2010_food_env_download.csv")},
+    content = function(file) {
+      st_write(ct_food_table_cols(), file)
+    }
+    
+  )
+  
   output$downloadcntycrime <- downloadHandler(
     filename = function() {paste0(Sys.Date(), "_geoexmap_county_crime_download.csv")},
     content = function(file) {
@@ -2758,9 +2767,14 @@ server <- function(input, output, session) {
     })
   
   output$food_table <- renderReactable({
-    validate(need(base::ncol(food_env_cols_tab()) > 1, "Please select a food environment variable."))
+    validate(need(base::ncol(ct_food_table_cols()) > 1, "Please select a food environment variable."))
     
-    reactable(food_env_cols_tab())
+    reactable(ct_food_table_cols(),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) if(is.numeric(value)) round(value, 3) else value,
+                align = "left"
+              ))
   })
   
   output$cnty_crime_table <- renderReactable({
