@@ -17,6 +17,7 @@ library(leaflet.extras)
 library(leaflet.extras2)
 library(leaflegend)
 library(plotly)
+#library(crosstalk)
 
 library(RColorBrewer)
 library(bslib)
@@ -766,6 +767,16 @@ ui <- page_navbar(
         });
       }
     });
+    
+    // have links open in new tab
+    window.addEventListener('DOMContentLoaded', function() {
+    var links = document.links;
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].hostname != window.location.hostname) {
+        links[i].target = '_blank';
+      }
+    }
+  });
   ")),
     includeHTML("google-analytics.html")
   ),
@@ -2174,6 +2185,7 @@ server <- function(input, output, session) {
     update_switch("transit", value = FALSE)
     update_switch("showcounties", value = FALSE)
     update_switch("showcities", value = FALSE)
+    update_switch("showchart", value = FALSE)
     update_switch("microplastics", value = FALSE)
     
     update_switch("cancer", value = FALSE)
@@ -2188,7 +2200,7 @@ server <- function(input, output, session) {
     # clear the map
     leafletProxy("geoexmap") %>%
       clearControls() %>%
-      clearShapes()
+      clearShapes() 
   })
   
   #### REACTIVE VALUES #### 
@@ -2355,6 +2367,9 @@ server <- function(input, output, session) {
     df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv, input$noise, input$land, input$hazards), drop = FALSE]
   }) %>% 
     bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv, input$noise, input$land, input$hazards) # reduce work by server
+  
+  # shared for crosstalk
+  #map_cols_sd <- SharedData$new(map_cols, key = ~GEOID, group = "main")
   
   tab_cols <- reactive({
     df <- og.data
@@ -2818,8 +2833,6 @@ server <- function(input, output, session) {
         # addProviderTiles(providers$CartoDB.Positron)
       
       # TODO: 
-      # TODO: dynamic labels for tracts
-      label = ""
       
       ##### point control flow #####
       # TODO: name and address popups for points where available
@@ -3164,7 +3177,9 @@ server <- function(input, output, session) {
       
       ##### map (main data) #####
       # TODO: combine before plotting, make snappier
-        groups <- character(0)
+      groups <- character(0)
+      # TODO: dynamic labels for tracts
+      label = character(0)
       
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
@@ -3172,6 +3187,7 @@ server <- function(input, output, session) {
           n <- length(map_cols())
           k <- NULL
           
+
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
             layer_counter(k) # set the new layer count
@@ -3197,7 +3213,7 @@ server <- function(input, output, session) {
               proxy <- proxy %>% 
                 addPolygons(data = map_cols(), fillColor = ~pal(x), stroke = FALSE,
                             fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                            group = layer.titles(c_name), label = "") %>% 
+                            group = layer.titles(c_name)) %>% 
                 addLegendFactor(pal = pal, values = x, fillOpacity = opacity, 
                                  orientation = "horizontal", shape = "circle", 
                                  title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
