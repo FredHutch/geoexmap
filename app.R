@@ -541,7 +541,7 @@ categories <- accordion(
     input_switch('ems', "Emergency medical stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('pharmacies', "Pharmacies", value = FALSE),
-    input_switch('wic_clinics', "Nutrition Program for Women, Infancts, and Childeren (WIC) clinics", value = FALSE),
+    input_switch('wic_clinics', "Nutrition Program for Women, Infants, and Childeren (WIC) clinics", value = FALSE),
     input_switch('wic_retailers', "WIC retailers", value = FALSE),
     input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
   ),
