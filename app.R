@@ -6,6 +6,7 @@ library(shiny)
 library(shinyjs)
 
 library(htmltools)
+library(htmlwidgets)
 library(reactable)
 library(tidyverse)
 library(sf)
@@ -86,6 +87,9 @@ data$No.Leisure.time.Physical.Activity.among.Adults <- as.numeric(data$No.Leisur
 data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
 df_vars <- data
+
+# jsfile for easy print
+jsfile <- "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"
 
 sociodemographics <- c("Population (total)" = "Total.Population")
 
@@ -536,7 +540,7 @@ categories <- accordion(
             title = "Tips",
             placement = "right",
             id = "healthaccpopover"))),
-    input_switch('cancer', "Commission on Cancer (Coc)-accredited programs ", value = FALSE),
+    input_switch('cancer', "Commission on Cancer (CoC)-accredited programs ", value = FALSE),
     input_switch('clinics', "Clinics", value = FALSE), 
     input_switch('ems', "Emergency medical stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
@@ -741,7 +745,8 @@ ui <- page_navbar(
       fill: #333;              /* text color */
     }
   ")),
-    tags$script(HTML("
+    tags$script(src = jsfile,
+    HTML("
     document.addEventListener('shown.bs.modal', function(){}); // no-op to ensure BS is loaded
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -791,8 +796,8 @@ ui <- page_navbar(
       <ul>
         <li>Through integrating <a href='https://aacrjournals.org/cebp/article/33/4/451/742073/Geospatial-Science-for-the-Environmental'>geospatial science (location-based technologies) with the exposome (the totality of environmental exposures that we experience throughout our lives)</a>, geo<b>ex</b>map enables the visualization of numerous neighborhood-level health and environmental data to better characterize and understand the <b>Washington State catchment area population, health disparities, and underserved communities.</b></li>
         <li>We proudly implemented a <b>community-engaged approach</b> to developing geo<b>ex</b>map, incorporating valuable input from community members and organizations through <a href='https://www.fredhutch.org/en/research/institutes-networks-ircs/ocoe/about-ocoe/collaborate-with-us.html'>Fred Hutch Cancer Center Community Coalitions</a>.</li>
-        <li>geo<b>ex</b>map contains information from datasets at the census tract (or neighborhood) and county levels for factors in the domains of sociodemographics, prevention, healthcare access, and the <b>exposome</b> (natural environment, built environment, and social environment).</li>
-        <li>geo<b>ex</b>map includes <b>user-centered functionalities</b> for mapping, customizable graphs and tables, neighborhood search, and documentation. </li>
+        <li>geo<b>ex</b>map contains information from the latest available datasets (2019-present) at the census tract (or neighborhood) and county levels for factors in the domains of sociodemographics, prevention, healthcare access, and the <b>exposome</b> (natural environment, built environment, and social environment).</li>
+        <li>geo<b>ex</b>map includes <b>user-centered functionalities</b> for mapping, customizable graphs and tables, data importing and exporting, overlaying multiple spatial data layers, neighborhood search, and documentation.</li>
         <li>To promote <b>disease prevention and control</b> efforts, actionable and practical tips are provided with links to evidence-based strategies for exposure mitigation of modifiable risk factors (e.g., access to free radon test kits) as well as resources for health and well-being. </li>
         <li>geo<b>ex</b>map was designed with <b>reproducible</b> and <b>scalable</b> methods that can be adopted by other cancer centers and institutions, created using open-source software (R Shiny, leaflet) and publicly available geospatial data. See our <a href='https://github.com/FredHutch/geoexmap'>GitHub repository</a>.</li>
       </ul>
@@ -2183,6 +2188,7 @@ server <- function(input, output, session) {
     
     # reset switches if needed
     update_switch("transit", value = FALSE)
+    update_switch("parks", value = FALSE)
     update_switch("showcounties", value = FALSE)
     update_switch("showcities", value = FALSE)
     update_switch("showchart", value = FALSE)
@@ -2750,12 +2756,13 @@ server <- function(input, output, session) {
   
   
   #### INITIAL MAP RENDER ####
+  
   output$geoexmap <- renderLeaflet({
     map <- leaflet() %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
       addSearchOSM() %>% 
-      addEasyprint(options = easyprintOptions(filename = "geoexmap_output", hideControlContainer = FALSE)) %>% 
+      addEasyprint(options = easyprintOptions(filename = "geoexmap_output", exportOnly = TRUE)) %>% 
       addEasyButton(easyButton(
         icon = 'fa-remove',
         title = "Remove all variables",
@@ -2763,7 +2770,7 @@ server <- function(input, output, session) {
                      Shiny.setInputValue('clear_all_vars', Math.random());
         }")#,
         #style = "background-color: red; color: white; border: none; padding: 10px;"
-      ))
+      )) 
       return(map)
   })
   
@@ -3247,6 +3254,7 @@ server <- function(input, output, session) {
                                  orientation = "horizontal", shape = "stadium", 
                                  width = 300,   # wider bar
                                  height = 18, bins = 5,
+                                 naLabel = "Not available",
                                  title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                              htmltools::tags$span(
                                                                legend.titles(c_name),
@@ -3311,6 +3319,7 @@ server <- function(input, output, session) {
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
                              height = 18, bins = 5,
+                             naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
                                                            legend.titles(c_name),
@@ -3368,6 +3377,7 @@ server <- function(input, output, session) {
                                orientation = "horizontal", shape = "stadium", 
                                width = 300,   # wider bar
                                height = 18, bins = 5,
+                               naLabel = "Not available",
                                title = htmltools::tags$div(
                                  legend.titles(c_name),
                                  style = "text-align: center; width: 100%; font-weight: bold;"
@@ -3408,6 +3418,7 @@ server <- function(input, output, session) {
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
                              height = 18, bins = 5,
+                             naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
                                                            paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2025:"),
@@ -3460,6 +3471,7 @@ server <- function(input, output, session) {
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
                              height = 18, bins = 5,
+                             naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
                                                            paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2023:"),
