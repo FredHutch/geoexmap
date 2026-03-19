@@ -6,7 +6,7 @@ library(shiny)
 library(shinyjs)
 
 library(htmltools)
-library(htmlwidgets)
+#library(htmlwidgets)
 library(reactable)
 library(tidyverse)
 library(sf)
@@ -545,7 +545,7 @@ categories <- accordion(
     input_switch('ems', "Emergency medical stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('pharmacies', "Pharmacies", value = FALSE),
-    input_switch('wic_clinics', "Nutrition Program for Women, Infants, and Childeren (WIC) clinics", value = FALSE),
+    input_switch('wic_clinics', "Nutrition Program for Women, Infants, and Children (WIC) clinics", value = FALSE),
     input_switch('wic_retailers', "WIC retailers", value = FALSE),
     input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
   ),
@@ -745,7 +745,7 @@ ui <- page_navbar(
       fill: #333;              /* text color */
     }
   ")),
-    tags$script(src = jsfile,
+    tags$script(#src = jsfile,
     HTML("
     document.addEventListener('shown.bs.modal', function(){}); // no-op to ensure BS is loaded
 
@@ -1514,42 +1514,42 @@ server <- function(input, output, session) {
     if(col == "Percent.Female") return("Female population in 2023 (%)")
     
     # age
-    if(col == "Total.0.to.4.years") return("0-4 years population in 2024 (total)")
-    if(col == "Percent.0.to.4.years") return("0-4 years population in 2024 (%)")
-    if(col == "Total.5.to.9.years") return("5-9 years poulation in 2024 (total)")
-    if(col == "Percent.5.to.9.years") return("5-9 years population in 2024 (%)")
-    if(col == "Total.10.to.14.years") return("10-14 years population in 2024 (total)")
-    if(col == "Percent.10.to.14.years") return("10-14 years population in 2024 (%)")
-    if(col == "Total.15.to.19.years") return("15-19 years population in 2024 (total)")
-    if(col == "Percent.15.to.19.years") return("15-19 years population in 2024 (%)")
-    if(col == "Total.20.to.24.years") return("20-24 years population in 2024 (total)")
-    if(col == "Percent.20.to.24.years") return("20-24 years population in 2024 (%)")
-    if(col == "Total.25.to.29.years") return("25-29 years population in 2024 (total)")
-    if(col == "Percent.25.to.29.years") return("25-29 years population in 2024 (%)")
-    if(col == "Total.30.to.34.years") return("30-34 years population in 2024 (total)")
-    if(col == "Percent.30.to.34.years") return("30-34 years population in 2024 (%)")
-    if(col == "Total.35.to.39.years") return("35-39 years population in 2024 (total)")
-    if(col == "Percent.35.to.39.years") return("35-39 years population in 2024 (%)")
-    if(col == "Total.40.to.44.years") return("40-44 years population in 2024 (total)")
-    if(col == "Percent.40.to.44.years") return("40-44 years population in 2024 (%)")
-    if(col == "Total.45.to.49.years") return("45-49 years population in 2024 (total)")
-    if(col == "Percent.45.to.49.years") return("45-49 years population in 2024 (%)")
-    if(col == "Total.50.to.54.years") return("50-54 years population in 2024 (total)")
-    if(col == "Percent.50.to.54.years") return("50-54 years population in 2024 (%)")
-    if(col == "Total.55.to.59.years") return("55-59 years population in 2024 (total)")
-    if(col == "Percent.55.to.59.years") return("55-59 years population in 2024 (%)")
-    if(col == "Total.60.to.64.years") return("60-64 years population in 2024 (total)")
-    if(col == "Percent.60.to.64.years") return("60-64 years population in 2024 (%)")
-    if(col == "Total.65.to.69.years") return("65-69 years population in 2024 (total)")
-    if(col == "Percent.65.to.69.years") return("65-69 years population in 2024 (%)")
-    if(col == "Total.70.to.74.years") return("70-74 years population in 2024 (total)")
-    if(col == "Percent.70.to.74.years") return("70-74 years population in 2024 (%)")
-    if(col == "Total.75.to.79.years") return("75-79 years population in 2024 (total)")
-    if(col == "Percent.75.to.79.years") return("75-79 years population in 2024 (%)")
-    if(col == "Total.80.to.84.years") return("80-84 years population in 2024 (total)")
-    if(col == "Percent.80.to.84.years") return("80-84 years population in 2024 (%)")
-    if(col == "Total.85.and.older") return("85+ years population in 2024 (total)")
-    if(col == "Percent.85.and.older") return("85+ years population in 2024 (%)")
+    if(col == "Total.0.to.4.years") return("0-4 years population in 2023 (total)")
+    if(col == "Percent.0.to.4.years") return("0-4 years population in 2023 (%)")
+    if(col == "Total.5.to.9.years") return("5-9 years poulation in 2023 (total)")
+    if(col == "Percent.5.to.9.years") return("5-9 years population in 2023 (%)")
+    if(col == "Total.10.to.14.years") return("10-14 years population in 2023 (total)")
+    if(col == "Percent.10.to.14.years") return("10-14 years population in 2023 (%)")
+    if(col == "Total.15.to.19.years") return("15-19 years population in 2023 (total)")
+    if(col == "Percent.15.to.19.years") return("15-19 years population in 2023 (%)")
+    if(col == "Total.20.to.24.years") return("20-24 years population in 2023 (total)")
+    if(col == "Percent.20.to.24.years") return("20-24 years population in 2023 (%)")
+    if(col == "Total.25.to.29.years") return("25-29 years population in 2023 (total)")
+    if(col == "Percent.25.to.29.years") return("25-29 years population in 2023 (%)")
+    if(col == "Total.30.to.34.years") return("30-34 years population in 2023 (total)")
+    if(col == "Percent.30.to.34.years") return("30-34 years population in 2023 (%)")
+    if(col == "Total.35.to.39.years") return("35-39 years population in 2023 (total)")
+    if(col == "Percent.35.to.39.years") return("35-39 years population in 2023 (%)")
+    if(col == "Total.40.to.44.years") return("40-44 years population in 2023 (total)")
+    if(col == "Percent.40.to.44.years") return("40-44 years population in 2023 (%)")
+    if(col == "Total.45.to.49.years") return("45-49 years population in 2023 (total)")
+    if(col == "Percent.45.to.49.years") return("45-49 years population in 2023 (%)")
+    if(col == "Total.50.to.54.years") return("50-54 years population in 2023 (total)")
+    if(col == "Percent.50.to.54.years") return("50-54 years population in 2023 (%)")
+    if(col == "Total.55.to.59.years") return("55-59 years population in 2023 (total)")
+    if(col == "Percent.55.to.59.years") return("55-59 years population in 2023 (%)")
+    if(col == "Total.60.to.64.years") return("60-64 years population in 2023 (total)")
+    if(col == "Percent.60.to.64.years") return("60-64 years population in 2023 (%)")
+    if(col == "Total.65.to.69.years") return("65-69 years population in 2023 (total)")
+    if(col == "Percent.65.to.69.years") return("65-69 years population in 2023 (%)")
+    if(col == "Total.70.to.74.years") return("70-74 years population in 2023 (total)")
+    if(col == "Percent.70.to.74.years") return("70-74 years population in 2023 (%)")
+    if(col == "Total.75.to.79.years") return("75-79 years population in 2023 (total)")
+    if(col == "Percent.75.to.79.years") return("75-79 years population in 2023 (%)")
+    if(col == "Total.80.to.84.years") return("80-84 years population in 2023 (total)")
+    if(col == "Percent.80.to.84.years") return("80-84 years population in 2023 (%)")
+    if(col == "Total.85.and.older") return("85+ years population in 2023 (total)")
+    if(col == "Percent.85.and.older") return("85+ years population in 2023 (%)")
     
     if(col == "Social.Vulnerability.Index") return("SVI in 2022")
     if(col == "Environmental.Justice.Index") return("EJI in 2019")
@@ -1559,7 +1559,7 @@ server <- function(input, output, session) {
     
     if(col == "Radon") return(HTML("Radon gas concentration in 2021 (Bq/m<sup>3</sup>)"))
     
-    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lbs/mi<sup>2</sup>)"))
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lb/mi<sup>2</sup>)"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation in 2020")
     
@@ -1594,9 +1594,9 @@ server <- function(input, output, session) {
     
     if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> in 2020 ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) in 2020 (ppb)")))
-    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb) in 2020 "))
-    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020 "))
-    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb) in 2020 "))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) in 2020 (ppb)"))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) in 2020 (ppm)"))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) in 2020 (ppb)"))
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value in 2024 ($)")
@@ -2080,24 +2080,24 @@ server <- function(input, output, session) {
     if(col == "Ozone") return("Ozone concentration estimate from Centers for Disease Control and Prevention (CDC) (2023 release)")
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
-    if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to avalanches from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture  due to coastal flooding from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to cold waves from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to droughts from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to earthquakes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Hail.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hail from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Heat.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to heat waves from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Hurricane.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hurricanes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Ice.Storm.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to ice storms from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Landslide.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to landslides from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Lightning.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to lightning from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Riverine.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to riverine flooding from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Strong.Wind.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to strong wind from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Tornado.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tornadoes from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Tsunami.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tsunamis from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Volcanic.Activity.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to volcanic activity from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to wildfires from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
-    if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to winter weather from the Federal Emergency Management Agency (FEMA) Nationa Risk Index (2025 release)")
+    if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to avalanches from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture  due to coastal flooding from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to cold waves from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to droughts from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to earthquakes from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Hail.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hail from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Heat.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to heat waves from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Hurricane.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to hurricanes from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Ice.Storm.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to ice storms from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Landslide.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to landslides from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Lightning.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to lightning from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Riverine.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to riverine flooding from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Strong.Wind.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to strong wind from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Tornado.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tornadoes from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Tsunami.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to tsunamis from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Volcanic.Activity.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to volcanic activity from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Wildfire.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to wildfires from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to winter weather from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     
     if(col == "bluespace") return("Percentage of blue space coverage in a census tract using the global surface water dataset from the European Commission (EC) Joint Research Commission (JRC)/Google and the Copernicus Programme (2024 release)")
     if(col == "social_capital") return("Social capital index, indicating the overall strength of social infrastructures within communities of a census tract using data from Fraser et al. Scientific Reports 2022")
@@ -3428,7 +3428,7 @@ server <- function(input, output, session) {
                                                            bs_icon('info-circle-fill'),
                                                            `data-bs-toggle` = "tooltip",
                                                            `data-bs-placement` = "top",
-                                                           title = "Data from the Washington State Cancer Registry",
+                                                           title = "These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available",
                                                            style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                          )
                              ),
@@ -3481,7 +3481,7 @@ server <- function(input, output, session) {
                                                            bs_icon('info-circle-fill'),
                                                            `data-bs-toggle` = "tooltip",
                                                            `data-bs-placement` = "top",
-                                                           title = "Data from the Washington State Cancer Registry",
+                                                           title = "These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available",
                                                            style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                          )
                              ),
