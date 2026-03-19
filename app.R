@@ -201,18 +201,18 @@ builtenv <- c("Walkability" = "Walkability",
               "Blue space" = "bluespace"
               )
 
-noiseenv <- c("Persons exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
-               "Persons exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
-               "Persons exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
-               "Persons exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
-               "Persons exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
-               "Persons exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
-               "Persons exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
-               "Persons exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
-               "Persons exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
-               "Persons exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
-               "Persons exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
-               "Persons exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
+noiseenv <- c("Population exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
+               "Population exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
+               "Population exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
+               "Population exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
+               "Population exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
+               "Population exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
+               "Population exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
+               "Population exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
+               "Population exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
+               "Population exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
+               "Population exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
+               "Population exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
 
 landuseenv <- c("Open water" = "pct_Open_Water",
                  "Developed open land" = "pct_Developed_Open",
@@ -938,7 +938,7 @@ server <- function(input, output, session) {
   
   output$prevention_icon <- renderUI({
     if (is.null(input$prevention) || identical(input$prevention, "")) {
-      tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px")
+      tags$img(src = "/prevention.png", height = "16px", width = "16px")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
     }
@@ -987,7 +987,7 @@ server <- function(input, output, session) {
   
   output$social_icon <- renderUI({
     if ((is.null(input$socialenv) || identical(input$socialenv, "")) && (is.null(input$crime) || identical(input$crime, ""))) {
-      tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px")
+      tags$img(src = "/social-environment.png", height = "16px", width = "16px")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
     }
@@ -1440,7 +1440,7 @@ server <- function(input, output, session) {
   # defines legend titles based on defined column
   #TODO: fix title sub and superscripts to work with leaflegend
   legend.titles <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> concentrations in 2022 ", "(\U03BC", "g/m<sup>3</sup>)")))
+    if(col == "Particulate.Matter.2.5") return(HTML("PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) concentrations in 2022 "))
     if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
     if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
@@ -1592,11 +1592,11 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature in 2020 ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation in 2020 (in.)")
     
-    if(col == "Wildfire.smoke") return(HTML(paste0("Wildfire smoke PM<sub>2.5</sub> in 2020 ", "(\U03BC", "g/m<sup>3</sup>)")))
-    if(col == "Nitrogen.dioxide") return(HTML(paste0("Nitrogen dioxide (NO<sub>2</sub>) in 2020 (ppb)")))
-    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) in 2020 (ppb)"))
-    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) in 2020 (ppm)"))
-    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) in 2020 (ppb)"))
+    if(col == "Wildfire.smoke") return(HTML("Wildfire smoke PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) in 2020"))
+    if(col == "Nitrogen.dioxide") return(HTML("Nitrogen dioxide (NO<sub>2</sub>) (ppb) in 2020"))
+    if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb) in 2020"))
+    if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020"))
+    if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb) in 2020"))
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value in 2024 ($)")
@@ -1790,15 +1790,15 @@ server <- function(input, output, session) {
     if(col == "Total.85.and.older") return("85+ years (total)")
     if(col == "Percent.85.and.older") return("85+ years (%)")
     
-    if(col == "Social.Vulnerability.Index") return("Social vulnerability index (SVI)")
-    if(col == "Environmental.Justice.Index") return("Environmental justice index (EJI)")
+    if(col == "Social.Vulnerability.Index") return("Social Vulnerability Index (SVI)")
+    if(col == "Environmental.Justice.Index") return("Environmental Justice Index (EJI)")
     if(col == "Unemployment") return("Unemployment (%)")
     
-    if(col == "UV.Index") return("UV index (UVI)")
+    if(col == "UV.Index") return("UV Index (UVI)")
     
     if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>)"))
     
-    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lbs/mi<sup>2</sup>)"))
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lb/mi<sup>2</sup>)"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation")
     
@@ -1882,11 +1882,11 @@ server <- function(input, output, session) {
     if(col == "pct_Mixed_Forest") return("Mixed forest (%)")
     if(col == "pct_Perennial_Ice") return("Perennial ice (%)")
     
-    if(col == "total_p1") return("Part I offenses in 2023 (total)")
-    if(col == "p1_rate") return("Part I offenses in 2023 (per 1,000 population)")
+    if(col == "total_p1") return("Part I offenses (total)")
+    if(col == "p1_rate") return("Part I offenses (per 1,000 population)")
     
-    if(col == "total_p2") return("Part II offenses in 2023 (total)")
-    if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
+    if(col == "total_p2") return("Part II offenses (total)")
+    if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
     # TODO: add legend titles for food environment columns
     # TODO: multiple x100 to get percentage, not proportion
@@ -2132,31 +2132,31 @@ server <- function(input, output, session) {
     
     # TODO: add legend titles for food environment columns
     if(col == "lapop1") return("Population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lapop1share") return("Percentage of tract population that are beyond 1 mile from supermarket")
-    if(col == "lalowi1") return("Low income population count beyond 1 mile from supermarket")
-    if(col == "lalowi1share") return("Percentage of tract population that are low income individuals beyond 1 mile from supermarket")
-    if(col == "lakids1") return("Children age 0-17 population count beyond 1 mile from supermarket")
-    if(col == "lakids1share") return("Percentage of tract population that are children age 0-17 beyond 1 mile from supermarket")
-    if(col == "laseniors1") return("Age 65+ population count beyond 1 mile from supermarket")
-    if(col == "laseniors1share") return("Percentage of tract population that are age 65+ beyond 1 mile from supermarket")
-    if(col == "lawhite1") return("White population count beyond 1 mile from supermarket")
-    if(col == "lawhite1share") return("Percentage of tract population that are white beyond 1 mile from supermarket")
-    if(col == "lablack1") return("Black or African American population count beyond 1 mile from supermarket")
-    if(col == "lablack1share") return("Percentage of tract population that are Black or African American beyond 1 mile from supermarket")
-    if(col == "laasian1") return("Asian population count beyond 1 mile from supermarket")
-    if(col == "laasian1share") return("Percentage of tract population that are Asian beyond 1 mile from supermarket")
-    if(col == "lanhopi1") return("Native Hawaiian and Pacific Islander population count beyond 1 mile from supermarket")
-    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian and Pacific Islander beyond 1 mile from supermarket")
-    if(col == "laaian1") return("American Indian or Alaska Native population count beyond 1 mile from supermarket")
-    if(col == "laaian1share") return("Percentage of tract population that are American Indian or Alaska Native beyond 1 mile from supermarket")
-    if(col == "laomultir1") return("Other/Multiple race population count beyond 1 mile from supermarket")
-    if(col == "laomultir1share") return("Percentage of tract population that are Other/Multiple race beyond 1 mile from supermarket")
-    if(col == "lahisp1") return("Hispanic or Latino ethnicity population count beyond 1 mile from supermarket")
-    if(col == "lahisp1share") return("Percentage of tract population that are of Hispanic or Latino ethnicity beyond 1 mile from supermarket")
-    if(col == "lahunv1") return("Housing units without vehicle count beyond 1 mile from supermarket")
-    if(col == "lahunv1share") return("percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket")
-    if(col == "lasnap1") return("Housing units receiving SNAP benefits count beyond 1 mile from supermarket")
-    if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket")
+    if(col == "lapop1share") return("Percentage of tract population that are beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lalowi1") return("Low income population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lalowi1share") return("Percentage of tract population that are low income individuals beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lakids1") return("Children age 0-17 population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lakids1share") return("Percentage of tract population that are children age 0-17 beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laseniors1") return("Age 65+ population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laseniors1share") return("Percentage of tract population that are age 65+ beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lawhite1") return("White population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lawhite1share") return("Percentage of tract population that are white beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lablack1") return("Black or African American population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lablack1share") return("Percentage of tract population that are Black or African American beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laasian1") return("Asian population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laasian1share") return("Percentage of tract population that are Asian beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lanhopi1") return("Native Hawaiian and Pacific Islander population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian and Pacific Islander beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laaian1") return("American Indian or Alaska Native population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laaian1share") return("Percentage of tract population that are American Indian or Alaska Native beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laomultir1") return("Other/Multiple race population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laomultir1share") return("Percentage of tract population that are Other/Multiple race beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahisp1") return("Hispanic or Latino ethnicity population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahisp1share") return("Percentage of tract population that are of Hispanic or Latino ethnicity beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahunv1") return("Housing units without vehicle count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahunv1share") return("percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lasnap1") return("Housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
   }
   
   #### CLEAR BUTTON OBSERVER ####
@@ -3323,7 +3323,7 @@ server <- function(input, output, session) {
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
                                                            legend.titles(c_name),
-                                                           style = "flex:0 1 auto; text-align:center;"
+                                                           style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                          ),
                                                          htmltools::tags$span(
                                                            bs_icon('info-circle-fill'),                    # circled 'i'
@@ -3334,7 +3334,7 @@ server <- function(input, output, session) {
                                                            style = "cursor:pointer; font-weight:bold; text-align: center; font-weight: bold"
                                                          )
                              ),
-                             labelStyle = "text-align: center; font-weight: bold;",
+                             labelStyle = "text-align: center;",
                              className  = "my-centered-num-legend",
                              position   = "bottomright") %>% 
             addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
@@ -3396,7 +3396,12 @@ server <- function(input, output, session) {
       #observe({
       if (inc.ready()) {
         geo.inc <- base::merge(county.bounds, filtered.inc(), by.x = "NAME", by.y = "counties") %>% 
-          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000))
+          mutate(Age.Adj..Rate.per.100.000 = as.numeric(Age.Adj..Rate.per.100.000)) %>% 
+          st_transform(crs = 4326)
+        
+        print(geo.inc)
+        
+        #geo.inc[geo.inc$Age.Adj..Rate.per.100.000 == "NR",] <- NA
         
         if (nrow(geo.inc) > 0) {
           k <- layer_counter() + 1
@@ -3421,7 +3426,7 @@ server <- function(input, output, session) {
                              naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
-                                                           paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2025:"),
+                                                           paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2022:"),
                                                            style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                          ),
                                                          htmltools::tags$span(
@@ -3432,7 +3437,7 @@ server <- function(input, output, session) {
                                                            style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                          )
                              ),
-                             labelStyle = "text-align: center; font-weight: bold;",
+                             labelStyle = "text-align: center;",
                              className  = "my-centered-num-legend",
                              position   = "bottomright") %>% 
             addLayersControl(overlayGroups = groups,
@@ -3474,7 +3479,7 @@ server <- function(input, output, session) {
                              naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
-                                                           paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2023:"),
+                                                           paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2022:"),
                                                            style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                          ),
                                                          htmltools::tags$span(
@@ -3485,7 +3490,7 @@ server <- function(input, output, session) {
                                                            style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                          )
                              ),
-                             labelStyle = "text-align: center; font-weight: bold;",
+                             labelStyle = "text-align: center;",
                              className  = "my-centered-num-legend",
                              position   = "bottomright") %>% 
             addLayersControl(overlayGroups = groups,
