@@ -3196,21 +3196,19 @@ server <- function(input, output, session) {
           label_cols <- colnames(m)
           label_names <- sapply(label_cols, layer.titles, USE.NAMES = FALSE)
           
-          label_raw <- apply(
-            m[, label_cols, drop = FALSE],
-            1,
-            function(row_vals) {
+          # construct label
+          label <- lapply(
+            #m[, label_cols, drop = FALSE],
+            seq(nrow(m)),
+            function(i) {
+              row_vals <- m[i, , drop = TRUE]
               paste(
-                paste0(label_names, ": ", row_vals),
-                collapse = "\n"
+                paste0("<b>", label_names, "</b>", ": ", row_vals),
+                collapse = "<br/>"
               )
             }
-          )
-          
-          label <- label_raw
-          
-          #label <- lapply(label_raw, htmltools::HTML)
-          #label <- as.character(label_raw)
+          ) %>% 
+            lapply(htmltools::HTML)
           
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
