@@ -840,10 +840,10 @@ ui <- page_navbar(
                                 accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv"), actionButton('clear2020', "Clear variables")),
                                 accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"), downloadButton('downloadfoodtab', "Download .csv"), actionButton('clear2010', "Clear variables"))),
                 accordion_panel("County Data", 
-                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv")),
-                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv")),
-                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"))),
-                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"))
+                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv"), actionButton('clearcrime', "Clear variables")),
+                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv"), actionButton('clearinc', "Clear variables")),
+                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"), actionButton('clearmort', "Clear variables"))),
+                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"), downloadButton('downloadstandalone', "Download .csv"), actionButton('clearstandalone', "Clear variables"))
               )
 
             )),
@@ -2161,7 +2161,7 @@ server <- function(input, output, session) {
     if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
   }
   
-  #### CLEAR BUTTON OBSERVER ####
+  #### CLEAR BUTTON OBSERVERS ####
   # observe event for clear button click
   observeEvent(input$clear_all_vars, {
     # reset all selectInputs and switches
@@ -2209,6 +2209,46 @@ server <- function(input, output, session) {
     leafletProxy("geoexmap") %>%
       clearControls() %>%
       clearShapes() 
+  })
+  
+  observeEvent(input$clear2020, {
+    updateSelectInput(session, "outcomes_tab", selected = character(0))
+    updateSelectInput(session, "sociodemo_tab", selected = character(0))
+    updateSelectInput(session, "age_tab", selected = character(0))
+    updateSelectInput(session, "sex_tab", selected = character(0))
+    updateSelectInput(session, "race_tab", selected = character(0))
+    updateSelectInput(session, "socialenv_tab", selected = character(0))
+    updateSelectInput(session, "prevention_tab", selected = character(0))
+    updateSelectInput(session, "behaviors_tab", selected = character(0))
+    updateSelectInput(session, "naturalenv_tab", selected = character(0))
+    updateSelectInput(session, "hazards_tab", selected = character(0))
+    updateSelectInput(session, "airpol_tab", selected = character(0))
+    updateSelectInput(session, "builtenv_tab", selected = character(0))
+    updateSelectInput(session, "noise_tab", selected = character(0))
+    updateSelectInput(session, "land_tab", selected = character(0))
+  })
+  
+  observeEvent(input$clear2010, {
+    updateSelectInput(session, "foodenv_tab", selected = character(0))
+  })
+  
+  observeEvent(input$clearinc, {
+    updateSelectInput(session, "incsite_tab", selected = "")
+    updateSelectInput(session, "incstage_tab", selected = "")
+    updateSelectInput(session, "incsex_tab", selected = "")
+  })
+  
+  observeEvent(input$clearmort, {
+    updateSelectInput(session, "mortsite_tab", selected = "")
+    updateSelectInput(session, "mortsex_tab", selected = "")
+  })
+  
+  observeEvent(input$clearcrime, {
+    updateSelectInput(session, "crime_tab", selected = character(0))
+  })
+  
+  observeEvent(input$clearstandalone, {
+    updateSelectInput(session, "standalone", selected = "")
   })
   
   #### REACTIVE VALUES #### 
@@ -3364,63 +3404,61 @@ server <- function(input, output, session) {
       }
       
       ##### map (crime) #####
-      #observe({
-        for (i in seq_along(colnames(crime_cols()))) {
-          c_name <- colnames(crime_cols())[i]
-          x <- crime_cols()[[c_name]]
-          n <- length(crime_cols())
-          k <- NULL
+      for (i in seq_along(colnames(crime_cols()))) {
+        c_name <- colnames(crime_cols())[i]
+        x <- crime_cols()[[c_name]]
+        n <- length(crime_cols())
+        k <- NULL
+        
+        if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          k <- layer_counter() + 1
+          layer_counter(k) # set the new layer count
+          print(paste("LAYER COUNTER", layer_counter()))
+        }
+        
+        pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
+        step <- if (n > 0) 1 / n else 1
+        
+        # increment progress bar
+        incProgress(step, detail = paste("Adding", layer.titles(c_name)))
+        
+        info_id <- paste0("legend-info-", c_name)
+        info_txt <- var.info(c_name)
+        
+        if (!is.null(pal)){
+          groups <- append(groups, layer.titles(c_name))
+          opacity <- if (k == 1) 0.5 else 0.2
           
-          if (ncol(crime_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
-            k <- layer_counter() + 1
-            layer_counter(k) # set the new layer count
-            print(paste("LAYER COUNTER", layer_counter()))
-          }
-          
-          pal <- geoex.palette(c_name, crime, layer_index = layer_counter())
-          step <- if (n > 0) 1 / n else 1
-          
-          # increment progress bar
-          incProgress(step, detail = paste("Adding", layer.titles(c_name)))
-          
-          info_id <- paste0("legend-info-", c_name)
-          info_txt <- var.info(c_name)
-          
-          if (!is.null(pal)){
-            groups <- append(groups, layer.titles(c_name))
-            opacity <- if (k == 1) 0.5 else 0.2
-            
-            proxy <- proxy %>% 
-              addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = layer.titles(c_name),
-                          fillOpacity = opacity, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
-                               orientation = "horizontal", shape = "stadium", 
-                               width = 300,   # wider bar
-                               height = 18, bins = 5,
-                               naLabel = "Not available",
-                               title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
-                                                           htmltools::tags$span(
-                                                             legend.titles(c_name),
-                                                             style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
-                                                           ),
-                                                           htmltools::tags$span(
-                                                             bs_icon('info-circle-fill'), # circled 'i'
-                                                             id    = info_id,
-                                                             `data-bs-toggle` = "tooltip",
-                                                             `data-bs-placement` = "top",
-                                                             title = info_txt,
-                                                             style = "cursor:pointer; font-weight:bold; text-align: center;"
-                                                           )
-                               ),
-                               labelStyle = "text-align: center; font-weight: bold;",
-                               className  = "my-centered-num-legend",
-                               position   = "bottomright") %>% 
-              addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
-                               position = "topright",
-                               options = layersControlOptions(collapsed = FALSE))
-          }
-        }#}) %>% 
-        #bindEvent(input$crime)
+          proxy <- proxy %>% 
+            addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = layer.titles(c_name),
+                        fillOpacity = opacity, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+            addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
+                             orientation = "horizontal", shape = "stadium", 
+                             width = 300,   # wider bar
+                             height = 18, bins = 5,
+                             naLabel = "Not available",
+                             title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                         htmltools::tags$span(
+                                                           legend.titles(c_name),
+                                                           style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                         ),
+                                                         htmltools::tags$span(
+                                                           bs_icon('info-circle-fill'), # circled 'i'
+                                                           id    = info_id,
+                                                           `data-bs-toggle` = "tooltip",
+                                                           `data-bs-placement` = "top",
+                                                           title = info_txt,
+                                                           style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                         )
+                             ),
+                             labelStyle = "text-align: center; font-weight: bold;",
+                             className  = "my-centered-num-legend",
+                             position   = "bottomright") %>% 
+            addLayersControl(overlayGroups = groups, 
+                             position = "topright",
+                             options = layersControlOptions(collapsed = FALSE))
+        }
+      }
       
       ##### map (WSCR incidence) #####
       #observe({
@@ -3441,7 +3479,6 @@ server <- function(input, output, session) {
           opacity <- if (k == 1) 0.5 else 0.2
           
           pal <- geoex.palette("Age.Adj..Rate.per.100.000", geo.inc, layer_index = layer_counter())
-          #pal <- colorNumeric("YlOrRd", domain = geo.inc$Age.Adj..Rate.per.100.000)
           val <- sort(geo.inc$Age.Adj..Rate.per.100.000)
           groups <- append(groups, "Cancer incidence")
           proxy <- proxy %>%
