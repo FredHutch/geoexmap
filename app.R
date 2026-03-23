@@ -88,9 +88,6 @@ data$Short.Sleep.Duration <- as.numeric(data$Short.Sleep.Duration)
 
 df_vars <- data
 
-# jsfile for easy print
-jsfile <- "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"
-
 sociodemographics <- c("Population (total)" = "Total.Population")
 
 racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
@@ -2762,7 +2759,6 @@ server <- function(input, output, session) {
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
       addSearchOSM() %>% 
-      addEasyprint(options = easyprintOptions(filename = "geoexmap_output", exportOnly = TRUE)) %>% 
       addEasyButton(easyButton(
         icon = 'fa-remove',
         title = "Remove all variables",
@@ -3186,7 +3182,7 @@ server <- function(input, output, session) {
       # TODO: combine before plotting, make snappier
       groups <- character(0)
       # TODO: dynamic labels for tracts
-      label = character(0)
+      
       
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
@@ -3194,7 +3190,28 @@ server <- function(input, output, session) {
           n <- length(map_cols())
           k <- NULL
           
-
+          m <- map_cols() %>%
+            sf::st_drop_geometry()
+          
+          label_cols <- colnames(m)
+          label_names <- sapply(label_cols, layer.titles, USE.NAMES = FALSE)
+          
+          label_raw <- apply(
+            m[, label_cols, drop = FALSE],
+            1,
+            function(row_vals) {
+              paste(
+                paste0(label_names, ": ", row_vals),
+                collapse = "\n"
+              )
+            }
+          )
+          
+          label <- label_raw
+          
+          #label <- lapply(label_raw, htmltools::HTML)
+          #label <- as.character(label_raw)
+          
           if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
             k <- isolate(layer_counter()) + 1
             layer_counter(k) # set the new layer count
@@ -3211,7 +3228,6 @@ server <- function(input, output, session) {
             opacity <- if (k == 1) 0.5 else 0.2
             
             groups <- append(groups, layer.titles(c_name))
-            print(groups)
             
             info_id <- paste0("legend-info-", c_name)
             info_txt <- var.info(c_name)
@@ -3220,7 +3236,7 @@ server <- function(input, output, session) {
               proxy <- proxy %>% 
                 addPolygons(data = map_cols(), fillColor = ~pal(x), stroke = FALSE,
                             fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                            group = layer.titles(c_name)) %>% 
+                            group = layer.titles(c_name), label = label) %>% 
                 addLegendFactor(pal = pal, values = x, fillOpacity = opacity, 
                                  orientation = "horizontal", shape = "circle", 
                                  title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
@@ -3249,7 +3265,7 @@ server <- function(input, output, session) {
               proxy <- proxy %>% 
                 addPolygons(data = map_cols(), fillColor = ~pal(x), stroke = FALSE,
                             fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
-                            group = layer.titles(c_name), label = "") %>% 
+                            group = layer.titles(c_name), label = label) %>% 
                 addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                  orientation = "horizontal", shape = "stadium", 
                                  width = 300,   # wider bar
