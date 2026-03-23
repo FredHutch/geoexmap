@@ -741,6 +741,11 @@ ui <- page_navbar(
       text-anchor: middle;
       fill: #333;              /* text color */
     }
+    
+    #clear-btn {
+      color: #fff;
+      background-color: #ff0000;
+    }
   ")),
     tags$script(#src = jsfile,
     HTML("
@@ -2764,8 +2769,8 @@ server <- function(input, output, session) {
         title = "Remove all variables",
         onClick = JS("function(btn, map){
                      Shiny.setInputValue('clear_all_vars', Math.random());
-        }")#,
-        #style = "background-color: red; color: white; border: none; padding: 10px;"
+        }"),
+        id = "clear-btn"
       )) 
       return(map)
   })
@@ -3378,6 +3383,9 @@ server <- function(input, output, session) {
           # increment progress bar
           incProgress(step, detail = paste("Adding", layer.titles(c_name)))
           
+          info_id <- paste0("legend-info-", c_name)
+          info_txt <- var.info(c_name)
+          
           if (!is.null(pal)){
             groups <- append(groups, layer.titles(c_name))
             opacity <- if (k == 1) 0.5 else 0.2
@@ -3385,16 +3393,24 @@ server <- function(input, output, session) {
             proxy <- proxy %>% 
               addPolygons(data = crime_cols(), fillColor = ~pal(x), weight = 0.5, color = "black", group = layer.titles(c_name),
                           fillOpacity = opacity, stroke = input$showcounties, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
-              #addLegend(colors = pal_colors, labels = pal_labs, title = legend.titles(c)) 
-              #addLegend(pal = pal, values = x, title = legend.titles(c_name), na.label = "NA") 
               addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                                orientation = "horizontal", shape = "stadium", 
                                width = 300,   # wider bar
                                height = 18, bins = 5,
                                naLabel = "Not available",
-                               title = htmltools::tags$div(
-                                 legend.titles(c_name),
-                                 style = "text-align: center; width: 100%; font-weight: bold;"
+                               title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                           htmltools::tags$span(
+                                                             legend.titles(c_name),
+                                                             style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                           ),
+                                                           htmltools::tags$span(
+                                                             bs_icon('info-circle-fill'), # circled 'i'
+                                                             id    = info_id,
+                                                             `data-bs-toggle` = "tooltip",
+                                                             `data-bs-placement` = "top",
+                                                             title = info_txt,
+                                                             style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                           )
                                ),
                                labelStyle = "text-align: center; font-weight: bold;",
                                className  = "my-centered-num-legend",
