@@ -6,7 +6,7 @@ library(shiny)
 library(shinyjs)
 
 library(htmltools)
-#library(htmlwidgets)
+library(rintrojs)
 library(reactable)
 library(tidyverse)
 library(sf)
@@ -477,10 +477,10 @@ soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or te
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
-  id = "accordion",
+  id = "main_acc",
   open = FALSE,
   accordion_panel(
-    title = HTML("<b>Sociodemographics</b>"), icon = uiOutput("sociodemo_icon"), #icon = bs_icon("person-vcard"),
+    title = HTML("<b>Sociodemographics</b>"), icon = uiOutput("sociodemo_icon"), 
     selectInput('sociodemo', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
@@ -499,7 +499,6 @@ categories <- accordion(
                              placement = "right",
                              id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
-    # TODO: add an info symbol with: These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available.
     accordion_panel("Cancer Incidence", icon = uiOutput("inc_icon"),
                     selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
@@ -530,7 +529,7 @@ categories <- accordion(
                                               placement = "right",
                                               id = "prevention_popover")), prevention, selectize = TRUE, multiple = TRUE)
   ),
-  accordion_panel(
+  accordion_panel(id = "access-panel",
     HTML("<b>Healthcare Access</b>"), icon = uiOutput("access_icon"),
     h6("Select features", htmltools::span(popover(bs_icon("lightbulb"),
             "Switch on one or more healthcare access features to see tips.",
@@ -629,15 +628,12 @@ categories <- accordion(
     input_switch("showchart", "Show graph", value = FALSE),
     # TODO: fix upload handler
     # TODO: disclaimer about uploaded data?
-    fileInput("upload", "Upload a shapefile", accept = ".shp")#,
-    #downloadButton("download", "Download data")
-  )
-  
+    fileInput("upload", "Upload a shapefile", accept = ".shp"),
+    actionButton("help", label = "", icon = icon("question"))
+  ),
 )
 
 # define table categories
-# TODO: update to reflect new categories
-# TODO: modify sizing of headings, wording
 table.cats <- accordion(
   open = FALSE,
   accordion_panel(
@@ -719,6 +715,7 @@ standalone_tab <- c("Choose dataset" = "",
 
 # -------- UI LAYOUT --------
 ui <- page_navbar(
+  introjsUI(),
   shinyjs::useShinyjs(),
   tags$head( # define style and scripts
     tags$style(HTML(" 
@@ -747,7 +744,7 @@ ui <- page_navbar(
       background-color: #ff0000;
     }
   ")),
-    tags$script(#src = jsfile,
+    tags$script(
     HTML("
     document.addEventListener('shown.bs.modal', function(){}); // no-op to ensure BS is loaded
 
@@ -813,8 +810,7 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(categories,
                                 width = "400px"),
-              
-              leafletOutput("geoexmap"),
+                leafletOutput("geoexmap"),
               conditionalPanel(
                 condition = "(input.showchart == true ) || (input.clear == null && input.clear == 0)",
                 absolutePanel(
@@ -837,13 +833,13 @@ ui <- page_navbar(
                                 width = "400px"),
               accordion(open = FALSE,
                 accordion_panel("Census Tract Data", 
-                                accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv"), actionButton('clear2020', "Clear variables")),
-                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"), downloadButton('downloadfoodtab', "Download .csv"), actionButton('clear2010', "Clear variables"))),
+                                accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv"), actionButton('clear2020', "Clear variables", class = "btn-danger")),
+                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"), downloadButton('downloadfoodtab', "Download .csv"), actionButton('clear2010', "Clear variables", class = "btn-danger"))),
                 accordion_panel("County Data", 
-                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv"), actionButton('clearcrime', "Clear variables")),
-                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv"), actionButton('clearinc', "Clear variables")),
-                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"), actionButton('clearmort', "Clear variables"))),
-                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"), downloadButton('downloadstandalone', "Download .csv"), actionButton('clearstandalone', "Clear variables"))
+                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv"), actionButton('clearcrime', "Clear variables", class = "btn-danger")),
+                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv"), actionButton('clearinc', "Clear variables", class = "btn-danger")),
+                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"), actionButton('clearmort', "Clear variables", class = "btn-danger"))),
+                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"), downloadButton('downloadstandalone', "Download .csv"), actionButton('clearstandalone', "Clear variables", class = "btn-danger"))
               )
 
             )),
@@ -861,15 +857,36 @@ ui <- page_navbar(
 # -------- SERVER --------
 server <- function(input, output, session) {
   # TODO: rintrojs for swipe through tutorial
-  showModal(modalDialog(
-    title = "Welcome to geoexmap!",
-    HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>. 
-    <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>")
-  ))
+  # showModal(modalDialog(
+  #   title = "Welcome to geoexmap!",
+  #   HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>. 
+  #   <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>")
+  # ))
+  steps <- reactive({
+    data.frame(
+      element = c("#geoexmap", "#main_acc"),
+      intro = c("This is the main map. It displays up to three layers of data.",
+                "Use these categories to choose which variables appear on the map."),
+      position = c("right", "right"),
+      stringsAsFactors = FALSE)
+  })
+  
+  # app tutorial
+  observeEvent(input$help, {
+    introjs(session,
+            options = list(
+              steps = steps(),
+              showBullets = TRUE,
+              nextLabel = "Next",
+              prevLabel = "Back",
+              skipLabel = "Skip tour",
+              scrollToElement = FALSE,
+              scrollPadding = 0))
+  })
+  
   # turn switch off if clear button is clicked
   observeEvent(input$clear, {
     update_switch("showchart", value = FALSE)
-   # update_switch("")
   })
   
   #### ICONS ####
@@ -940,7 +957,7 @@ server <- function(input, output, session) {
   
   output$prevention_icon <- renderUI({
     if (is.null(input$prevention) || identical(input$prevention, "")) {
-      tags$img(src = "/prevention.png", height = "16px", width = "16px")
+      tags$img(src = "/prevention.png", height = "16px", width = "16px", title = "No selection yet")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
     }
@@ -989,7 +1006,7 @@ server <- function(input, output, session) {
   
   output$social_icon <- renderUI({
     if ((is.null(input$socialenv) || identical(input$socialenv, "")) && (is.null(input$crime) || identical(input$crime, ""))) {
-      tags$img(src = "/social-environment.png", height = "16px", width = "16px")
+      tags$img(src = "/social-environment.png", height = "16px", width = "16px", title = "No selection yet")
     } else {
       bs_icon("check-circle", class = "text-success", title = "Variables selected")
     }
