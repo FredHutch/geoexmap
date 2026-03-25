@@ -709,6 +709,7 @@ standalone_tab <- c("Choose dataset" = "",
                     "WIC retailers" = "wic.retailers",
                     "Microplastics" = "microplastics",
                     "Transit stops" = "transit",
+                    "Alcohol retailers" = "alcohol.retailers",
                     "Parks" = "parks",
                     "Superfund sites" = "superfund") 
 
@@ -861,7 +862,7 @@ server <- function(input, output, session) {
     title = "Welcome to geoexmap!",
     HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>.
     <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>"),
-    footer = tagList(modalButton("Dismiss"), actionButton("help", "Show tour"))
+    footer = tagList(modalButton("Dismiss"), actionButton("help", label = NULL, icon = icon("question")))
   ))
   
   # TODO: rintrojs for swipe through tutorial
@@ -2617,7 +2618,8 @@ server <- function(input, output, session) {
            "cancer.progs" = cancer.progs,
            "clinics" = clinics, "ems" = ems, "fqhc" = fqhc, "hospitals" = hospitals,
            "pharmacies" = pharmacies, "wic.clinics" = wic.clinics, "wic.retailers" = wic.retailers,
-           "microplastics" = microplastics, "transit" = transit, "parks" = parks, "superfund" = superfund)
+           "microplastics" = microplastics, "transit" = transit, "parks" = parks, "superfund" = superfund,
+           "alcohol.retailers" = alc)
   })
   
   #### OBSERVERS FOR WSCR DATA ####
@@ -2777,6 +2779,13 @@ server <- function(input, output, session) {
     filename = function() {paste0(Sys.Date(), "_geoexmap_county_cancer_mort_download.csv")},
     content = function(file) {
       st_write(cnty_wscr_table_mort(), file)
+    }
+  )
+  
+  output$downloadstandalone <- downloadHandler(
+    filename = function() {paste0(Sys.Date(), "_geoexmap_standalone_download.csv")},
+    content = function(file) {
+      st_write(tab_point_data(), file)
     }
   )
   
