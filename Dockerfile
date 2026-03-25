@@ -24,7 +24,7 @@ RUN mkdir -p /srv/shiny-server/app_cache/sass
 
 RUN chown -R shiny:shiny /srv/shiny-server/
 
-RUN R -f /tmp/check.R --args shiny tidyverse sf leaflet leaflet.extras  leaflet.extras2 mapview crosstalk RColorBrewer bslib bsicons dplyr rsconnect rlang plotly data.table reactable htmltools leaflegend
+RUN R -f /tmp/check.R --args shiny tidyverse sf leaflet leaflet.extras  leaflet.extras2 mapview crosstalk RColorBrewer bslib bsicons dplyr rsconnect rlang plotly data.table reactable htmltools leaflegend rintrojs
 
 WORKDIR /srv/shiny-server/
 
