@@ -744,6 +744,8 @@ ui <- page_navbar(
       background-color: #ff0000;
     }
   ")),
+    tags$link(rel = "stylesheet", 
+              href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
     tags$script(
     HTML("
     document.addEventListener('shown.bs.modal', function(){}); // no-op to ensure BS is loaded
@@ -797,7 +799,7 @@ ui <- page_navbar(
         <li>We proudly implemented a <b>community-engaged approach</b> to developing geo<b>ex</b>map, incorporating valuable input from community members and organizations through <a href='https://www.fredhutch.org/en/research/institutes-networks-ircs/ocoe/about-ocoe/collaborate-with-us.html'>Fred Hutch Cancer Center Community Coalitions</a>.</li>
         <li>geo<b>ex</b>map contains information from the latest available datasets (2019-present) at the census tract (or neighborhood) and county levels for factors in the domains of sociodemographics, prevention, healthcare access, and the <b>exposome</b> (natural environment, built environment, and social environment).</li>
         <li>geo<b>ex</b>map includes <b>user-centered functionalities</b> for mapping, customizable graphs and tables, data importing and exporting, overlaying multiple spatial data layers, neighborhood search, and documentation.</li>
-        <li>To promote <b>disease prevention and control</b> efforts, actionable and practical tips are provided with links to evidence-based strategies for exposure mitigation of modifiable risk factors (e.g., access to free radon test kits) as well as resources for health and well-being. </li>
+        <li>To promote <b>disease prevention and control</b> efforts, actionable and practical tips <i class='bi bi-lightbulb' style = 'color:black;'></i> are provided with links to evidence-based strategies for exposure mitigation of modifiable risk factors (e.g., access to free radon test kits) as well as resources for health and well-being. </li>
         <li>geo<b>ex</b>map was designed with <b>reproducible</b> and <b>scalable</b> methods that can be adopted by other cancer centers and institutions, created using open-source software (R Shiny, leaflet) and publicly available geospatial data. See our <a href='https://github.com/FredHutch/geoexmap'>GitHub repository</a>.</li>
       </ul>
       <br>
@@ -848,8 +850,8 @@ ui <- page_navbar(
             h2("Technical Documentation"),
             a("geoexmap_technical_documentation.pdf", target = "_blank", href = "geoexmap_technical_documentation.pdf")),
   nav_panel("Contact us",
-            h3("Questions or comments?"),
-            a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org")),
+            h3("Contact us"),
+            p("Connect with us regarding any questions, suggestions, and feedback at ", a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org"), "or reach out directly to Dr. Trang VoPham (", a("trang@fredhutch.org", href = "mailto:trang@fredhutch.org", .noWS = "outside"), ").")),
   window_title = "geoexmap | Geospatial Exposome Map at Fred Hutch Cancer Center"
   
 )
@@ -864,10 +866,11 @@ server <- function(input, output, session) {
   # ))
   steps <- reactive({
     data.frame(
-      element = c("#geoexmap", "#main_acc"),
+      element = c("#geoexmap", "#main_acc", "#outcome_popover"),
       intro = c("This is the main map. It displays up to three layers of data.",
-                "Use these categories to choose which variables appear on the map."),
-      position = c("right", "right"),
+                "Use these categories to choose which variables appear on the map.",
+                "Click on this icon to look at health and prevention tips."),
+      position = c("right", "right", "right"),
       stringsAsFactors = FALSE)
   })
   
