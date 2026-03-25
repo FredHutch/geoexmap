@@ -628,8 +628,8 @@ categories <- accordion(
     input_switch("showchart", "Show graph", value = FALSE),
     # TODO: fix upload handler
     # TODO: disclaimer about uploaded data?
-    fileInput("upload", "Upload a shapefile", accept = ".shp"),
-    actionButton("help", label = "", icon = icon("question"))
+    fileInput("upload", "Upload a shapefile", accept = ".shp")#,
+    #actionButton("help", label = "", icon = icon("question"))
   ),
 )
 
@@ -641,16 +641,15 @@ table.cats <- accordion(
     selectInput('sociodemo_tab', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
-    accordion_panel("Race and Ethnicity", icon = uiOutput("race_icon"), selectInput('race_tab', NULL, racev, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Sex", icon = uiOutput("sex_icon"), selectInput('sex_tab', NULL, sexv, selectize = TRUE, multiple = TRUE)),
-    accordion_panel("Age", icon = uiOutput("age_icon"), selectInput('age_tab', NULL, agev, selectize = TRUE, multiple = TRUE))
+    accordion_panel("Race and Ethnicity", selectInput('race_tab', NULL, racev, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Sex", selectInput('sex_tab', NULL, sexv, selectize = TRUE, multiple = TRUE)),
+    accordion_panel("Age", selectInput('age_tab', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
   accordion_panel(
     HTML("<b>Health Outcomes</b>"), icon = bs_icon("heart-pulse", class = "text-secondary"),
     selectInput('outcomes_tab', "Select variables", outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
-    # TODO: add an info symbol with: These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available.
     accordion_panel("Cancer Incidence",
                     selectInput('incsite_tab', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage_tab', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
@@ -668,7 +667,7 @@ table.cats <- accordion(
                 multiple = TRUE, selectize = TRUE, selected = "")
   ),
   accordion_panel(
-    HTML("<b>Prevention</b>"), icon = tags$img(src = "/prevention.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Prevention</b>"), icon = tags$img(src = "/prevention.png", height = "16px", width = "16px"),
     selectInput('prevention_tab', "Select variables", prevention, selectize = TRUE, multiple = TRUE)
   ),
   accordion_panel(
@@ -692,7 +691,7 @@ table.cats <- accordion(
     )
   ),
   accordion_panel(
-    HTML("<b>Social Environment</b>"), icon = tags$img(src = "/social-environment.png", height = "20.48px", width = "20.48px"),
+    HTML("<b>Social Environment</b>"), icon = tags$img(src = "/social-environment.png", height = "16px", width = "16px"),
     selectInput('socialenv_tab', "Select variables", socialenv, selectize = TRUE,  multiple = TRUE),
     accordion_panel('Crime', icon = bs_icon("file-earmark-lock", class = "text-secondary"),
                     selectInput('crime_tab', "Select variables", crimeenv, selectize = TRUE, multiple = TRUE))
@@ -858,12 +857,14 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  showModal(modalDialog(
+    title = "Welcome to geoexmap!",
+    HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>.
+    <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>"),
+    footer = tagList(modalButton("Dismiss"), actionButton("help", "Show tour"))
+  ))
+  
   # TODO: rintrojs for swipe through tutorial
-  # showModal(modalDialog(
-  #   title = "Welcome to geoexmap!",
-  #   HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>. 
-  #   <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>")
-  # ))
   steps <- reactive({
     data.frame(
       element = c("#geoexmap", "#main_acc", "#outcome_popover"),
@@ -876,6 +877,7 @@ server <- function(input, output, session) {
   
   # app tutorial
   observeEvent(input$help, {
+    removeModal()
     introjs(session,
             options = list(
               steps = steps(),
@@ -3298,7 +3300,7 @@ server <- function(input, output, session) {
             if (c_name == "PFAS_dw") {
               proxy <- proxy %>% 
                 addPolygons(data = map_cols(), fillColor = ~pal(x), stroke = FALSE,
-                            fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE),
+                            fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE, sendToBack = TRUE),
                             group = layer.titles(c_name), label = label) %>% 
                 addLegendFactor(pal = pal, values = x, fillOpacity = opacity, 
                                  orientation = "horizontal", shape = "circle", 
