@@ -3514,8 +3514,8 @@ server <- function(input, output, session) {
           groups <- append(groups, "Cancer incidence")
           proxy <- proxy %>%
             addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                        popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        popup = ~paste("<b>", NAMELSAD, "</b>", "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Year:", Year, "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                         group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>% 
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
@@ -3567,8 +3567,8 @@ server <- function(input, output, session) {
           groups <- append(groups, "Cancer mortality")
           proxy <- proxy %>%
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
-                        popup = ~paste(NAMELSAD, "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                       "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                        popup = ~paste("<b>", NAMELSAD, "</b>", "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
+                                       "<br>Year:", Year, "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
                         group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>%
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
