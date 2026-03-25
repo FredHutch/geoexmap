@@ -350,8 +350,8 @@ cancer_mort_md <- markdown("What are risk factors for cancer? What are ways to p
 health_bh_md <- list(
   "Binge.Drinking.among.Adults" = "- **Binge drinking**: What are ways that can help with [starting to drink less](https://www.cdc.gov/drink-less-be-your-best/getting-started-with-drinking-less/index.html)?",
   "Cigarette.Smoking.among.Adults" = "- **Cigarette smoking**: What are ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)? How do I download [QuitBot](https://quitbot.net/), a free smartphone app to help quit smoking?",
-  "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: learn about ways to [get more exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)",
-  "Short.Sleep.Duration" = "- **Short sleep duration**: learn about ways to [get better sleep](https://www.cdc.gov/sleep/about/index.html)"
+  "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: What are ways to help with [starting to exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)",
+  "Short.Sleep.Duration" = "- **Short sleep duration**: What are ways to help with [getting better sleep](https://www.cdc.gov/sleep/about/index.html)"
 )
 
 health_prev_md <- list("Lack.of.Health.Insurance" = "- **Lack of health insurance**: How can I [apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for free or low-cost Medicaid health insurance in Washington state?",
