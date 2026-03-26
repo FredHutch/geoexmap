@@ -626,7 +626,7 @@ categories <- accordion(
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
-    fileInput("upload", htmltools::span("Upload shapefile (.shp, .shx, .dbf)", popover(bs_icon("question-circle"), "Upload all components of your shapefile. .shp, .shx, and .dbf are needed to display your uploaded shapefile.", title = "Help")), 
+    fileInput("upload", htmltools::span("Upload shapefile (.shp, .shx, .dbf)", tooltip(bs_icon("question-circle"), "Help", title = "Upload all components of your shapefile. .shp, .shx, and .dbf are needed to display your uploaded shapefile.")), 
               multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg"))
   ),
 )
@@ -786,6 +786,7 @@ ui <- page_navbar(
   ),
   # TODO: make logo clickable
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
+  id = "app_nav",
   selected = "Map",
   nav_spacer(),
   nav_panel("About", fluidPage(
@@ -828,7 +829,7 @@ ui <- page_navbar(
                             plotlyOutput("chart"))
                 ))
             )),
-  nav_panel("Table",
+  nav_panel("Table", value = "tab",
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
@@ -847,7 +848,7 @@ ui <- page_navbar(
   nav_panel("Documentation",
             h2("Version History"),
             h2("Technical Documentation"),
-            a("geoexmap_technical_documentation.pdf", target = "_blank", href = "geoexmap_technical_documentation.pdf")),
+            a("Download", target = "_blank", href = "geoexmap_technical_doc.pdf")),
   nav_panel("Contact us",
             h3("Contact us"),
             p("Connect with us regarding any questions, suggestions, and feedback at ", a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org"), "or reach out directly to Dr. Trang VoPham (", a("trang@fredhutch.org", href = "mailto:trang@fredhutch.org", .noWS = "outside"), ").")),
@@ -861,7 +862,7 @@ server <- function(input, output, session) {
     title = "Welcome to geoexmap!",
     HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>.
     <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>"),
-    footer = tagList(modalButton("Dismiss"), actionButton("help", label = NULL, icon = icon("question")))
+    footer = tagList(modalButton("Dismiss"), actionButton("help", label = "Show tour"))
   ))
   
   # TODO: rintrojs for swipe through tutorial
@@ -873,21 +874,22 @@ server <- function(input, output, session) {
   # TODO: documentation
   steps <- reactive({
     data.frame(
-      element = c("#geoexmap", "#main_acc", "#help_icon", "#acc_options", "#info_id"),
-      intro = c("This is the main map. It displays up to three layers of data.",
+      element = c("#geoexmap", "#geoexmap", "#main_acc", "#help_icon", "#acc_options"),
+      intro = c("This is the main map. It displays up to three layers of county and neighborhood-level data.",
+                "Hover over the <i class='bi bi-info-circle-fill'></i> in the legend to see details for each layer, including data sources.",
                 "Use these categories to choose which variables or features appear on the map.",
                 "Click on this icon to look at health and prevention tips.",
                 "In options, you can choose to display area boundaries, display the graph, or upload a shapefile."),
-      position = c("right", "right", "right", "right"),
+      position = c("right", "right", "right", "right", "right"),
       stringsAsFactors = FALSE)
   })
   
   # app tutorial
   observeEvent(input$help, {
     removeModal()
-    accordion_panel_open(id = "main_acc", values = "<b>Health Outcomes</b>")
-    accordion_panel_open(id = "main_acc", values = "<b>Healthcare Access</b>")
-    accordion_panel_open(id = "main_acc", values = "<b>Options</b>")
+    accordion_panel_open(id = "main_acc", values = c("<b>Health Outcomes</b>", "<b>Options</b>"))
+    #accordion_panel_open(id = "main_acc", values = )
+    updateSelectInput(session, 'outcomes', selected = "Cancer.or.Melanoma.among.Adults")
     introjs(session,
             options = list(
               steps = steps(),
@@ -897,6 +899,10 @@ server <- function(input, output, session) {
               skipLabel = "Skip tour",
               scrollToElement = TRUE,
               scrollPadding = 0))
+  })
+  
+  observeEvent(input$app_nav, {
+    if(input$)
   })
   
   # turn switch off if clear button is clicked
@@ -3377,6 +3383,7 @@ server <- function(input, output, session) {
             groups <- append(groups, layer.titles(c_name))
             
             info_id <- paste0("legend-info-", c_name)
+            print(info_id)
             info_txt <- var.info(c_name)
             
             if (c_name == "PFAS_dw") {
@@ -3393,7 +3400,7 @@ server <- function(input, output, session) {
                                                              ),
                                                              htmltools::tags$span(
                                                                bs_icon('info-circle-fill'), # circled 'i'
-                                                               id    = "info_id",
+                                                               id    = info_id,
                                                                `data-bs-toggle` = "tooltip",
                                                                `data-bs-placement` = "top",
                                                                title = info_txt,
@@ -3425,10 +3432,11 @@ server <- function(input, output, session) {
                                                              ),
                                                              htmltools::tags$span(
                                                                bs_icon('info-circle-fill'), # circled 'i'
-                                                               id    = "info_id",
+                                                               id    = info_id,
                                                                `data-bs-toggle` = "tooltip",
                                                                `data-bs-placement` = "top",
                                                                title = info_txt,
+                                                               class = "legend-info-icon",
                                                                style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                              )
                                  ),
