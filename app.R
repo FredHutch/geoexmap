@@ -2214,6 +2214,7 @@ server <- function(input, output, session) {
     # reset switches if needed
     update_switch("transit", value = FALSE)
     update_switch("parks", value = FALSE)
+    update_switch("superfund", value = FALSE)
     update_switch("showcounties", value = FALSE)
     update_switch("showcities", value = FALSE)
     update_switch("showchart", value = FALSE)
