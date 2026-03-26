@@ -489,11 +489,11 @@ categories <- accordion(
     accordion_panel("Age", icon = uiOutput("age_icon"), selectInput('age', NULL, agev, selectize = TRUE, multiple = TRUE))
     
   ),
-  accordion_panel(
+  accordion_panel(id = "acc_outcomes",
     HTML("<b>Health Outcomes</b>"), icon = uiOutput("outcomes_icon"),
     selectInput('outcomes', 
                 htmltools::span("Select variables",
-                     popover(bs_icon("lightbulb"),
+                     popover(htmltools::span(id = "help_icon", bs_icon("lightbulb")),
                              "Select one or more health outcomes to see tips.",
                              title = "Tips",
                              placement = "right",
@@ -785,6 +785,7 @@ ui <- page_navbar(
   ")),
     includeHTML("google-analytics.html")
   ),
+  # TODO: make logo clickable
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
   selected = "Map",
   nav_spacer(),
@@ -865,9 +866,15 @@ server <- function(input, output, session) {
   ))
   
   # TODO: rintrojs for swipe through tutorial
+  # TODO: where to select variables
+  # TODO: highlight options
+  # TODO: tips
+  # TODO: info button
+  # TODO: table tab
+  # TODO: documentation
   steps <- reactive({
     data.frame(
-      element = c("#geoexmap", "#main_acc", "#outcome_popover"),
+      element = c("#geoexmap", "#main_acc", "#help_icon"),
       intro = c("This is the main map. It displays up to three layers of data.",
                 "Use these categories to choose which variables appear on the map.",
                 "Click on this icon to look at health and prevention tips."),
@@ -878,6 +885,7 @@ server <- function(input, output, session) {
   # app tutorial
   observeEvent(input$help, {
     removeModal()
+    accordion_panel_open(id = "main_acc", values = "<b>Health Outcomes</b>")
     introjs(session,
             options = list(
               steps = steps(),
@@ -2623,6 +2631,7 @@ server <- function(input, output, session) {
   })
   
   ##### UPLOAD REACTIVE #####
+  # TODO: robust error handling
   user_polys <- reactive({
     req(input$upload)
     
@@ -3372,7 +3381,7 @@ server <- function(input, output, session) {
                                                              ),
                                                              htmltools::tags$span(
                                                                bs_icon('info-circle-fill'), # circled 'i'
-                                                               id    = info_id,
+                                                               id    = "info_id",
                                                                `data-bs-toggle` = "tooltip",
                                                                `data-bs-placement` = "top",
                                                                title = info_txt,
@@ -3404,7 +3413,7 @@ server <- function(input, output, session) {
                                                              ),
                                                              htmltools::tags$span(
                                                                bs_icon('info-circle-fill'), # circled 'i'
-                                                               id    = info_id,
+                                                               id    = "info_id",
                                                                `data-bs-toggle` = "tooltip",
                                                                `data-bs-placement` = "top",
                                                                title = info_txt,
