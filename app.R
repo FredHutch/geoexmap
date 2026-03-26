@@ -634,6 +634,7 @@ categories <- accordion(
 # define table categories
 table.cats <- accordion(
   open = FALSE,
+  id = "table_cats",
   accordion_panel(
     title = HTML("<b>Sociodemographics</b>"), icon = bs_icon("person-vcard", class = "text-secondary"),
     selectInput('sociodemo_tab', "Select variables",
@@ -833,15 +834,16 @@ ui <- page_navbar(
             layout_sidebar(
               sidebar = sidebar(table.cats, 
                                 width = "400px"),
-              accordion(open = FALSE,
-                accordion_panel("Census Tract Data", 
-                                accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), downloadButton('downloadcttab', "Download .csv"), actionButton('clear2020', "Clear variables", class = "btn-danger")),
-                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"), downloadButton('downloadfoodtab', "Download .csv"), actionButton('clear2010', "Clear variables", class = "btn-danger"))),
+              accordion(open = FALSE, id = "table_accs",
+                accordion(id = "table_subacc1",
+                          accordion_panel("Census Tract Data", 
+                                accordion_panel("2020 Census Tracts", reactableOutput("ct_table"), br(), downloadButton('downloadcttab', "Download .csv"), actionButton('clear2020', "Clear variables", class = "btn-danger")),
+                                accordion_panel("2010 Census Tracts (Food Environment)", reactableOutput("food_table"), br(), downloadButton('downloadfoodtab', "Download .csv"), actionButton('clear2010', "Clear variables", class = "btn-danger")))),
                 accordion_panel("County Data", 
-                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), downloadButton('downloadcntycrime', "Download .csv"), actionButton('clearcrime', "Clear variables", class = "btn-danger")),
-                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), downloadButton('downloadcntyinc', "Download .csv"), actionButton('clearinc', "Clear variables", class = "btn-danger")),
-                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), downloadButton('downloadcntymort', "Download .csv"), actionButton('clearmort', "Clear variables", class = "btn-danger"))),
-                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), reactableOutput("standalone_table"), downloadButton('downloadstandalone', "Download .csv"), actionButton('clearstandalone', "Clear variables", class = "btn-danger"))
+                                accordion_panel("Crime", reactableOutput("cnty_crime_table"), br(), downloadButton('downloadcntycrime', "Download .csv"), actionButton('clearcrime', "Clear variables", class = "btn-danger")),
+                                accordion_panel("Cancer Incidence", reactableOutput("cnty_inc_table"), br(), downloadButton('downloadcntyinc', "Download .csv"), actionButton('clearinc', "Clear variables", class = "btn-danger")),
+                                accordion_panel("Cancer Mortality", reactableOutput("cnty_mort_table"), br(), downloadButton('downloadcntymort', "Download .csv"), actionButton('clearmort', "Clear variables", class = "btn-danger"))),
+                accordion_panel("Standalone Data", selectInput('standalone', "", choices = standalone_tab), br(), reactableOutput("standalone_table"), downloadButton('downloadstandalone', "Download .csv"), actionButton('clearstandalone', "Clear variables", class = "btn-danger"))
               )
 
             )),
@@ -888,7 +890,6 @@ server <- function(input, output, session) {
   observeEvent(input$help, {
     removeModal()
     accordion_panel_open(id = "main_acc", values = c("<b>Health Outcomes</b>", "<b>Options</b>"))
-    #accordion_panel_open(id = "main_acc", values = )
     updateSelectInput(session, 'outcomes', selected = "Cancer.or.Melanoma.among.Adults")
     introjs(session,
             options = list(
@@ -901,8 +902,42 @@ server <- function(input, output, session) {
               scrollPadding = 0))
   })
   
+  tab_steps <- reactive({
+    data.frame(
+      element = c("#table_cats", "#table_accs", "#downloadcttab"),
+      intro = c("Use these categories to choose which variables or features to view tables for.",
+                "View tables for selected data here.",
+                "Use this button to download .csv files for selected data."),
+      position = c("right", "right", "right"),
+      stringsAsFactors = FALSE)
+  })
+  
   observeEvent(input$app_nav, {
-    if(input$)
+    if(input$app_nav == "tab") {
+      showModal(modalDialog(
+        title = "Tables and Data Download",
+        HTML("On this page you can view and download data in geo<b>ex</b>map."),
+        footer = tagList(modalButton("Dismiss"), actionButton("help2", label = "Show tour"))
+      ))
+      
+      observeEvent(input$help2, {
+        removeModal()
+        accordion_panel_open(id = "table_cats", values = "<b>Health Outcomes</b>")
+        accordion_panel_open(id = "table_accs", values = c("Census Tract Data"))
+        accordion_panel_open(id = "table_subacc1", values = c("2020 Census Tracts"))
+        
+        introjs(session, options = list(
+          steps = tab_steps(),
+          showBullets = TRUE,
+          nextLabel = "Next",
+          prevLabel = "Back",
+          skipLabel = "Skip tour",
+          scrollToElement = TRUE,
+          scrollPadding = 0))
+      })
+      
+    }
+      
   })
   
   # turn switch off if clear button is clicked
@@ -2930,7 +2965,6 @@ server <- function(input, output, session) {
   })
   
   #### TABLE RENDER ####
-  # TODO: add button to clear tables (either in category or all categories)
   # TODO: add year for variables displayed
   output$ct_table <- renderReactable({
     validate(need(base::ncol(ct_table_cols()) > 3, "Please select a variable."))
