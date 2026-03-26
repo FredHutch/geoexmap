@@ -620,15 +620,14 @@ categories <- accordion(
                                                                  title = "Tips",
                                                                  placement = "right")), crimeenv, selectize = TRUE, multiple = TRUE))
   ),
-  accordion_panel(
+  accordion_panel(id = "acc_options",
     HTML("<b>Options</b>"), icon = bs_icon("gear"),
     input_switch("showbounds", "Show tract boundaries", value = TRUE),
     input_switch("showcounties", "Show county boundaries", value = FALSE),
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
-    # TODO: fix upload handler
-    # TODO: disclaimer about uploaded data?
-    fileInput("upload", "Upload a shapefile", multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg"))
+    fileInput("upload", htmltools::span("Upload shapefile (.shp, .shx, .dbf)", popover(bs_icon("question-circle"), "Upload all components of your shapefile. .shp, .shx, and .dbf are needed to display your uploaded shapefile.", title = "Help")), 
+              multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg"))
   ),
 )
 
@@ -874,11 +873,12 @@ server <- function(input, output, session) {
   # TODO: documentation
   steps <- reactive({
     data.frame(
-      element = c("#geoexmap", "#main_acc", "#help_icon"),
+      element = c("#geoexmap", "#main_acc", "#help_icon", "#acc_options", "#info_id"),
       intro = c("This is the main map. It displays up to three layers of data.",
-                "Use these categories to choose which variables appear on the map.",
-                "Click on this icon to look at health and prevention tips."),
-      position = c("right", "right", "right"),
+                "Use these categories to choose which variables or features appear on the map.",
+                "Click on this icon to look at health and prevention tips.",
+                "In options, you can choose to display area boundaries, display the graph, or upload a shapefile."),
+      position = c("right", "right", "right", "right"),
       stringsAsFactors = FALSE)
   })
   
@@ -886,6 +886,8 @@ server <- function(input, output, session) {
   observeEvent(input$help, {
     removeModal()
     accordion_panel_open(id = "main_acc", values = "<b>Health Outcomes</b>")
+    accordion_panel_open(id = "main_acc", values = "<b>Healthcare Access</b>")
+    accordion_panel_open(id = "main_acc", values = "<b>Options</b>")
     introjs(session,
             options = list(
               steps = steps(),
@@ -893,7 +895,7 @@ server <- function(input, output, session) {
               nextLabel = "Next",
               prevLabel = "Back",
               skipLabel = "Skip tour",
-              scrollToElement = FALSE,
+              scrollToElement = TRUE,
               scrollPadding = 0))
   })
   
@@ -2633,7 +2635,17 @@ server <- function(input, output, session) {
   ##### UPLOAD REACTIVE #####
   # TODO: robust error handling
   user_polys <- reactive({
+    exts <- tools::file_ext(input$upload$name)
+    need_ok <- all(c("shp", "shx", "dbf") %in% exts)  # + "prj" if you require it
+    
+    validate(
+      need(need_ok,
+           "Please upload all shapefile components: .shp, .shx, .dbf (and .prj if available)."))
     req(input$upload)
+    
+    # if we get here, it's safe to proceed
+    idx_shp <- which(exts == "shp")[1]
+    input$upload$datapath[idx_shp]
     
     shpdf <- input$upload
     print(shpdf)
