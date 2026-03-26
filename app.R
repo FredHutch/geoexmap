@@ -628,8 +628,7 @@ categories <- accordion(
     input_switch("showchart", "Show graph", value = FALSE),
     # TODO: fix upload handler
     # TODO: disclaimer about uploaded data?
-    fileInput("upload", "Upload a shapefile", accept = ".shp")#,
-    #actionButton("help", label = "", icon = icon("question"))
+    fileInput("upload", "Upload a shapefile", multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg"))
   ),
 )
 
@@ -637,7 +636,7 @@ categories <- accordion(
 table.cats <- accordion(
   open = FALSE,
   accordion_panel(
-    title = HTML("<b>Sociodemographics</b>"), icon = bs_icon("person-vcard", class = "text-secondary"), #icon = bs_icon("person-vcard"),
+    title = HTML("<b>Sociodemographics</b>"), icon = bs_icon("person-vcard", class = "text-secondary"),
     selectInput('sociodemo_tab', "Select variables",
                 sociodemographics,
                 selectize = TRUE, multiple = TRUE),
@@ -2623,7 +2622,61 @@ server <- function(input, output, session) {
            "alcohol.retailers" = alc)
   })
   
-  #### OBSERVERS FOR WSCR DATA ####
+  ##### UPLOAD REACTIVE #####
+  user_polys <- reactive({
+    req(input$upload)
+    
+    shpdf <- input$upload
+    print(shpdf)
+    
+    # files projected with names
+    # 0.dbf, 1.prj, 2.shp, 3.xml, 4.shx
+    # need to rename files with actual names
+    # Just in case any other files get uploaded
+    shpdf <- shpdf[grepl("\\.(shp|dbf|shx|prj)$",
+                         shpdf$name, ignore.case = TRUE), ]
+    req(nrow(shpdf) > 0)
+    
+    # Row corresponding to the .shp file
+    
+    # name of temp dir where files are uploaded
+    targetdir <- tempfile("shp_")
+    dir.create(targetdir)
+    
+    base <- "upload"
+    #cat("temp dir:", tmpdirname)
+    
+    for (i in seq_len(nrow(shpdf))) {
+      ext <- tools::file_ext(shpdf$name[i])
+      new_name <- paste0(base, ".", ext)
+      file.copy(
+        from = shpdf$datapath[i],
+        to   = file.path(targetdir, new_name),
+        overwrite = TRUE
+      )
+    }
+    
+    shp_path <- file.path(targetdir, paste0(base, ".shp"))
+    shp <- st_read(shp_path, quiet = TRUE)
+    
+    # polygon geom only
+    gtypes <- unique(st_geometry_type(shp, by_geometry = TRUE))
+    allowed <- c("POLYGON", "MULTIPOLYGON")
+    
+    validate(need(all(as.character(gtypes) %in% allowed),
+                  "Uploaded shapefile must contain only polygons or multipolygons."))
+    
+    # Ensure WGS84 for Leaflet
+    if (is.na(st_crs(shp))) {
+      shp <- st_set_crs(shp, 4326)
+    } else if (st_crs(shp)$epsg != 4326) {
+      shp <- st_transform(shp, 4326)
+    }
+    
+    shp
+  })
+  
+  #### OBSERVERS (WSCR) ####
   filtered.inc <- reactive({
     req(input$incsite != "", input$incstage != "", input$incsex != "")
     wscr.inc %>% 
@@ -2735,6 +2788,8 @@ server <- function(input, output, session) {
   values <- reactiveValues(
     active_variables = character(0)
   )
+  
+  
   
   #### DOWNLOAD HANDLERS ####
   # TODO: add map download button
@@ -3256,11 +3311,7 @@ server <- function(input, output, session) {
       }
       
       ##### map (main data) #####
-      # TODO: combine before plotting, make snappier
       groups <- character(0)
-      # TODO: dynamic labels for tracts
-      
-      
         for (i in seq_along(colnames(map_cols()))) {
           c_name <- colnames(map_cols())[i]
           x <- map_cols()[[c_name]]
@@ -3428,11 +3479,31 @@ server <- function(input, output, session) {
                              labelStyle = "text-align: center;",
                              className  = "my-centered-num-legend",
                              position   = "bottomright") %>% 
-            addLayersControl(overlayGroups = groups, # TODO: fix this functionality (overlay not functioning)
+            addLayersControl(overlayGroups = groups,
                              position = "topright",
                              options = layersControlOptions(collapsed = FALSE))
           #addLegend(pal = pal, values = x, title = legend.titles(c_name))
         }
+      }
+      
+      ##### map (user upload) #####
+      if (!is.null(input$upload)) {
+        groups <- append(groups, "Uploaded file")
+        proxy <- proxy %>% 
+          addPolygons(
+            data = user_polys(),
+            group = "Uploaded file",
+            stroke = TRUE,
+            color = "purple",
+            weight = 2,
+            fillColor = "transparent",
+            highlightOptions = highlightOptions(weight = 3,
+                                                color = "#fff",
+                                                bringToFront = TRUE)
+          ) %>% 
+          addLayersControl(overlayGroups = groups,
+                           position = "topright",
+                           options = layersControlOptions(collapsed = FALSE))
       }
       
       ##### map (crime) #####
@@ -3647,6 +3718,8 @@ server <- function(input, output, session) {
 
 # -------- CREATE SHINY APP --------
 options <- list()
+
+options(shiny.maxRequestSize = 50 * 1024^2)
 
 if (!interactive()) {
   options$shiny.port = 3838
