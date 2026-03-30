@@ -331,149 +331,156 @@ food_env_inp <- food_env %>%
 
 #### DEFINE MARKDOWN FOR TIPS ####
 health_out_md <- list(
-  "Arthritis.among.Adults" = "- **Arthritis**: What are [risk factors for arthritis](https://www.cdc.gov/arthritis/basics/index.html)? What are ways to [treat arthritis](https://www.arthritis.org/treatments) and [manage arthritis](https://www.cdc.gov/arthritis/prevention/index.html)?",
-  "Asthma.among.Adults" = "- **Asthma**: What are [risk factors for asthma](https://www.lung.org/lung-health-diseases/lung-disease-lookup/asthma/learn-about-asthma/what-causes-asthma)? What are ways to [treat asthma](https://www.nhlbi.nih.gov/health/asthma/treatment-action-plan#How-is-asthma-treated?) and [manage asthma](https://www.cdc.gov/asthma/control/index.html)?",
-  "High.Blood.Pressure.among.Adults" = "- **High blood pressure**: What are [risk factors for high blood pressure](https://www.cdc.gov/high-blood-pressure/risk-factors/index.html)? What are ways to [treat high blood pressure](https://www.nhlbi.nih.gov/health/high-blood-pressure/treatment) and [control high blood pressure](https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure)?",
-  "Cancer.or.Melanoma.among.Adults" = "- **Cancer**: What are [risk factors for cancer](https://www.cancer.org/cancer/risk-prevention/understanding-cancer-risk.html)? What are ways to [prevent cancer](https://www.cdc.gov/cancer/prevention/index.html)? What are ways to [treat cancer](https://www.cancer.org/cancer/managing-cancer.html) and [live well after cancer treatment](https://www.cancer.org/cancer/survivorship.html)? What are [healthy recipes and nutrition resources](https://www.cookforyourlife.org/) for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a [Survivorship Care Plan](https://www.fredhutch.org/en/patient-care/services/survivorship/survivorship-clinic.html)?",
-  "High.Cholesterol.among.Screened.Adults" = "- **High cholesterol**: What are [risk factors for high cholesterol](https://www.cdc.gov/cholesterol/risk-factors/index.html)? What are ways to [treat high cholesterol](https://www.heart.org/en/health-topics/cholesterol/prevention-and-treatment-of-high-cholesterol-hyperlipidemia) and [manage high cholesterol](https://www.heart.org/en/healthy-living/healthy-lifestyle/lifes-essential-8/how-to-control-cholesterol-fact-sheet)?",
-  "COPD.among.Adults" = "- **Chronic obstructive pulmonary disease (COPD)**: What are [risk factors for COPD](https://www.nhlbi.nih.gov/health/copd/causes)? What are ways to [treat COPD](https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/treating) and [manage COPD](https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/living-with-copd)?",
-  "Coronary.Heart.Disease.among.Adults" = "- **Heart disease**: What are [risk factors for heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/risk-factors)? What are ways to [treat heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/treatment) and [manage heart disease](https://www.nhlbi.nih.gov/health/coronary-heart-disease/living-with)?",
-  "Depression.among.Adults" = "- **Depression**: What are [risk factors for depression](https://www.psychiatry.org/patients-families/depression/what-is-depression#section_0)? What are ways to [treat depression](https://www.cdc.gov/tobacco/campaign/tips/diseases/depression-anxiety.html#treatments) and [manage depression](https://adaa.org/understanding-anxiety/depression/tips)? ",
-  "Diagnosed.Diabetes.among.Adults" = "- **Diabetes**: What are [risk factors for diabetes](https://www.cdc.gov/diabetes/risk-factors/index.html)? What are ways to [treat diabetes](https://diabetes.org/living-with-diabetes/treatment-care) and [manage diabetes](https://www.cdc.gov/diabetes/living-with/index.html)?",
-  "Obesity.among.Adults" = "- **Obesity**: What are [risk factors for obesity](https://www.cdc.gov/obesity/risk-factors/risk-factors.html)? What are ways to [treat obesity](https://diabetes.org/obesity) and [manage your weight](https://www.cdc.gov/diabetes/living-with/index.html)?",
-  "All.Teeth.Lost.among.Adults.65.and.Older" = "- **Tooth loss**: What are [risk factors for tooth loss](https://www.cdc.gov/oral-health/about/about-tooth-loss.html#cdc_disease_basics_population-who-is-at-risk)? What are ways to [treat tooth loss](https://www.cdc.gov/oral-health/about/about-tooth-loss.html#cdc_disease_basics_treatment-treatment-and-recovery) and [manage oral health?](https://www.cdc.gov/oral-health/prevention/oral-health-tips-for-adults.html)",
-  "Stroke.among.Adults" = "- **Stroke**: What are [risk factors for stroke](https://www.cdc.gov/stroke/risk-factors/index.html)? What are ways to [treat stroke](https://www.cdc.gov/stroke/treatment/index.html) and [rehab after experiencing a stroke](https://www.stroke.org/en/life-after-stroke)?"
-) 
-
-cancer_mort_md <- markdown("What are risk factors for cancer? What are ways to prevent cancer? What are ways to treat cancer and live well after cancer treatment? What are healthy recipes and nutrition resources for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a Survivorship Care Plan?")
-
-health_bh_md <- list(
-  "Binge.Drinking.among.Adults" = "- **Binge drinking**: What are ways that can help with [starting to drink less](https://www.cdc.gov/drink-less-be-your-best/getting-started-with-drinking-less/index.html)?",
-  "Cigarette.Smoking.among.Adults" = "- **Cigarette smoking**: What are ways to [quit smoking](https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html)? How do I download [QuitBot](https://quitbot.net/), a free smartphone app to help quit smoking?",
-  "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: What are ways to help with [starting to exercise](https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html)",
-  "Short.Sleep.Duration" = "- **Short sleep duration**: What are ways to help with [getting better sleep](https://www.cdc.gov/sleep/about/index.html)"
+  "Arthritis.among.Adults" = "- **Arthritis**: What are <a href='https://www.cdc.gov/arthritis/basics/index.html' target='_blank' rel='noopener noreferrer'>risk factors for arthritis</a>? What are ways to <a href='https://www.arthritis.org/treatments' target='_blank' rel='noopener noreferrer'>treat arthritis</a> and <a href='https://www.cdc.gov/arthritis/prevention/index.html' target='_blank' rel='noopener noreferrer'>manage arthritis</a>?",
+  "Asthma.among.Adults" = "- **Asthma**: What are <a href='https://www.lung.org/lung-health-diseases/lung-disease-lookup/asthma/learn-about-asthma/what-causes-asthma' target='_blank' rel='noopener noreferrer'>risk factors for asthma</a>? What are ways to <a href='https://www.nhlbi.nih.gov/health/asthma/treatment-action-plan#How-is-asthma-treated?' target='_blank' rel='noopener noreferrer'>treat asthma</a> and <a href='https://www.cdc.gov/asthma/control/index.html' target='_blank' rel='noopener noreferrer'>manage asthma</a>?",
+  "High.Blood.Pressure.among.Adults" = "- **High blood pressure**: What are <a href='' target='_blank' rel='noopener noreferrer'>risk factors for high blood pressure</a>? What are ways to <a href='https://www.nhlbi.nih.gov/health/high-blood-pressure/treatment' target='_blank' rel='noopener noreferrer'>treat high blood pressure</a> and <a href='https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure' target='_blank' rel='noopener noreferrer'>control high blood pressure</a>?",
+  "Cancer.or.Melanoma.among.Adults" = "- **Cancer**: What are <a href='https://www.cancer.org/cancer/risk-prevention/understanding-cancer-risk.html' target='_blank' rel='noopener noreferrer'>risk factors for cancer</a>? What are ways to <a href='https://www.cdc.gov/cancer/prevention/index.html' target='_blank' rel='noopener noreferrer'>prevent cancer</a>? What are ways to <a href='https://www.cancer.org/cancer/managing-cancer.html' target='_blank' rel='noopener noreferrer'>treat cancer</a> and <a href='https://www.cancer.org/cancer/survivorship.html' target='_blank' rel='noopener noreferrer'>live well after cancer treatment</a>? What are <a href='https://www.cookforyourlife.org/' target='_blank' rel='noopener noreferrer'>healthy recipes and nutrition resources</a> for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a <a href='https://www.fredhutch.org/en/patient-care/services/survivorship/survivorship-clinic.html' target='_blank' rel='noopener noreferrer'>Survivorship Care Plan</a>?",
+  "High.Cholesterol.among.Screened.Adults" = "- **High cholesterol**: What are <a href='https://www.cdc.gov/cholesterol/risk-factors/index.html' target='_blank' rel='noopener noreferrer'>risk factors for high cholesterol</a>? What are ways to <a href='https://www.heart.org/en/health-topics/cholesterol/prevention-and-treatment-of-high-cholesterol-hyperlipidemia' target='_blank' rel='noopener noreferrer'>treat high cholesterol</a> and <a href='https://www.heart.org/en/healthy-living/healthy-lifestyle/lifes-essential-8/how-to-control-cholesterol-fact-sheet' target='_blank' rel='noopener noreferrer'>manage high cholesterol</a>?",
+  "COPD.among.Adults" = "- **Chronic obstructive pulmonary disease (COPD)**: What are <a href='https://www.nhlbi.nih.gov/health/copd/causes' target='_blank' rel='noopener noreferrer'>risk factors for COPD</a>? What are ways to <a href='https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/treating' target='_blank' rel='noopener noreferrer'>treat COPD</a> and <a href='https://www.lung.org/lung-health-diseases/lung-disease-lookup/copd/living-with-copd' target='_blank' rel='noopener noreferrer'>manage COPD</a>?",
+  "Coronary.Heart.Disease.among.Adults" = "- **Heart disease**: What are <a href='https://www.nhlbi.nih.gov/health/coronary-heart-disease/risk-factors' target='_blank' rel='noopener noreferrer'>risk factors for heart disease</a>? What are ways to <a href='https://www.nhlbi.nih.gov/health/coronary-heart-disease/treatment' target='_blank' rel='noopener noreferrer'>treat heart disease</a> and <a href='https://www.nhlbi.nih.gov/health/coronary-heart-disease/living-with' target='_blank' rel='noopener noreferrer'>manage heart disease</a>?",
+  "Depression.among.Adults" = "- **Depression**: What are <a href='https://www.psychiatry.org/patients-families/depression/what-is-depression#section_0' target='_blank' rel='noopener noreferrer'>risk factors for depression</a>? What are ways to <a href='https://www.cdc.gov/tobacco/campaign/tips/diseases/depression-anxiety.html#treatments' target='_blank' rel='noopener noreferrer'>treat depression</a> and <a href='https://adaa.org/understanding-anxiety/depression/tips' target='_blank' rel='noopener noreferrer'>manage depression</a>?",
+  "Diagnosed.Diabetes.among.Adults" = "- **Diabetes**: What are <a href='https://www.cdc.gov/diabetes/risk-factors/index.html' target='_blank' rel='noopener noreferrer'>risk factors for diabetes</a>? What are ways to <a href='https://diabetes.org/living-with-diabetes/treatment-care' target='_blank' rel='noopener noreferrer'>treat diabetes</a> and <a href='https://www.cdc.gov/diabetes/living-with/index.html' target='_blank' rel='noopener noreferrer'>manage diabetes</a>?",
+  "Obesity.among.Adults" = "- **Obesity**: What are <a href='https://www.cdc.gov/obesity/risk-factors/risk-factors.html' target='_blank' rel='noopener noreferrer'>risk factors for obesity</a>? What are ways to <a href='https://diabetes.org/obesity' target='_blank' rel='noopener noreferrer'>treat obesity</a> and <a href='https://www.cdc.gov/diabetes/living-with/index.html' target='_blank' rel='noopener noreferrer'>manage your weight</a>?",
+  "All.Teeth.Lost.among.Adults.65.and.Older" = "- **Tooth loss**: What are <a href='https://www.cdc.gov/oral-health/about/about-tooth-loss.html#cdc_disease_basics_population-who-is-at-risk' target='_blank' rel='noopener noreferrer'>risk factors for tooth loss</a>? What are ways to <a href='https://www.cdc.gov/oral-health/about/about-tooth-loss.html#cdc_disease_basics_treatment-treatment-and-recovery' target='_blank' rel='noopener noreferrer'>treat tooth loss</a> and <a href='https://www.cdc.gov/oral-health/prevention/oral-health-tips-for-adults.html' target='_blank' rel='noopener noreferrer'>manage oral health</a>?",
+  "Stroke.among.Adults" = "- **Stroke**: What are <a href='https://www.cdc.gov/stroke/risk-factors/index.html' target='_blank' rel='noopener noreferrer'>risk factors for stroke</a>? What are ways to <a href='https://www.cdc.gov/stroke/treatment/index.html' target='_blank' rel='noopener noreferrer'>treat stroke</a> and <a href='https://www.stroke.org/en/life-after-stroke' target='_blank' rel='noopener noreferrer'>rehab after experiencing a stroke</a>?"
 )
 
-health_prev_md <- list("Lack.of.Health.Insurance" = "- **Lack of health insurance**: How can I [apply for Apple Health](https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html), which is the name for free or low-cost Medicaid health insurance in Washington state?",
-                "Routine.Checkup.in.the.Past.Year" = "- **Routine checkup**: What are ways to [stay up to date on your preventive care](https://www.cdc.gov/chronic-disease/prevention/preventive-care.html)?",
-                "Visited.Dentist.in.Past.Year" = "- **Dental care**: What are ways to [maintain dental health](https://www.cdc.gov/oral-health/prevention/oral-health-tips-for-adults.html)?",
-                "Taking.Medicine.to.Control.High.Blood.Pressure" = "- **High blood pressure medication use**: What are ways to [better manage taking blood pressure medication](https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure/managing-high-blood-pressure-medications)?",
-                "Cholesterol.Screening" = "- **Cholesterol screening**: What are ways to [test for cholesterol](https://www.cdc.gov/cholesterol/testing/index.html)?",
-                "Mammography.Use.among.Women.50.to.74" = "- **Mammography**: What are ways to get a [mammogram](https://www.komen.org/breast-cancer/screening/), which helps to screen for breast cancer? How can I schedule a mammogram on the [Fred Hutch Mammography Van](https://www.fredhutch.org/en/patient-care/prevention/breast-cancer-screening/mammogram-van.html)?",
-                "Colorectal.Cancer.Screening.among.Adults.45.to.75" = "- **Colorectal cancer screening**: What are ways to get [screened for colorectal cancer](https://www.fredhutch.org/en/research/institutes-networks-ircs/population-health-colorectal-cancer-screening-program/resources.html)? How can you use [MyGeneRisk](https://mygenerisk-colon.fredhutch.org/), a free tool to learn about your risk of developing colorectal cancer?"
-                )
+health_bh_md <- list(
+  "Binge.Drinking.among.Adults" = "- **Binge drinking**: What are ways that can help with <a href='https://www.cdc.gov/drink-less-be-your-best/getting-started-with-drinking-less/index.html' target='_blank' rel='noopener noreferrer'>starting to drink less</a>?",
+  "Cigarette.Smoking.among.Adults" = "- **Cigarette smoking**: What are ways to <a href='https://www.cdc.gov/tobacco/campaign/tips/quit-smoking/index.html' target='_blank' rel='noopener noreferrer'>quit smoking</a>? How do I download <a href='https://quitbot.net/' target='_blank' rel='noopener noreferrer'>QuitBot</a>, a free smartphone app to help quit smoking?",
+  "No.Leisure.time.Physical.Activity.among.Adults" = "- **No leisure-time physical activity**: What are ways to help with <a href='https://www.cdc.gov/healthy-weight-growth/physical-activity/getting-started.html' target='_blank' rel='noopener noreferrer'>starting to exercise</a>?",
+  "Short.Sleep.Duration" = "- **Short sleep duration**: What are ways to help with <a href='https://www.cdc.gov/sleep/about/index.html' target='_blank' rel='noopener noreferrer'>getting better sleep</a>?"
+)
 
-airpol_md_list <- list("Particulate.Matter.2.5" = "- **Particulate matter <2.5 microns in diameter (PM<sub>2.5</sub>)**: What is [PM<sub>2.5</sub>](https://www.stateofglobalair.org/pollution-sources/pm25)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
-                       "Nitrogen.dioxide" = "- **Nitrogen dioxide (NO<sub>2</sub>)**: What is [NO<sub>2</sub>](https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/nitrogen-dioxide)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
-                       "Ozone" = "- **Ozone (O<sub>3</sub>)**: What is [O<sub>3</sub>](https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/ozone)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
-                       "Carbon.monoxide" = "- **Carbon monoxide (CO)**: What is [CO](https://www.lung.org/clean-air/indoor-air/indoor-air-pollutants/carbon-monoxide)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
-                       "Sulfur.dioxide" = "- **Sulfur dioxide (SO<sub>2</sub>)**: What is [SO<sub>2</sub>](https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/sulfur-dioxide)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
-                       "Wildfire.smoke" = "- **Wildfire smoke**: What is [wildfire smoke](https://ecology.wa.gov/air-climate/air-quality/smoke-fire/wildfire-smoke)? What are ways to [protect yourself from air pollution](http://www.breatheasy.tips/)? How can you use the [Air Quality Index (AQI)](https://www.breatheasy.tips/#aqi), a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels? How can you learn about the current [wildfire smoke forecast](https://airqualitymap.ecology.wa.gov/?view=forecast) in your area (select <u>**Smoke Forecast**</u> from the View menu)? How can you [prepare for wildfires](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/wildfires)?"
-                       )
+health_prev_md <- list(
+  "Lack.of.Health.Insurance" = "- **Lack of health insurance**: How can I <a href='https://www.wahealthplanfinder.org/us/en/my-account/my-coverage/learnapplehealth.html' target='_blank' rel='noopener noreferrer'>apply for Apple Health</a>, which is the name for free or low-cost Medicaid health insurance in Washington state?",
+  "Routine.Checkup.in.the.Past.Year" = "- **Routine checkup**: What are ways to <a href='https://www.cdc.gov/chronic-disease/prevention/preventive-care.html' target='_blank' rel='noopener noreferrer'>stay up to date on your preventive care</a>?",
+  "Visited.Dentist.in.Past.Year" = "- **Dental care**: What are ways to <a href='https://www.cdc.gov/oral-health/prevention/oral-health-tips-for-adults.html' target='_blank' rel='noopener noreferrer'>maintain dental health</a>?",
+  "Taking.Medicine.to.Control.High.Blood.Pressure" = "- **High blood pressure medication use**: What are ways to <a href='https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure/managing-high-blood-pressure-medications' target='_blank' rel='noopener noreferrer'>better manage taking blood pressure medication</a>?",
+  "Cholesterol.Screening" = "- **Cholesterol screening**: What are ways to <a href='https://www.cdc.gov/cholesterol/testing/index.html' target='_blank' rel='noopener noreferrer'>test for cholesterol</a>?",
+  "Mammography.Use.among.Women.50.to.74" = "- **Mammography**: What are ways to get a <a href='https://www.komen.org/breast-cancer/screening/' target='_blank' rel='noopener noreferrer'>mammogram</a>, which helps to screen for breast cancer? How can I schedule a mammogram on the <a href='https://www.fredhutch.org/en/patient-care/prevention/breast-cancer-screening/mammogram-van.html' target='_blank' rel='noopener noreferrer'>Fred Hutch Mammography Van</a>?",
+  "Colorectal.Cancer.Screening.among.Adults.45.to.75" = "- **Colorectal cancer screening**: What are ways to get <a href='https://www.fredhutch.org/en/research/institutes-networks-ircs/population-health-colorectal-cancer-screening-program/resources.html' target='_blank' rel='noopener noreferrer'>screened for colorectal cancer</a>? How can you use <a href='https://mygenerisk-colon.fredhutch.org/' target='_blank' rel='noopener noreferrer'>MyGeneRisk</a>, a free tool to learn about your risk of developing colorectal cancer?"
+)
+
+airpol_md_list <- list(
+  "Particulate.Matter.2.5" = "- **Particulate matter <2.5 microns in diameter (PM<sub>2.5</sub>)**: What is <a href='https://www.stateofglobalair.org/pollution-sources/pm25' target='_blank' rel='noopener noreferrer'>PM<sub>2.5</sub></a>? What are ways to <a href='http://www.breatheasy.tips/' target='_blank' rel='noopener noreferrer'>protect yourself from air pollution</a>? How can you use the <a href='https://www.breatheasy.tips/#aqi' target='_blank' rel='noopener noreferrer'>Air Quality Index (AQI)</a>, a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+  "Nitrogen.dioxide" = "- **Nitrogen dioxide (NO<sub>2</sub>)**: What is <a href='https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/nitrogen-dioxide' target='_blank' rel='noopener noreferrer'>NO<sub>2</sub></a>? What are ways to <a href='http://www.breatheasy.tips/' target='_blank' rel='noopener noreferrer'>protect yourself from air pollution</a>? How can you use the <a href='https://www.breatheasy.tips/#aqi' target='_blank' rel='noopener noreferrer'>Air Quality Index (AQI)</a>, a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+  "Ozone" = "- **Ozone (O<sub>3</sub>)**: What is <a href='https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/ozone' target='_blank' rel='noopener noreferrer'>O<sub>3</sub></a>? What are ways to <a href='http://www.breatheasy.tips/' target='_blank' rel='noopener noreferrer'>protect yourself from air pollution</a>? How can you use the <a href='https://www.breatheasy.tips/#aqi' target='_blank' rel='noopener noreferrer'>Air Quality Index (AQI)</a>, a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+  "Carbon.monoxide" = "- **Carbon monoxide (CO)**: What is <a href='https://www.lung.org/clean-air/indoor-air/indoor-air-pollutants/carbon-monoxide' target='_blank' rel='noopener noreferrer'>CO</a>? What are ways to <a href='http://www.breatheasy.tips/' target='_blank' rel='noopener noreferrer'>protect yourself from air pollution</a>? How can you use the <a href='https://www.breatheasy.tips/#aqi' target='_blank' rel='noopener noreferrer'>Air Quality Index (AQI)</a>, a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+  "Sulfur.dioxide" = "- **Sulfur dioxide (SO<sub>2</sub>)**: What is <a href='https://www.lung.org/clean-air/outdoors/what-makes-air-unhealthy/sulfur-dioxide' target='_blank' rel='noopener noreferrer'>SO<sub>2</sub></a>? What are ways to <a href='http://www.breatheasy.tips/' target='_blank' rel='noopener noreferrer'>protect yourself from air pollution</a>? How can you use the <a href='https://www.breatheasy.tips/#aqi' target='_blank' rel='noopener noreferrer'>Air Quality Index (AQI)</a>, a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels?",
+  "Wildfire.smoke" = "- **Wildfire smoke**: What is <a href='https://ecology.wa.gov/air-climate/air-quality/smoke-fire/wildfire-smoke' target='_blank' rel='noopener noreferrer'>wildfire smoke</a>? What are ways to <a href='http://www.breatheasy.tips/' target='_blank' rel='noopener noreferrer'>protect yourself from air pollution</a>? How can you use the <a href='https://www.breatheasy.tips/#aqi' target='_blank' rel='noopener noreferrer'>Air Quality Index (AQI)</a>, a free tool to help plan your outdoor activities and learn about unhealthy air pollution levels? How can you learn about the current <a href='https://airqualitymap.ecology.wa.gov/?view=forecast' target='_blank' rel='noopener noreferrer'>wildfire smoke forecast</a> in your area (select <u>**Smoke Forecast**</u> from the View menu)? How can you <a href='https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/wildfires' target='_blank' rel='noopener noreferrer'>prepare for wildfires</a>?"
+)
 
 # all natural disaster events have same key--use to avoid redundancy and repeated same tip
-nat_dis_key <- list(nat_disaster = "- **Extreme weather events and natural disasters**: What can you do before, during, and after an [extreme weather event or natural disaster](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters)?",
-                    temperature = "- **Temperature**: What are ways to help with [heat waves](https://www.cdc.gov/heat-health/about/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fextreme-heat%2Fabout%2Findex.html)? How can you find [extreme heat cooling centers](https://search.wa211.org/search?location=&query=TH-2600.1900-180&query_type=taxonomy&query_label=Extreme+Heat+Cooling+Centers) in your area? What are ways to help with [cold spells](https://www.cdc.gov/winter-weather/safety/stay-safe-during-after-a-winter-storm-safety.html)?")
+nat_dis_key <- list(nat_disaster = "- **Extreme weather events and natural disasters**: What can you do before, during, and after an <a href=https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters target='_blank' rel='noopener noreferrer'>extreme weather event or natural disaster</a>?",
+                    temperature = "- **Temperature**: What are ways to help with <a href=https://www.cdc.gov/heat-health/about/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fextreme-heat%2Fabout%2Findex.html target='_blank' rel='noopener noreferrer'>heat waves</a>? How can you find <a href=https://search.wa211.org/search?location=&query=TH-2600.1900-180&query_type=taxonomy&query_label=Extreme+Heat+Cooling+Centers target='_blank' rel='noopener noreferrer'>extreme heat cooling centers</a>[]() in your area? What are ways to help with [cold spells](https://www.cdc.gov/winter-weather/safety/stay-safe-during-after-a-winter-storm-safety.html)?")
 
-nat_md_list <- list("UV.Index" = "- **Ultraviolet radiation (UV)**: What is [UV](https://www.cdc.gov/radiation-health/data-research/facts-stats/ultraviolet-radiation.html)? What are ways to help with [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)?",
-                 "Maximum.temperature" = "temperature",
-                 "Minimum.temperature" = "temperature",
-                 "Average.temperature" = "temperature",
-                 "Precipitation" = "- **Precipitation**: What to do before, during, and after a [flood](https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/floods)?",
-                 "Radon" = "- **Radon**: What is [radon and ways to test for radon in your home](https://doh.wa.gov/community-and-environment/contaminants/radon)?",
-                 "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are [PFAS and ways to reduce your exposure to PFAS](https://doh.wa.gov/community-and-environment/contaminants/pfas)?"
-                 )
+nat_md_list <- list(
+  "UV.Index" = "- **Ultraviolet radiation (UV)**: What is <a href=https://www.cdc.gov/radiation-health/data-research/facts-stats/ultraviolet-radiation.html target='_blank' rel='noopener noreferrer'>UV</a>? What are ways to help with [sun safety](https://www.cdc.gov/skin-cancer/sun-safety/index.html)?",
+  "Maximum.temperature" = "temperature",
+  "Minimum.temperature" = "temperature",
+  "Average.temperature" = "temperature",
+  "Precipitation" = "- **Precipitation**: What to do before, during, and after a <a href=https://doh.wa.gov/emergencies/be-prepared-be-safe/severe-weather-and-natural-disasters/floods target='_blank' rel='noopener noreferrer'>flood</a> []()?",
+  "Radon" = "- **Radon**: What is <a href=https://doh.wa.gov/community-and-environment/contaminants/radon target='_blank' rel='noopener noreferrer'>radon and ways to test for radon in your home</a> []()?",
+  "PFAS_dw" = "- **Per- and polyfluoroalkyl substances (PFAS) in drinking water**: What are <a href=https://doh.wa.gov/community-and-environment/contaminants/pfas target='_blank' rel='noopener noreferrer'>PFAS and ways to reduce your exposure to PFAS</a> []()?"
+)
 
-nat_dis_list <- list("Avalanche.Risk.Score" = "nat_disaster", # use key mappings
-                     "Coastal.Flooding.Risk.Score" = "nat_disaster",
-                     "Cold.Wave.Risk.Score" = "nat_disaster",
-                     "Drought.Risk.Score" = "nat_disaster",
-                     "Earthquake.Risk.Score" = "nat_disaster",
-                     "Hail.Risk.Score" = "nat_disaster",
-                     "Heat.Wave.Risk.Score" = "nat_disaster",
-                     "Hurricane.Risk.Score" = "nat_disaster",
-                     "Ice.Storm.Risk.Score" = "nat_disaster",
-                     "Landslide.Risk.Score" = "nat_disaster",
-                     "Lightning.Risk.Score" = "nat_disaster",
-                     "Riverine.Flooding.Risk.Score" = "nat_disaster",
-                     "Strong.Wind.Risk.Score" = "nat_disaster",
-                     "Tornado.Risk.Score" = "nat_disaster",
-                     "Tsunami.Risk.Score" = "nat_disaster",
-                     "Volcanic.Activity.Risk.Score" = "nat_disaster",
-                     "Wildfire.Risk.Score" = "nat_disaster",
-                     "Winter.Weather.Risk.Score" = "nat_disaster")
+nat_dis_list <- list(
+  "Avalanche.Risk.Score" = "nat_disaster", # use key mappings
+  "Coastal.Flooding.Risk.Score" = "nat_disaster",
+  "Cold.Wave.Risk.Score" = "nat_disaster",
+  "Drought.Risk.Score" = "nat_disaster",
+  "Earthquake.Risk.Score" = "nat_disaster",
+  "Hail.Risk.Score" = "nat_disaster",
+  "Heat.Wave.Risk.Score" = "nat_disaster",
+  "Hurricane.Risk.Score" = "nat_disaster",
+  "Ice.Storm.Risk.Score" = "nat_disaster",
+  "Landslide.Risk.Score" = "nat_disaster",
+  "Lightning.Risk.Score" = "nat_disaster",
+  "Riverine.Flooding.Risk.Score" = "nat_disaster",
+  "Strong.Wind.Risk.Score" = "nat_disaster",
+  "Tornado.Risk.Score" = "nat_disaster",
+  "Tsunami.Risk.Score" = "nat_disaster",
+  "Volcanic.Activity.Risk.Score" = "nat_disaster",
+  "Wildfire.Risk.Score" = "nat_disaster",
+  "Winter.Weather.Risk.Score" = "nat_disaster")
 
-built_noise_key <- list(noise = "- **Noise**: What is [noise](https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise) that comes from the environment? What are [health effects of noise](https://doh.wa.gov/community-and-environment/noise)?",
-                        land = "- **Land use and land cover**: What is [land use and land cover](https://oceanservice.noaa.gov/facts/lclu.html)?")
+built_noise_key <- list(noise = "- **Noise**: What is <a href=https://www.who.int/tools/compendium-on-health-and-environment/environmental-noise target='_blank' rel='noopener noreferrer'>noise</a> []() that comes from the environment? What are <a href=https://doh.wa.gov/community-and-environment/noise target='_blank' rel='noopener noreferrer'>health effects of noise</a>[]()?",
+                        land = "- **Land use and land cover**: What is <a href=https://oceanservice.noaa.gov/facts/lclu.html target='_blank' rel='noopener noreferrer'>land use and land cover</a> []()?")
 
-built_md_list <- list("Walkability" = "- **Neighborhood walkability**: What is [walkability](https://usafacts.org/articles/what-is-walkability-what-does-the-government-spend-on-it/)? What are [health benefits of walking](https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise)?",
-                      "Pesticide.Exposure" = "- **Agricultural pesticide use**: What are [pesticides](https://doh.wa.gov/community-and-environment/contaminants/pesticides)? What are ways to reduce pesticide exposure from [foods](https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices) and during [usage](https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf)?",
-                      "Green.Space" = "- **Green space**: What is [green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)? What are [health benefits of green space](https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks)?",
-                      "bluespace" = "- **Blue space**: [Blue space](https://pubmed.ncbi.nlm.nih.gov/32971082/) is any water body such as ponds, lakes, rivers, and oceans. What are [health benefits of blue space](https://www.apa.org/monitor/2020/04/nurtured-nature)?",
-                      "Nighttime.Radiance" = "- **Outdoor light at night**: What is [outdoor light at night](), which is also known as light pollution? What are [health effects of outdoor light at night](https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.)?"
-                      )
+built_md_list <- list(
+  "Walkability" = "- **Neighborhood walkability**: What is <a href='https://usafacts.org/articles/what-is-walkability-what-does-the-government-spend-on-it/' target='_blank' rel='noopener noreferrer'>walkability</a>? What are <a href='https://www.heart.org/en/healthy-living/fitness/walking/why-is-walking-the-most-popular-form-of-exercise' target='_blank' rel='noopener noreferrer'>health benefits of walking</a>?",
+  "Pesticide.Exposure" = "- **Agricultural pesticide use**: What are <a href='https://doh.wa.gov/community-and-environment/contaminants/pesticides' target='_blank' rel='noopener noreferrer'>pesticides</a>? What are ways to reduce pesticide exposure from <a href='https://www.epa.gov/safepestcontrol/pesticides-and-food-healthy-sensible-food-practices' target='_blank' rel='noopener noreferrer'>foods</a> and during <a href='https://icash.public-health.uiowa.edu/wp-content/uploads/2017/02/UO218.pdf' target='_blank' rel='noopener noreferrer'>usage</a>?",
+  "Green.Space" = "- **Green space**: What is <a href='https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks' target='_blank' rel='noopener noreferrer'>green space</a>? What are <a href='https://www.countyhealthrankings.org/strategies-and-solutions/what-works-for-health/strategies/green-space-parks' target='_blank' rel='noopener noreferrer'>health benefits of green space</a>?",
+  "bluespace" = "- **Blue space**: <a href='https://pubmed.ncbi.nlm.nih.gov/32971082/' target='_blank' rel='noopener noreferrer'>Blue space</a> is any water body such as ponds, lakes, rivers, and oceans. What are <a href='https://www.apa.org/monitor/2020/04/nurtured-nature' target='_blank' rel='noopener noreferrer'>health benefits of blue space</a>?",
+  "Nighttime.Radiance" = "- **Outdoor light at night**: What is <a href='' target='_blank' rel='noopener noreferrer'>outdoor light at night</a>, which is also known as light pollution? What are <a href='https://journalofethics.ama-assn.org/article/were-all-healthier-under-starry-sky/2024-10#:~:text=Blue%20wavelengths%20of%20light%20are,to%20many%20kinds%20of%20illness.' target='_blank' rel='noopener noreferrer'>health effects of outdoor light at night</a>?"
+)
 
-noise_md_list <- list("N.Noise.More.than.LAeq.45.to.50.db" = "noise",
-                      "N.Noise.More.than.LAeq.50.to.60.db" = "noise",
-                      "N.Noise.More.than.LAeq.60.to.70.db" = "noise",
-                      "N.Noise.More.than.LAeq.70.to.80.db" = "noise",
-                      "N.Noise.More.than.LAeq.80.to.90.db" = "noise",
-                      "N.Noise.More.than.LAeq.90.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.45.to.50.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.50.to.60.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.60.to.70.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.70.to.80.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.80.to.90.db" = "noise",
-                      "Pct.Noise.More.than.LAeq.90.db" = "noise")
 
-land_md_list <- list("pct_Open_Water" = "land",
-                     "pct_Developed_Open" = "land",
-                     "pct_Developed_Low" = "land",
-                     "pct_Developed_Medium" = "land",
-                     "pct_Developed_High" = "land",
-                     "pct_Barren" = "land",
-                     "pct_Evergreen_Forest" = "land",
-                     "pct_Shrub" = "land",
-                     "pct_Grassland" = "land",
-                     "pct_Pasture" = "land",
-                     "pct_Crops" = "land",
-                     "pct_Woody_Wetlands" = "land",
-                     "pct_Crops" = "land",
-                     "pct_Woody_Wetlands" = "land",
-                     "pct_Herbaceous_Wetlands" = "land",
-                     "pct_Deciduous_Forest" = "land",
-                     "pct_Mixed_Forest" = "land",
-                     "pct_Perennial_Ice" = "land"
+noise_md_list <- list(
+  "N.Noise.More.than.LAeq.45.to.50.db" = "noise",
+  "N.Noise.More.than.LAeq.50.to.60.db" = "noise",
+  "N.Noise.More.than.LAeq.60.to.70.db" = "noise",
+  "N.Noise.More.than.LAeq.70.to.80.db" = "noise",
+  "N.Noise.More.than.LAeq.80.to.90.db" = "noise",
+  "N.Noise.More.than.LAeq.90.db" = "noise",
+  "Pct.Noise.More.than.LAeq.45.to.50.db" = "noise",
+  "Pct.Noise.More.than.LAeq.50.to.60.db" = "noise",
+  "Pct.Noise.More.than.LAeq.60.to.70.db" = "noise",
+  "Pct.Noise.More.than.LAeq.70.to.80.db" = "noise",
+  "Pct.Noise.More.than.LAeq.80.to.90.db" = "noise",
+  "Pct.Noise.More.than.LAeq.90.db" = "noise")
+
+land_md_list <- list(
+  "pct_Open_Water" = "land",
+  "pct_Developed_Open" = "land",
+  "pct_Developed_Low" = "land",
+  "pct_Developed_Medium" = "land",
+  "pct_Developed_High" = "land",
+  "pct_Barren" = "land",
+  "pct_Evergreen_Forest" = "land",
+  "pct_Shrub" = "land",
+  "pct_Grassland" = "land",
+  "pct_Pasture" = "land",
+  "pct_Crops" = "land",
+  "pct_Woody_Wetlands" = "land",
+  "pct_Crops" = "land",
+  "pct_Woody_Wetlands" = "land",
+  "pct_Herbaceous_Wetlands" = "land",
+  "pct_Deciduous_Forest" = "land",
+  "pct_Mixed_Forest" = "land",
+  "pct_Perennial_Ice" = "land"
 )
 
 food_env_md <- markdown("
-                        - **Food environment/healthy food**: How can you find [local healthy foods](https://www.usdalocalfoodportal.com/) in your area such as farmers markets?
+                        - **Food environment/healthy food**: How can you find <a href=https://www.usdalocalfoodportal.com/ target='_blank' rel='noopener noreferrer'>local healthy foods</a> in your area such as farmers markets?
                         ")
 
 crime_md <- markdown("
-                     - **Crime**: Where can you learn more information about [crimes in Washington state](https://nibrs.fbi.gov/2024/) from the Federal Bureau of Investigation?
+                     - **Crime**: Where can you learn more information about <a href=https://nibrs.fbi.gov/2024/ target='_blank' rel='noopener noreferrer'>crimes in Washington state</a> from the Federal Bureau of Investigation?
                      ")
 
-soc_md_list <- list("Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the [Washington helpline](https://search.wa211.org/). Call 1-866-HUNGRY for food assistance programs from the [National Hunger Hotline](https://www.hungerfreeamerica.org/en-us/national-hunger-hotline). Find the closest food bank or meal program from [Feeding Washington](https://feedingwashington.org/find-food/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Housing.Insecurity" = "- **Housing insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the [Washington helpline](https://search.wa211.org/). Find other available resources, including emergency housing, from the [Washington State Department of Social and Health Services](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Utility.Services.Threat" = "- **Utility services threat**: Call 2-1-1 or text '211WAOD' to 898211 for help with utilities from the [Washington helpline](https://search.wa211.org/). Find other available resources, including energy assistance programs, from the [Washington Utilities and Transportation Commission](https://www.utc.wa.gov/consumers/energy/energy-assistance-programs) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Lacking.Reliable.Transportation" = "- **Lack of reliable transportation**: Call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "No.broadband.internet" = "- **No internet**: Call 2-1-1 or text '211WAOD' to 898211 for help with getting internet from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Crowding" = "- **Household crowding**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the [Washington helpline](https://search.wa211.org/). Find other available resources, including emergency housing, from the [Washington State Department of Social and Health Services](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Housing.cost.burden" = "- **Housing cost burden**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the [Washington helpline](https://search.wa211.org/). Find other available resources, including emergency housing, from the [Washington State Department of Social and Health Services](https://www.dshs.wa.gov/esa/community-services-offices/housing-resources) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "No.high.school.diploma" = "- **No high school education**: Call 2-1-1 or text '211WAOD' to 898211 for education resources from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Poverty" = "- **People living below 150% of the poverty level**: 150% of the poverty level: Call 2-1-1 or text '211WAOD' to 898211 for financial resources from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Single.parent.households" = "- Single parent households: Find resources for families, including childcare, from the [Washington State Department of Children, Youth, and Families](https://dcyf.wa.gov/services/housing-basic-needs) and [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Unemployment" = "- **Unemployment**: Call 2-1-1 or text '211WAOD' to 898211 for employment resources from the [Washington helpline](https://search.wa211.org/). Find other available resources from [Washington Connection](https://www.washingtonconnection.org/home/exploreoptions.go).",
-               "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)*: What is the [Environmental Justice Index](https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html)?",
-               "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the [Social Vulnerability Index](https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html)",
-               "Median.HH.Income" = "- **Median household income**: What does a [median household income](https://usafacts.org/answers/what-is-the-income-of-a-us-household/country/united-states/) mean?",
-               "HT_Index" = "- **Housing and Transportation (H + T\U00AE) Affordability Index**: Why is it important to consider [transportation costs with affordability](https://cnt.org/tools/housing-and-transportation-affordability-index)?",
-               "Racial.Residential.Segregation" = "- **Residential segregation**: What is the [Dissimilarity Index](https://www.khanacademy.org/test-prep/mcat/social-inequality/social-class/v/residential-segregation), which is a measure of residential segregation?",
-               "Historic.Redlining.Score" = "- **Redlining**: What is [redlining](https://education.nationalgeographic.org/resource/mapmaker-redlining-united-states/)?",
-               "social_capital" = "- **Social capital**: What is [social capital](https://aspe.hhs.gov/sites/default/files/private/pdf/263491/What-is-social-capital.pdf)?",
-               "Population.density" = "- **Urbanicity/rurality**: What are resources to improve health and healthcare in [rural communities](https://doh.wa.gov/public-health-provider-resources/rural-health)?"
-               )
+soc_md_list <- list(
+  "Food.Insecurity" = "- **Food insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for nearby food banks and free meals from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Call 1-866-HUNGRY for food assistance programs from the <a href='https://www.hungerfreeamerica.org/en-us/national-hunger-hotline' target='_blank' rel='noopener noreferrer'>National Hunger Hotline</a>. Find the closest food bank or meal program from <a href='https://feedingwashington.org/find-food/' target='_blank' rel='noopener noreferrer'>Feeding Washington</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Housing.Insecurity" = "- **Housing insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Utility.Services.Threat" = "- **Utility services threat**: Call 2-1-1 or text '211WAOD' to 898211 for help with utilities from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including energy assistance programs, from the <a href='https://www.utc.wa.gov/consumers/energy/energy-assistance-programs' target='_blank' rel='noopener noreferrer'>Washington Utilities and Transportation Commission</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Lacking.Reliable.Transportation" = "- **Lack of reliable transportation**: Call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "No.broadband.internet" = "- **No internet**: Call 2-1-1 or text '211WAOD' to 898211 for help with getting internet from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Crowding" = "- **Household crowding**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Housing.cost.burden" = "- **Housing cost burden**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "No.high.school.diploma" = "- **No high school education**: Call 2-1-1 or text '211WAOD' to 898211 for education resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Poverty" = "- **People living below 150% of the poverty level**: 150% of the poverty level: Call 2-1-1 or text '211WAOD' to 898211 for financial resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Single.parent.households" = "- Single parent households: Find resources for families, including childcare, from the <a href='https://dcyf.wa.gov/services/housing-basic-needs' target='_blank' rel='noopener noreferrer'>Washington State Department of Children, Youth, and Families</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Unemployment" = "- **Unemployment**: Call 2-1-1 or text '211WAOD' to 898211 for employment resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)*: What is the <a href='https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html' target='_blank' rel='noopener noreferrer'>Environmental Justice Index</a>?",
+  "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the <a href='https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html' target='_blank' rel='noopener noreferrer'>Social Vulnerability Index</a>?",
+  "Median.HH.Income" = "- **Median household income**: What does a <a href='https://usafacts.org/answers/what-is-the-income-of-a-us-household/country/united-states/' target='_blank' rel='noopener noreferrer'>median household income</a> mean?",
+  "HT_Index" = "- **Housing and Transportation (H + T\\U00AE) Affordability Index**: Why is it important to consider <a href='https://cnt.org/tools/housing-and-transportation-affordability-index' target='_blank' rel='noopener noreferrer'>transportation costs with affordability</a>?",
+  "Racial.Residential.Segregation" = "- **Residential segregation**: What is the <a href='https://www.khanacademy.org/test-prep/mcat/social-inequality/social-class/v/residential-segregation' target='_blank' rel='noopener noreferrer'>Dissimilarity Index</a>, which is a measure of residential segregation?",
+  "Historic.Redlining.Score" = "- **Redlining**: What is <a href='https://education.nationalgeographic.org/resource/mapmaker-redlining-united-states/' target='_blank' rel='noopener noreferrer'>redlining</a>?",
+  "social_capital" = "- **Social capital**: What is <a href='https://aspe.hhs.gov/sites/default/files/private/pdf/263491/What-is-social-capital.pdf' target='_blank' rel='noopener noreferrer'>social capital</a>?",
+  "Population.density" = "- **Urbanicity/rurality**: What are resources to improve health and healthcare in <a href='https://doh.wa.gov/public-health-provider-resources/rural-health' target='_blank' rel='noopener noreferrer'>rural communities</a>?"
+)
 
 # -------- UI ELEMENTS --------
 categories <- accordion(
@@ -793,19 +800,20 @@ ui <- page_navbar(
   nav_panel("About", fluidPage(
     HTML(
       "<h5>Thank you for visiting the Geospatial Exposome Map (geo<b>ex</b>map).</h5><br>
-      <h6>geo<b>ex</b>map was developed by the Fred Hutch Cancer Center <a href='https://www.geoexlab.com/'>Geospatial Exposome Lab</a> as an open-source geospatial web app to support community outreach and engagement work in reducing cancer burden in Washington State, the catchment area for the Fred Hutch Cancer Center.</h6><br>
+      <h6>geo<b>ex</b>map was developed by the Fred Hutch Cancer Center <a href='https://www.geoexlab.com/'>Geospatial Exposome Lab</a> as an open-source geospatial web app to support community outreach and engagement work in reducing cancer burden within the state of Washington, the catchment area for the Fred Hutch Cancer Center.</h6><br>
       <h6><b>Key highlights:</b></h6><br>
       <ul>
-        <li>Through integrating <a href='https://aacrjournals.org/cebp/article/33/4/451/742073/Geospatial-Science-for-the-Environmental'>geospatial science (location-based technologies) with the exposome (the totality of environmental exposures that we experience throughout our lives)</a>, geo<b>ex</b>map enables the visualization of numerous neighborhood-level health and environmental data to better characterize and understand the <b>Washington State catchment area population, health disparities, and underserved communities.</b></li>
+        <li>Through integrating <b>geospatial science</b> (location-based technologies) with the <b>exposome</b> (the totality of environmental exposures that we experience throughout our lives) (<a href='https://aacrjournals.org/cebp/article/33/4/451/742073/Geospatial-Science-for-the-Environmental'>reference</a>), geo<b>ex</b>map enables the visualization of numerous neighborhood-level health and environmental data to better characterize and understand the <b>Washington State catchment area population, health disparities, and underserved communities.</b></li>
         <li>We proudly implemented a <b>community-engaged approach</b> to developing geo<b>ex</b>map, incorporating valuable input from community members and organizations through <a href='https://www.fredhutch.org/en/research/institutes-networks-ircs/ocoe/about-ocoe/collaborate-with-us.html'>Fred Hutch Cancer Center Community Coalitions</a>.</li>
-        <li>geo<b>ex</b>map contains information from the latest available datasets (2019-present) at the census tract (or neighborhood) and county levels for factors in the domains of sociodemographics, prevention, healthcare access, and the <b>exposome</b> (natural environment, built environment, and social environment).</li>
+        <li>geo<b>ex</b>map contains information from the latest available datasets (2019-present) at the census tract (or neighborhood) and county levels for factors in the domains of sociodemographics, prevention, healthcare access, and the exposome (natural environment, built environment, and social environment).</li>
         <li>geo<b>ex</b>map includes <b>user-centered functionalities</b> for mapping, customizable graphs and tables, data importing and exporting, overlaying multiple spatial data layers, neighborhood search, and documentation.</li>
-        <li>To promote <b>disease prevention and control</b> efforts, actionable and practical tips <i class='bi bi-lightbulb' style = 'color:black;'></i> are provided with links to evidence-based strategies for exposure mitigation of modifiable risk factors (e.g., access to free radon test kits) as well as resources for health and well-being.</li>
+        <li>To promote <b>disease prevention and control</b> efforts, health and prevention tips <i class='bi bi-lightbulb' style = 'color:black;'></i> are provided with links to actionable, practical, evidence-based strategies for exposure mitigation of modifiable risk factors (e.g., access to free radon test kits) as well as resources for health and well-being.</li>
         <li>geo<b>ex</b>map was designed with <b>reproducible</b> and <b>scalable</b> methods that can be adopted by other cancer centers and institutions, created using open-source software (R Shiny, leaflet, Docker) and publicly available geospatial data. See our <a href='https://github.com/FredHutch/geoexmap'>GitHub repository</a>.</li>
       </ul>
       <br>
-      <h6> Feel free to contact us with any questions, suggestions, and feedback at <a href='mailto:geoexmap@fredhutch.org'>geoexmap@fredhutch.org</a></h6><br>
+      <h6> Feel free to contact us with any questions, suggestions, and feedback at <a href='mailto:geoexmap@fredhutch.org'>geoexmap@fredhutch.org</a>.</h6><br>
       <h6>geo<b>ex</b>map is supported by funding from the Dillon Family Foundation. </h6>
+      <br>
       "
     )
   )),
@@ -863,7 +871,7 @@ server <- function(input, output, session) {
   showModal(modalDialog(
     title = HTML("Welcome to geo<b>ex</b>map"),
     HTML("This geospatial web app allows you to map and download neighborhood-level health and environmental data across Washington state."),
-    footer = tagList(modalButton("Dismiss"), actionButton("help", label = "Show tour"))
+    footer = tagList(modalButton("Dismiss"), actionButton("help", label = "Show tour", class = "btn-info"))
   ))
   
   # TODO: rintrojs for swipe through tutorial
