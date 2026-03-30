@@ -48,8 +48,6 @@ food <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "food_env"
 
 crime <- st_read("Data_Processed/complete/geoexmap_data.gpkg", layer = "county_crime")
 
-# TODO: fix wscr mortality (anal cancer)
-# TODO: sentence case for wscr data
 wscr.inc <- fread("Data_Processed/wscr_inc.csv")
 wscr.mort <- fread("Data_Processed/wscr_mort.csv") %>% 
   mutate(Stage.At.Diagnosis = "Invasive")
@@ -465,6 +463,7 @@ soc_md_list <- list(
   "Housing.Insecurity" = "- **Housing insecurity**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "Utility.Services.Threat" = "- **Utility services threat**: Call 2-1-1 or text '211WAOD' to 898211 for help with utilities from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including energy assistance programs, from the <a href='https://www.utc.wa.gov/consumers/energy/energy-assistance-programs' target='_blank' rel='noopener noreferrer'>Washington Utilities and Transportation Commission</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "Lacking.Reliable.Transportation" = "- **Lack of reliable transportation**: Call 2-1-1 or text '211WAOD' to 898211 for help with transportation from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Lack.of.Social.and.Emotional.Support" = "- **Lack of social and emotional support**: Call 2-1-1 or text '211WAOD' to 898211 for counseling and mental health resources from the <a href=https://search.wa211.org/ target='_blank' rel='noopener noreferrer'>Washington Helpline</a>. Find other available resources from <a href=https://www.washingtonconnection.org/home/exploreoptions.go target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "No.broadband.internet" = "- **No internet**: Call 2-1-1 or text '211WAOD' to 898211 for help with getting internet from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "Crowding" = "- **Household crowding**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "Housing.cost.burden" = "- **Housing cost burden**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
@@ -834,7 +833,7 @@ ui <- page_navbar(
                   height = "200px",
                   width = "400px",
                   # TODO: add explanation for graph 
-                  wellPanel(actionButton("clear", label = "X"),
+                  wellPanel(actionButton("clear", icon = icon("x"), class = "btn-danger", label = NULL),
                             plotlyOutput("chart"))
                 ))
             )),
@@ -2922,26 +2921,26 @@ server <- function(input, output, session) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
         layout(
           plot_bgcolor = '#e5ecf6',
-          xaxis = list(title = names(plotly.dat)[1]),
+          xaxis = list(title = layer.titles(names(plotly.dat)[1])),
           yaxis = list(title = "Frequency")) %>% 
         config()
     } else if (ncol(plotly.dat) == 2) {
       plot_ly(data = plotly.dat, type = "scatter", x = plotly.dat[,1], y = plotly.dat[,2],
-              text = ~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
-                             "<br>", gsub("\\.", " ", names(plotly.dat)[2]), ": ", round(plotly.dat[,2], digits = 2))) %>%
+              text = ~paste0("<b>", layer.titles(names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
+                             "<br>", layer.titles(names(plotly.dat)[2]), ": ", round(plotly.dat[,2], digits = 2))) %>%
         layout(
           plot_bgcolor = '#e5ecf6',
-          xaxis = list(title = gsub("\\.", " ", names(plotly.dat)[1])),
-          yaxis = list(title = gsub("\\.", " ", names(plotly.dat)[2]))) %>% 
+          xaxis = list(title = layer.titles(names(plotly.dat)[1])),
+          yaxis = list(title = layer.titles(names(plotly.dat)[2]))) %>% 
         config(scrollZoom = TRUE)
     } else if (ncol(plotly.dat) == 3) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3],
-              text = ~paste0("<b>", gsub("\\.", " ", names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
-                             "<br>", gsub("\\.", " ", names(plotly.dat)[2]), ": ", round(plotly.dat[,2], digits = 2),
-                             "<br>", gsub("\\.", " ", names(plotly.dat)[3]), ": ", round(plotly.dat[,3], digits = 2))) %>%
-        layout(scene = list(xaxis = list(title = gsub("\\.", " ", names(plotly.dat)[1])),
-                            yaxis = list(title = gsub("\\.", " ", names(plotly.dat)[2])),
-                            zaxis = list(title = gsub("\\.", " ", names(plotly.dat)[3])))) %>% 
+              text = ~paste0("<b>", layer.titles(names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
+                             "<br>", layer.titles(names(plotly.dat)[2]), ": ", round(plotly.dat[,2], digits = 2),
+                             "<br>", layer.titles(names(plotly.dat)[3]), ": ", round(plotly.dat[,3], digits = 2))) %>%
+        layout(scene = list(xaxis = list(title = layer.titles(names(plotly.dat)[1])),
+                            yaxis = list(title = layer.titles(names(plotly.dat)[2])),
+                            zaxis = list(title = layer.titles(names(plotly.dat)[3])))) %>% 
         config()
     } else {
       #TODO: add to render UI to choose at least 1 variable
@@ -2956,7 +2955,7 @@ server <- function(input, output, session) {
     map <- leaflet(options = leafletOptions(zoomSnap = 0.1, zoomDelta = 0.5)) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
-      addSearchOSM() %>% 
+      addSearchOSM(options = searchOptions(textPlaceholder = "Search", zoom = 15)) %>% 
       addEasyButton(easyButton(
         icon = 'fa-remove',
         title = "Remove all variables",
@@ -3396,7 +3395,7 @@ server <- function(input, output, session) {
             function(i) {
               row_vals <- m[i, , drop = TRUE]
               paste(
-                paste0("<b>", label_names, "</b>", ": ", row_vals),
+                paste0("<b>", label_names, "</b>", ": ", prettyNum(row_vals, big.mark = ",")),
                 collapse = "<br/>"
               )
             }
