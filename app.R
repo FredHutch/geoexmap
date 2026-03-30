@@ -785,10 +785,10 @@ ui <- page_navbar(
   ")),
     includeHTML("google-analytics.html")
   ),
+  id = "app_nav",
   # TODO: make logo clickable
   title = tags$img(src = "/geoexmap_edit.png", height = '57.62px', width = '165.08px'),
-  id = "app_nav",
-  selected = "Map",
+  selected = "map",
   nav_spacer(),
   nav_panel("About", fluidPage(
     HTML(
@@ -809,7 +809,7 @@ ui <- page_navbar(
       "
     )
   )),
-  nav_panel("Map",
+  nav_panel("Map", value = "map",
             layout_sidebar(
               sidebar = sidebar(categories,
                                 width = "400px"),
@@ -861,27 +861,23 @@ ui <- page_navbar(
 # -------- SERVER --------
 server <- function(input, output, session) {
   showModal(modalDialog(
-    title = "Welcome to geoexmap!",
-    HTML("Thank you for visiting geoexmap! Please note that this tool is still <b>under development</b>.
-    <br><br><b>Please do not distribute data or images of geoexmap at this time.</b>"),
+    title = HTML("Welcome to geo<b>ex</b>map"),
+    HTML("This geospatial web app allows you to map and download neighborhood-level health and environmental data across Washington state."),
     footer = tagList(modalButton("Dismiss"), actionButton("help", label = "Show tour"))
   ))
   
   # TODO: rintrojs for swipe through tutorial
-  # TODO: where to select variables
-  # TODO: highlight options
-  # TODO: tips
-  # TODO: info button
-  # TODO: table tab
   # TODO: documentation
   steps <- reactive({
     data.frame(
       element = c("#geoexmap", "#geoexmap", "#main_acc", "#help_icon", "#acc_options"),
-      intro = c("This is the main map. It displays up to three layers of county and neighborhood-level data.",
-                "Hover over the <i class='bi bi-info-circle-fill'></i> in the legend to see details for each layer, including data sources.",
+      # TODO: add neighborhood search
+      # TODO: add point locations
+      intro = c("This is the main map. It displays up to three layers of neighborhood- and county-level data at a time.",
+                "Hover over the <i class='bi bi-info-circle-fill'></i> icon in the legend to see details for each data layer such as data sources.",
                 "Use these categories to choose which variables or features appear on the map.",
-                "Click on this icon to look at health and prevention tips.",
-                "In options, you can choose to display area boundaries, display the graph, or upload a shapefile."),
+                "Click on this icon to learn about health and prevention tips related to the variables that you selected.",
+                "In Options, you can choose to show different boundaries, show graphs of the selected variables, and upload a shapefile."),
       position = c("right", "right", "right", "right", "right"),
       stringsAsFactors = FALSE)
   })
@@ -1517,7 +1513,7 @@ server <- function(input, output, session) {
   legend.titles <- function(col) {
     if(col == "Particulate.Matter.2.5") return(HTML("PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) concentrations in 2022 "))
     if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
-    if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
+    if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr) in 2022"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
     if(col == "Food.Insecurity") return("Food insecurity in 2023 (%)")
     if(col == "Housing.Insecurity") return("Housing insecurity in 2023 (%)")
@@ -1632,9 +1628,9 @@ server <- function(input, output, session) {
     
     if(col == "UV.Index") return("UVI in 2024")
     
-    if(col == "Radon") return(HTML("Radon gas concentration in 2021 (Bq/m<sup>3</sup>)"))
+    if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>) in 2021"))
     
-    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use in 2023 (lb/mi<sup>2</sup>)"))
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lb/mi<sup>2</sup>) in 2019 "))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation in 2020")
     
@@ -1667,7 +1663,7 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature in 2020 ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation in 2020 (in.)")
     
-    if(col == "Wildfire.smoke") return(HTML("Wildfire smoke PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) in 2020"))
+    if(col == "Wildfire.smoke") return(HTML("Wildfire smoke PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) in 2023"))
     if(col == "Nitrogen.dioxide") return(HTML("Nitrogen dioxide (NO<sub>2</sub>) (ppb) in 2020"))
     if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb) in 2020"))
     if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020"))
@@ -2949,7 +2945,7 @@ server <- function(input, output, session) {
   #### INITIAL MAP RENDER ####
   
   output$geoexmap <- renderLeaflet({
-    map <- leaflet() %>% 
+    map <- leaflet(options = leafletOptions(zoomSnap = 0.1, zoomDelta = 0.5)) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
       addProviderTiles(providers$CartoDB.Positron) %>%
       addSearchOSM() %>% 
