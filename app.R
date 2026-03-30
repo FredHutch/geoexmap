@@ -1541,7 +1541,7 @@ server <- function(input, output, session) {
     if(col == "Arthritis.among.Adults") return("Arthritis in 2023 (%)")
     if(col == "Asthma.among.Adults") return("Asthma in 2023 (%)")
     if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure in 2023 (%)")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence among adults in 2023 (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence in 2023 (%)")
     if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol in 2023 (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease in 2023 (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease in 2023 (%)")
@@ -1594,7 +1594,7 @@ server <- function(input, output, session) {
     # age
     if(col == "Total.0.to.4.years") return("0-4 years population in 2023 (total)")
     if(col == "Percent.0.to.4.years") return("0-4 years population in 2023 (%)")
-    if(col == "Total.5.to.9.years") return("5-9 years poulation in 2023 (total)")
+    if(col == "Total.5.to.9.years") return("5-9 years population in 2023 (total)")
     if(col == "Percent.5.to.9.years") return("5-9 years population in 2023 (%)")
     if(col == "Total.10.to.14.years") return("10-14 years population in 2023 (total)")
     if(col == "Percent.10.to.14.years") return("10-14 years population in 2023 (%)")
@@ -1780,7 +1780,7 @@ server <- function(input, output, session) {
     if(col == "Arthritis.among.Adults") return("Arthritis (%)")
     if(col == "Asthma.among.Adults") return("Asthma (%)")
     if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure (%)")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer or melanoma among adults (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence among adults (%)")
     if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease (%)")
@@ -1994,12 +1994,10 @@ server <- function(input, output, session) {
     if(col == "lahunv1share") return("Low access households without vehicle at 1 mile (percentage)")
     if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile (total)")
     if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile (percentage)")
-    
-    
   }
   
   var.info <- function(col) {
-    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
+    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
     if(col == "Green.Space") return("Green space vegetation health and intensity in a census tract measured using the Normalized Difference Vegetation Index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
     if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN), also known as nighttime radiance or light pollution, from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
     if(col == "Food.Stamps") return("Estimate of the percentage of adults in a census tract who reported receiving food stamps, also called SNAP, the Supplemental Nutrition Assistance Program, on an EBT card from CDC PLACES (2025 release)")
@@ -2024,10 +2022,10 @@ server <- function(input, output, session) {
     if(col == "High.Blood.Pressure.among.Adults") return("Estimate of the percentage of adults in a census tract who reported ever having been told by a doctor, nurse, or other health professional that they have high blood pressure from CDC PLACES (2025 release)")
     if(col == "Cancer.or.Melanoma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had melanoma or any other types of cancer?' and 'no' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had skin cancer that is not melanoma?' from CDC PLACES (2025 release)")
     if(col == "High.Cholesterol.among.Screened.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been screened for high cholesterol and told by a doctor, nurse, or other health professional that they had high cholesterol from CDC PLACES (2025 release)")
-    if(col == "COPD.among.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been told by a doctor, nurse, or other health professional they had chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis")
-    if(col == "Coronary.Heart.Disease.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they had angina or coronary heart disease")
-    if(col == "Depression.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to having ever been told by a doctor, nurse, or other health professional they had a depressive disorder, including depression, major depression, dysthymia, or minor depression")
-    if(col == "Diagnosed.Diabetes.among.Adults") return("Estimate of the percentage of adults in a census tract who report being told by a doctor or other health professional that they have diabetes (other than diabetes during pregnancy for female respondents)")
+    if(col == "COPD.among.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been told by a doctor, nurse, or other health professional they had chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis from CDC PLACES (2025 release)")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they had angina or coronary heart disease from CDC PLACES (2025 release)")
+    if(col == "Depression.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to having ever been told by a doctor, nurse, or other health professional they had a depressive disorder, including depression, major depression, dysthymia, or minor depression from CDC PLACES (2025 release)")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Estimate of the percentage of adults in a census tract who report being told by a doctor or other health professional that they have diabetes (other than diabetes during pregnancy for female respondents) from CDC PLACES (2025 release)")
     if(col == "Obesity.among.Adults") return("Estimate of the percentage of adults in a census tract who have a body mass index (BMI) \U2265 30.0 kg/m\U00B2 from CDC PLACES (2025 release)")
     if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("Estimate of the percentage of adults in a census tract \U2265 65 years who report having lost all of their natural teeth due to tooth decay and gum disease from CDC PLACES (2025 release)")
     if(col == "Stroke.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they have had a stroke from CDC PLACES (2025 release)")
@@ -2114,7 +2112,7 @@ server <- function(input, output, session) {
     if(col == "Environmental.Justice.Index") return("Environmental Justice Index score of a census tract, which ranks the cumulative impacts of environmental injustice on health, using the Centers for Disease Control and Prevention (CDC)/Agency for Toxic Substances and Disease Registry (ATSDR) Environmental Justice Index (2024 release)")
     if(col == "Unemployment") return("Estimate of the percentage of individuals in a census tract who are 16-64 years old in the labor force and unemployed from CDC PLACES (2023 release)")
     
-    if(col == "UV.Index") return("Ultraviolet radiation index from Tropospheric Emission Monitoring Internet Service (TEMIS) satellite data (2024)")
+    if(col == "UV.Index") return("Average ultraviolet radiation index from Tropospheric Emission Monitoring Internet Service (TEMIS) satellite data (2024)")
     
     if(col == "Radon") return("Radon gas concentration using data from Li et al. Proc Natl Acad Sci 2024")
     
@@ -2123,18 +2121,18 @@ server <- function(input, output, session) {
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation, calculated using Duncan's multi-group dissimilarity index with 2020 race data by block group from the National Historical Geographic Information Systems (NHGIS) data portal")
     
     # transportation noise model
-    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 45-50 dB from Seto and Huang medRxiv 2023")
-    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Percentage of individuals in a census tract exposed to noise levels LAeq \U2265 45-50 dB from Seto and Huang medRxiv 2023")
-    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 50-60 dB from Seto and Huang medRxiv 2023")
-    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 50-60 dB from Seto and Huang medRxiv 2023")
-    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 60-70 dB from Seto and Huang medRxiv 2023")
-    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 60-70 dB from Seto and Huang medRxiv 2023")
-    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 70-80 dB from Seto and Huang medRxiv 2023")
-    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 70-80 dB from Seto and Huang medRxiv 2023")
-    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 80-90 dB from Seto and Huang medRxiv 2023")
-    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 80-90 dB from Seto and Huang medRxiv 2023")
-    if(col == "N.Noise.More.than.LAeq.90.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 90 dB from Seto and Huang medRxiv 2023")
-    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 90 dB from Seto and Huang medRxiv 2023")
+    if(col == "N.Noise.More.than.LAeq.45.to.50.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 45-50 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "Pct.Noise.More.than.LAeq.45.to.50.db") return("Percentage of individuals in a census tract exposed to noise levels LAeq \U2265 45-50 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "N.Noise.More.than.LAeq.50.to.60.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 50-60 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "Pct.Noise.More.than.LAeq.50.to.60.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 50-60 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "N.Noise.More.than.LAeq.60.to.70.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 60-70 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "Pct.Noise.More.than.LAeq.60.to.70.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 60-70 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "N.Noise.More.than.LAeq.70.to.80.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 70-80 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "Pct.Noise.More.than.LAeq.70.to.80.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 70-80 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "N.Noise.More.than.LAeq.80.to.90.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 80-90 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "Pct.Noise.More.than.LAeq.80.to.90.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 80-90 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "N.Noise.More.than.LAeq.90.db") return("Total number of individuals in a census tract exposed to noise levels \U2265 90 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
+    if(col == "Pct.Noise.More.than.LAeq.90.db") return("Percentage of individuals in a census tract exposed to noise levels \U2265 90 dB from Huang and Seto. Environ Impact Assess Rev (2024)")
     
     if(col == "Walkability") return("Walkability of a census tract using Environmental Protection Agency (EPA) data (2021 release)")
     
@@ -3662,7 +3660,7 @@ server <- function(input, output, session) {
                              naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
-                                                           paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2022:"),
+                                                           paste(unique(geo.inc$Cancer.Site), "cancer (age-adjusted incidence rate per 100,000) in 2018-2022:"),
                                                            style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                          ),
                                                          htmltools::tags$span(
@@ -3715,7 +3713,7 @@ server <- function(input, output, session) {
                              naLabel = "Not available",
                              title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
                                                          htmltools::tags$span(
-                                                           paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2022:"),
+                                                           paste(unique(geo.mort$Cancer.Site), "cancer (age-adjusted mortality rate per 100,000) in 2018-2022:"),
                                                            style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
                                                          ),
                                                          htmltools::tags$span(
