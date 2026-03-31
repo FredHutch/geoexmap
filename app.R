@@ -148,8 +148,8 @@ outcomes <- c("Arthritis" = "Arthritis.among.Adults",
 
 prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
                 "No health insurance" = "Lack.of.Health.Insurance",
-                "Routine checkup in past year" = "Routine.Checkup.in.the.Past.Year",
-                "Visited dentist in past year" = "Visited.Dentist.in.Past.Year",
+                "Routine checkup" = "Routine.Checkup.in.the.Past.Year",
+                "Visited dentist" = "Visited.Dentist.in.Past.Year",
                 "Taking blood pressure medication" = "Taking.Medicine.to.Control.High.Blood.Pressure",
                 "Cholesterol screening" = "Cholesterol.Screening",
                 "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
@@ -748,6 +748,8 @@ ui <- page_navbar(
       color: #fff;
       background-color: #ff0000;
     }
+    
+    
   ")),
     tags$link(rel = "stylesheet", 
               href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
@@ -1528,8 +1530,8 @@ server <- function(input, output, session) {
     if(col == "Lacking.Reliable.Transportation") return("Lack of reliable transportation in 2023 (%)")
     if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support in 2023 (%)")
     if(col == "Lack.of.Health.Insurance") return("No health insurance in 2021 (%)")
-    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in past year in 2023 (%)")
-    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in past year in 2023 (%)")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in 2023 (%)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in 2023 (%)")
     if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Taking blood pressure medication in 2023 (%)")
     if(col == "Cholesterol.Screening") return("Cholesterol screening in 2023 (%)")
     if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer  in 2023 (%)")
@@ -1767,8 +1769,8 @@ server <- function(input, output, session) {
     if(col == "Lacking.Reliable.Transportation") return("Lack of reliable transportation (%)")
     if(col == "Lack.of.Social.and.Emotional.Support") return("Lack of social and emotional support (%)")
     if(col == "Lack.of.Health.Insurance") return("No health insurance (%)")
-    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup in past year (%)")
-    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist in past year (%)")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Routine checkup (%)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Visited dentist (%)")
     if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Taking blood pressure medication (%)")
     if(col == "Cholesterol.Screening") return("Cholesterol screening (%)")
     if(col == "Mammography.Use.among.Women.50.to.74") return("Mammography screening for breast cancer  (%)")
@@ -3671,7 +3673,7 @@ server <- function(input, output, session) {
           proxy <- proxy %>%
             addPolygons(data = geo.inc, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste("<b>", NAMELSAD, "</b>", "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                       "<br>Year:", Year, "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                                       "<br>Year:", Year, "<br>Age-adjusted incidence rate per 100,000:", Age.Adj..Rate.per.100.000),
                         group = "Cancer incidence", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>% 
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
@@ -3687,7 +3689,7 @@ server <- function(input, output, session) {
                                                            bs_icon('info-circle-fill'),
                                                            `data-bs-toggle` = "tooltip",
                                                            `data-bs-placement` = "top",
-                                                           title = "These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available",
+                                                           title = "These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available.",
                                                            style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                          )
                              ),
@@ -3724,7 +3726,7 @@ server <- function(input, output, session) {
           proxy <- proxy %>%
             addPolygons(data = geo.mort, fillColor = ~pal(Age.Adj..Rate.per.100.000),
                         popup = ~paste("<b>", NAMELSAD, "</b>", "<br>Site:", Cancer.Site, "<br>Stage:", Stage.At.Diagnosis, "<br>Sex:", Gender,
-                                       "<br>Year:", Year, "<br>Age-Adjusted Rate:", Age.Adj..Rate.per.100.000),
+                                       "<br>Year:", Year, "<br>Age-adjusted incidence rate per 100,000:", Age.Adj..Rate.per.100.000),
                         group = "Cancer mortality", weight = 0.5, stroke = input$showcounties, fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3)) %>%
             addLegendNumeric(pal = pal, values = val, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
@@ -3740,7 +3742,7 @@ server <- function(input, output, session) {
                                                            bs_icon('info-circle-fill'),
                                                            `data-bs-toggle` = "tooltip",
                                                            `data-bs-placement` = "top",
-                                                           title = "These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available",
+                                                           title = "These data were derived from the Washington State Cancer Registry. Information on stage- and sex-specific rates are provided where available.",
                                                            style = "cursor:pointer; font-weight:bold; text-align: center;"
                                                          )
                              ),
