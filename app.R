@@ -549,7 +549,7 @@ categories <- accordion(
     input_switch('pharmacies', "Pharmacies", value = FALSE),
     input_switch('wic_clinics', "Nutrition Program for Women, Infants, and Children (WIC) clinics", value = FALSE),
     input_switch('wic_retailers', "WIC retailers", value = FALSE),
-    input_switch('fqhc', "Federally qualified health centers (FQHCs)", value = FALSE)
+    input_switch('fqhc', "Federally Qualified Health Centers (FQHCs)", value = FALSE)
   ),
   accordion_panel(
     HTML("<b>Natural Environment</b>"), icon = uiOutput("natural_icon"),
@@ -3069,7 +3069,7 @@ server <- function(input, output, session) {
                              width = 20, 'stroke-width' = 1)
         proxy <- proxy %>% 
           addMarkers(data = cancer.progs,
-                     popup = ~Center.or.Hospital.Name,
+                     popup = ~paste0("Name: ", Center.or.Hospital.Name, "<br>Address: ", Address),
                      group = "cancer_programs",
                      icon = ~ icons(iconUrl = symbol,
                                     iconWidth = 20,
@@ -3077,7 +3077,7 @@ server <- function(input, output, session) {
                      ) %>% 
           addLegendImage(
             images = symbol,
-            labels = "Commission on Cancer (CoC)-accredited programs",
+            labels = "CoC-accredited programs",
             width = 20,
             height = 20,
             orientation = "vertical",
@@ -3159,7 +3159,7 @@ server <- function(input, output, session) {
         
         proxy <- proxy %>% 
           addMarkers(data = clinics,
-                     popup = ~NAME,
+                     popup = ~paste0("Name: ", NAME, "<br>Address: ", ADDRESS, ", ", CITY, ", WA ", ZIP),
                      group = "clinics",
                      icon = ~ icons(iconUrl = symbol,
                                     iconWidth = 20,
@@ -3196,7 +3196,7 @@ server <- function(input, output, session) {
                                     iconHeight = 20)) %>% 
           addLegendImage(
             images = symbol,
-            labels = "EMS Stations",
+            labels = "EMS stations",
             width = 20,
             height = 20,
             orientation = "vertical",
@@ -3338,7 +3338,7 @@ server <- function(input, output, session) {
         
         proxy <- proxy %>% 
           addMarkers(data = fqhc,
-                     popup = ~Facility,
+                     popup = ~paste0("Name: ", Facility, "<br>Address: ", Address, ", ", City, ", WA ,", Zip),
                      group = "fqhc",
                      icon = ~ icons(iconUrl = symbol,
                                     iconWidth = 20,
