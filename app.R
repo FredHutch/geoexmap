@@ -92,16 +92,16 @@ racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic Whi
           "Non-Hispanic Black (total)" = "Black.NonHispanic", "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
           "Non-Hispanic Asian (total)" = "Asian.NonHispanic", "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
           "Non-Hispanic American Indian or Alaska Native (total)" = "American.Indian.Alaska.Native.NonHispanic", "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
-          "Non-Hispanic Native Hawaiian or Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.NonHispanic",  "Non-Hispanic Native Hawaiian or Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
-          "Non-Hispanic other race (total)" = "Other.Race.NonHispanic", "Non-Hispanic other race (percentage)" = "Percent.Other.Race.NonHispanic",
+          "Non-Hispanic Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.NonHispanic",  "Non-Hispanic Native Hawaiian or Other Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
+          "Non-Hispanic Other race (total)" = "Other.Race.NonHispanic", "Non-Hispanic Other race (percentage)" = "Percent.Other.Race.NonHispanic",
           "Non-Hispanic two or more races (total)" = "Two.or.More.Races.NonHispanic", "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
           "Hispanic or Latino (total)" = "Hispanic.or.Latino", "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
           "Hispanic or Latino White (total)" = "White.Hispanic.or.Latino", "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
           "Hispanic or Latino Black (total)" = "Black.Hispanic.or.Latino", "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
           "Hispanic or Latino Asian (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
           "Hispanic or Latino American Indian or Alaska Native (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
-          "Hispanic or Latino Native Hawaiian or Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
-          "Hispanic or Latino other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino other race (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
+          "Hispanic or Latino Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Other Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
+          "Hispanic or Latino Other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino Other race (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
           "Hispanic or Latino two or more races (total)" = "Two.or.More.Races.Hispanic.or.Latino", "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
 
 sexv <- c("Male (total)" = "Total.Male.Population",
@@ -266,10 +266,10 @@ foodenv <- c("Population > 1 mile from supermarket (total)" = "lapop1",
              "Black population > 1 mile from supermarket (percentage)" = "lablack1share",
              "Asian population > 1 mile from supermarket (total)" = "laasian1",
              "Asian population > 1 mile from supermarket (percentage)" = "laasian1share",
-             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (total)" = "lanhopi1",
-             "Native Hawaiian and Other Pacific Islander population > 1 mile from supermarket (percentage)" = "lanhopi1share",
-             "American Indian and Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
-             "American Indian and Alaska Native population > 1 mile from supermarket (percentage)" = "laaian1share",
+             "Native Hawaiian or Other Pacific Islander population > 1 mile from supermarket (total)" = "lanhopi1",
+             "Native Hawaiian or Other Pacific Islander population > 1 mile from supermarket (percentage)" = "lanhopi1share",
+             "American Indian or Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
+             "American Indian or Alaska Native population > 1 mile from supermarket (percentage)" = "laaian1share",
              "Other/Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
              "Other/Multiple race population > 1 mile from supermarket (percentage)" = "laomultir1share",
              "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
@@ -544,7 +544,7 @@ categories <- accordion(
             id = "healthaccpopover"))),
     input_switch('cancer', "Commission on Cancer (CoC)-accredited programs ", value = FALSE),
     input_switch('clinics', "Clinics", value = FALSE), 
-    input_switch('ems', "Emergency medical stations", value = FALSE),
+    input_switch('ems', "Emergency Medical Services (EMS) stations", value = FALSE),
     input_switch('hospitals', "Hospitals", value = FALSE),
     input_switch('pharmacies', "Pharmacies", value = FALSE),
     input_switch('wic_clinics', "Nutrition Program for Women, Infants, and Children (WIC) clinics", value = FALSE),
@@ -1560,14 +1560,14 @@ server <- function(input, output, session) {
     if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population in 2023 (%)")
     if(col == "Black.NonHispanic") return("Non-Hispanic Black population in 2023 (total)")
     if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population in 2023 (%)")
-    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population in 2023 (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population in 2023 (%)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian or Alaska Native population in 2023 (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian or Alaska Native population in 2023 (%)")
     if(col == "Asian.NonHispanic") return("Non-Hispanic Asian population in 2023 (total)")
     if(col == "Percent.Asian.NonHispanic") return("Non-Hispanic Asian population in 2023 (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population in 2023 (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population in 2023 (%)")
-    if(col == "Other.Race.NonHispanic") return("Non-Hispanic other race population in 2023 (total)")
-    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic other race population in 2023 (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian or Other Pacific Islander population in 2023 (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian or Other Pacific Islander population in 2023 (%)")
+    if(col == "Other.Race.NonHispanic") return("Non-Hispanic Other race population in 2023 (total)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic Other race population in 2023 (%)")
     if(col == "Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population in 2023 (total)")
     if(col == "Percent.Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population in 2023 (%)")
     
@@ -1576,14 +1576,14 @@ server <- function(input, output, session) {
     if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White population in 2023 (%)")
     if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black population in 2023 (total)")
     if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black population in 2023 (%)")
-    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native population in 2023 (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native population in 2023 (%)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian or Alaska Native population in 2023 (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian or Alaska Native population in 2023 (%)")
     if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian population in 2023 (total)")
     if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian population in 2023 (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander population in 2023 (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander population in 2023 (%)")
-    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race population in 2023 (total)")
-    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race population in 2023 (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian or Other Pacific Islander population in 2023 (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian or Other Pacific Islander population in 2023 (%)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino Other race population in 2023 (total)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino Other race population in 2023 (%)")
     if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races population in 2023 (total)")
     if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races population in 2023 (%)")
     
@@ -1744,12 +1744,12 @@ server <- function(input, output, session) {
     if(col == "lablack1share") return("Low access, Black population at 1 mile in 2019 (percentage)")
     if(col == "laasian1") return("Low access, Asian population at 1 mile in 2019 (total)")
     if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (percentage)")
-    if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile in 2019 (total)")
-    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile in 2019 (percentage)")
+    if(col == "lanhopi1") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (total)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (percentage)")
     if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (total)")
     if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (percentage)")
-    if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile in 2019 (total)")
-    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile in 2019 (percentage)")
+    if(col == "laomultir1") return("Low access, Other/multiple race population at 1 mile in 2019 (total)")
+    if(col == "laomultir1share") return("Low access, Other/multiple population at 1 mile in 2019 (percentage)")
     if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile in 2019 (total)")
     if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile in 2019 (percentage)")
     if(col == "lahunv1") return("Low access, households without vehicle at 1 mile in 2019 (total)")
@@ -1799,31 +1799,31 @@ server <- function(input, output, session) {
     if(col == "Percent.White.NonHispanic") return("Non-Hispanic White population (%)")
     if(col == "Black.NonHispanic") return("Non-Hispanic Black population (total)")
     if(col == "Percent.Black.NonHispanic") return("Non-Hispanic Black population (%)")
-    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian and Alaska Native population (%)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian or Alaska Native population (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Non-Hispanic American Indian or Alaska Native population (%)")
     if(col == "Asian.NonHispanic") return("Non-Hispanic Asian population (total)")
     if(col == "Percent.Asian.NonHispanic") return("Non-Hispanic Asian population (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian and other Pacific Islander population (%)")
-    if(col == "Other.Race.NonHispanic") return("Non-Hispanic other race population (total)")
-    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic other race population (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian or Other Pacific Islander population (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Non-Hispanic Native Hawaiian or Other Pacific Islander population (%)")
+    if(col == "Other.Race.NonHispanic") return("Non-Hispanic Other race population (total)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Non-Hispanic Other race population (%)")
     if(col == "Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population (total)")
     if(col == "Percent.Two.or.More.Races.NonHispanic") return("Non-Hispanic two or more races population (%)")
     
     # hispanic or latino subcats
     if(col == "White.Hispanic.or.Latino") return("Hispanic or Latino White (total)")
     if(col == "Percent.White.Hispanic.or.Latino") return("Hispanic or Latino White (%)")
-    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black(total)")
+    if(col == "Black.Hispanic.or.Latino") return("Hispanic or Latino Black (total)")
     if(col == "Percent.Black.Hispanic.or.Latino") return("Hispanic or Latino Black (%)")
-    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (total)")
-    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian and Alaska Native (%)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian or Alaska Native (total)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Hispanic or Latino American Indian or Alaska Native (%)")
     if(col == "Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (total)")
     if(col == "Percent.Asian.Hispanic.or.Latino") return("Hispanic or Latino Asian (%)")
-    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (total)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian and other Pacific Islander (%)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian or Other Pacific Islander (total)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Hispanic or Latino Native Hawaiian or Other Pacific Islander (%)")
     if(col == "Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (total)")
     if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Hispanic or Latino other race (%)")
-    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino (total)")
+    if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races (total)")
     if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Hispanic or Latino two or more races (%)")
     
     # sex
@@ -2035,34 +2035,34 @@ server <- function(input, output, session) {
     if(col == "Total.Population") return("Total number of individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Hispanic.or.Latino") return("Total number of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.Hispanic.or.Latino") return("Percentage of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "White.NonHispanic") return("Total number of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.White.NonHispanic") return("Percentage of Non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Black.NonHispanic") return("Total number of Non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.Black.NonHispanic") return("Percentage of Non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Total number of Non-Hispanic American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Percentage of Non-Hispanic American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Asian.NonHispanic") return("Total number of Non-Hispanic Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.Asian.NonHispanic") return("Percentage of Non-Hispanic Asian individuals in a census tract using American Community Survey 5-year data (2019-2023) using American Community Survey 5-year data (2019-2023)")
-    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Total number of Non-Hispanic Native Hawaiian and other Pacific Islander individuals in a census tract")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Percentage of Non-Hispanic Native Hawaiian and other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Other.Race.NonHispanic") return("Total number of Non-Hispanic other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.Other.Race.NonHispanic") return("Percentage of Non-Hispanic other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Two.or.More.Races.NonHispanic") return("Total number of Non-Hispanic two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Total number of Non-Hispanic two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "White.NonHispanic") return("Total number of non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.White.NonHispanic") return("Percentage of non-Hispanic White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Black.NonHispanic") return("Total number of non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Black.NonHispanic") return("Percentage of non-Hispanic Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "American.Indian.Alaska.Native.NonHispanic") return("Total number of non-Hispanic American Indian or Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.American.Indian.Alaska.Native.NonHispanic") return("Percentage of non-Hispanic American Indian or Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Asian.NonHispanic") return("Total number of non-Hispanic Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Asian.NonHispanic") return("Percentage of non-Hispanic Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Native.Hawaiian.Pacific.Islander.NonHispanic") return("Total number of non-Hispanic Native Hawaiian or Other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic") return("Percentage of non-Hispanic Native Hawaiian or Other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Other.Race.NonHispanic") return("Total number of non-Hispanic other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Other.Race.NonHispanic") return("Percentage of non-Hispanic other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Two.or.More.Races.NonHispanic") return("Total number of non-Hispanic two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Two.or.More.Races.NonHispanic") return("Percentage of non-Hispanic two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     
     # hispanic or latino subcats
     if(col == "White.Hispanic.or.Latino") return("Total number of Hispanic or Latino White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.White.Hispanic.or.Latino") return("Percentage of Hispanic or Latino White individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Black.Hispanic.or.Latino") return("Total number of Hispanic or Latino Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.Black.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Black individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Total number of Hispanic or Latino American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Percentage of Hispanic or Latino American Indian and Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "American.Indian.Alaska.Native.Hispanic.or.Latino") return("Total number of Hispanic or Latino American Indian or Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino") return("Percentage of Hispanic or Latino American Indian or Alaska Native individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Asian.Hispanic.or.Latino") return("Total number of Hispanic or Latino Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.Asian.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Asian individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Total number of Hispanic or Latino Native Hawaiian and other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Native Hawaiian and other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Other.Race.Hispanic.or.Latino") return("Total number of Hispanic or Latino other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
-    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Percentage of Hispanic or Latino other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Total number of Hispanic or Latino Native Hawaiian or Other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Native Hawaiian or Other Pacific Islander individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Other.Race.Hispanic.or.Latino") return("Total number of Hispanic or Latino Other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
+    if(col == "Percent.Other.Race.Hispanic.or.Latino") return("Percentage of Hispanic or Latino Other race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Two.or.More.Races.Hispanic.or.Latino") return("Total number of Hispanic or Latino two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Percent.Two.or.More.Races.Hispanic.or.Latino") return("Percentage of Hispanic or Latino two or more race individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     
@@ -2223,8 +2223,8 @@ server <- function(input, output, session) {
     if(col == "lablack1share") return("Percentage of tract population that are Black or African American beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laasian1") return("Asian population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laasian1share") return("Percentage of tract population that are Asian beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lanhopi1") return("Native Hawaiian and Pacific Islander population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian and Pacific Islander beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lanhopi1") return("Native Hawaiian or Other Pacific Islander population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian or Other Pacific Islander beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laaian1") return("American Indian or Alaska Native population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laaian1share") return("Percentage of tract population that are American Indian or Alaska Native beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laomultir1") return("Other/Multiple race population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
@@ -3039,7 +3039,7 @@ server <- function(input, output, session) {
         html_legend <- '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bus-front" viewBox="0 0 16 16">
   <path d="M5 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0m8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-6-1a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2zm1-6c-1.876 0-3.426.109-4.552.226A.5.5 0 0 0 3 4.723v3.554a.5.5 0 0 0 .448.497C4.574 8.891 6.124 9 8 9s3.426-.109 4.552-.226A.5.5 0 0 0 13 8.277V4.723a.5.5 0 0 0-.448-.497A44 44 0 0 0 8 4m0-1c-1.837 0-3.353.107-4.448.22a.5.5 0 1 1-.104-.994A44 44 0 0 1 8 2c1.876 0 3.426.109 4.552.226a.5.5 0 1 1-.104.994A43 43 0 0 0 8 3"/>
   <path d="M15 8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1V2.64c0-1.188-.845-2.232-2.064-2.372A44 44 0 0 0 8 0C5.9 0 4.208.136 3.064.268 1.845.408 1 1.452 1 2.64V4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v3.5c0 .818.393 1.544 1 2v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14h6v1.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2c.607-.456 1-1.182 1-2zM8 1c2.056 0 3.71.134 4.822.261.676.078 1.178.66 1.178 1.379v8.86a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5V2.64c0-.72.502-1.301 1.178-1.379A43 43 0 0 1 8 1"/>
-</svg> Transit stops (zoom to see stops)<br/>'
+</svg> Transit stops (zoom to view stops)<br/>'
         
         clusterOptions <- markerClusterOptions(disableClusteringAtZoom = 14)
         
@@ -3240,7 +3240,7 @@ server <- function(input, output, session) {
       
       if (input$pharmacies) {
         symbol <- makeSymbol(shape = "circle", 
-                             fillColor = "#FB9A99",
+                             fillColor = "#E31A1CFF",
                              color = "black",
                              opacity = 1,
                              fillOpacity = 0.8,
@@ -3269,7 +3269,7 @@ server <- function(input, output, session) {
       
       if (input$wic_clinics) {
         symbol <- makeSymbol(shape = "circle", 
-                             fillColor = "#E31A1C",
+                             fillColor = "#FDBF6FFF",
                              color = "black",
                              opacity = 1,
                              fillOpacity = 0.8,
@@ -3299,7 +3299,7 @@ server <- function(input, output, session) {
       
       if (input$wic_retailers) {
         symbol <- makeSymbol(shape = "circle", 
-                             fillColor = "#FDBF6F",
+                             fillColor = "#FF7F00FF",
                              color = "black",
                              opacity = 1,
                              fillOpacity = 0.8,
@@ -3329,7 +3329,7 @@ server <- function(input, output, session) {
       
       if (input$fqhc) {
         symbol <- makeSymbol(shape = "circle", 
-                             fillColor = "#FF7F00",
+                             fillColor = "#CAB2D6FF",
                              color = "black",
                              opacity = 1,
                              fillOpacity = 0.8,
