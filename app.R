@@ -2143,10 +2143,10 @@ server <- function(input, output, session) {
     if(col == "Poverty") return("Estimate of the percentage of individuals in a census tract living below 150% of the poverty threshold from CDC PLACES (2023 release)")
     if(col == "Housing.cost.burden") return("Estimate of the percentage of households with annual income less than $75,000 that spend 30% or more of their household income on housing from CDC PLACES (2023 release)")
     
-    if(col == "Dew.point") return("Mean dew point temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
-    if(col == "Maximum.temperature") return("Maximum temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
-    if(col == "Minimum.temperature") return("Minimum temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
-    if(col == "Average.temperature") return("Average temperature in a census tract, Copyright\U00A9 PRISM Climate Group at Oregon State University (2021 release)")
+    if(col == "Dew.point") return("Average annual mean dew point temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
+    if(col == "Maximum.temperature") return("Average annual maximum temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
+    if(col == "Minimum.temperature") return("Average annual Minimum temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
+    if(col == "Average.temperature") return("Average annual average temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
     if(col == "Precipitation") return("Precipitation (in.)")
     
     if(col == "Wildfire.smoke") return("Wildfire smoke concentration estimate from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023 release)")
@@ -2180,7 +2180,7 @@ server <- function(input, output, session) {
     
     if(col == "PFAS_dw") return("Whether PFAS has been found in water within a census tract using data from the Environmental Protection Agency (EPA) Unregulated Contaminant Monitoring Rule (UCMR) 5 (2025 release)")
     if(col == "Median.HH.Income") return("Median income of households within a census tract using data from American Community Survey 5-year data (2019-2023). Values are censored for tracts with a median household income of over $250,000") # TODO: reword this
-    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index from the Center for Neighborhood Technology")
+    if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index from the Center for Neighborhood Technology. The Center for Neighborhood Technology bears no responsibility for the analyses or interpretations of the data presented here.")
     if(col == "Historic.Redlining.Score") return("Historic Home Owners' Loan Corporation (HOLC) score of a census tract from 1-4. 1 = A (most 'desirable' neighborhoods); 4 = D (least 'desirable' neighborhoods)")
     
     if(col == "pct_Open_Water") return("Percent area in a census tract with open water, generally with less than 25% cover of vegetation or soil from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
@@ -3498,6 +3498,26 @@ server <- function(input, output, session) {
         k <- NULL
         n <- length(food_env_cols())
         
+        m <- food_env_cols() %>%
+          sf::st_drop_geometry()
+        
+        label_cols <- colnames(m)
+        label_names <- sapply(label_cols, layer.titles, USE.NAMES = FALSE)
+        
+        # construct label
+        label <- lapply(
+          #m[, label_cols, drop = FALSE],
+          seq(nrow(m)),
+          function(i) {
+            row_vals <- m[i, , drop = TRUE]
+            paste(
+              paste0("<b>", label_names, "</b>", ": ", prettyNum(row_vals, big.mark = ",")),
+              collapse = "<br/>"
+            )
+          }
+        ) %>% 
+          lapply(htmltools::HTML)
+        
         if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
           k <- isolate(layer_counter()) + 1
           layer_counter(k) # set the new layer count
@@ -3520,7 +3540,7 @@ server <- function(input, output, session) {
           
           proxy <- proxy %>% 
             addPolygons(data = food_env_cols(), fillColor = ~pal(x), stroke = TRUE, weight = 0.25, color = "blue", group = layer.titles(c_name),
-                        fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
+                        fillOpacity = opacity, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE), label = label) %>% 
             addLegendNumeric(pal = pal, values = x, fillOpacity = opacity, 
                              orientation = "horizontal", shape = "stadium", 
                              width = 300,   # wider bar
