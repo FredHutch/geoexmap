@@ -190,7 +190,7 @@ hazardenv <- c("Avalanche risk" = "Avalanche.Risk.Score",
                "Winter weather risk" = "Winter.Weather.Risk.Score")
 
 builtenv <- c("Walkability" = "Walkability",
-              "Pesticide exposure" = "Pesticide.Exposure",
+              "Pesticide use" = "Pesticide.Exposure",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
               "Blue space" = "bluespace"
@@ -748,7 +748,24 @@ ui <- page_navbar(
       color: #fff;
       background-color: #ff0000;
     }
+
+    #help {
+    background-color: #00C1D5;
+    transition: 0.3s ease;
+    }
     
+    #help:hover {
+    background-color: #0A799A;
+    } 
+    
+    #help2 {
+    background-color: #00C1D5;
+    transition: 0.3s ease;
+    }
+    
+    #help2:hover {
+    background-color: #0A799A;
+    }
     
   ")),
     tags$link(rel = "stylesheet", 
@@ -872,29 +889,30 @@ server <- function(input, output, session) {
   showModal(modalDialog(
     title = HTML("Welcome to geo<b>ex</b>map"),
     HTML("This geospatial web app allows you to map and download neighborhood-level health and environmental data across Washington state."),
-    footer = tagList(modalButton("Dismiss"), actionButton("help", label = "Show tour", class = "btn-info"))
+    footer = tagList(modalButton("Dismiss"), actionButton("help", label = "Show tour"))
   ))
   
-  # TODO: rintrojs for swipe through tutorial
-  # TODO: documentation
+  #### APP TUTORIAL ####
   steps <- reactive({
     data.frame(
-      element = c("#geoexmap", "#geoexmap", "#main_acc", "#help_icon", "#acc_options"),
+      element = c("#geoexmap", "#geoexmap", "#main_acc", "#help_icon", "#access-panel", "#acc_options"),
       # TODO: add neighborhood search
       # TODO: add point locations
       intro = c("This is the main map. It displays up to three layers of neighborhood- and county-level data at a time.",
                 "Hover over the <i class='bi bi-info-circle-fill'></i> icon in the legend to see details for each data layer such as data sources.",
+                #"Click on the *magnifying glass* icon to search for an address.",
                 "Use these categories to choose which variables or features appear on the map.",
                 "Click on this icon to learn about health and prevention tips related to the variables that you selected.",
+                "For variables that are point locations (rather than census tracts or counties), you can use the toggle buttons to add as many layers as you would like.",
                 "In Options, you can choose to show different boundaries, show graphs of the selected variables, and upload a shapefile."),
-      position = c("right", "right", "right", "right", "right"),
+      position = c("right", "right", "right", "right", "right", "right"),
       stringsAsFactors = FALSE)
   })
   
   # app tutorial
   observeEvent(input$help, {
     removeModal()
-    accordion_panel_open(id = "main_acc", values = c("<b>Health Outcomes</b>", "<b>Options</b>"))
+    accordion_panel_open(id = "main_acc", values = c("<b>Health Outcomes</b>", "<b>Healthcare Access</b>", "<b>Options</b>"))
     updateSelectInput(session, 'outcomes', selected = "Cancer.or.Melanoma.among.Adults")
     introjs(session,
             options = list(
@@ -1501,6 +1519,7 @@ server <- function(input, output, session) {
       domain <- df[[var]] 
       
       if (var == "PFAS_dw") {
+        # TODO: make PFAS sentence case
         return(colorFactor(
           palette = c("#780000", "#fdf0d5"), domain = domain,
           levels = c(TRUE, FALSE)
@@ -1746,8 +1765,8 @@ server <- function(input, output, session) {
     if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (percentage)")
     if(col == "lanhopi1") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (total)")
     if(col == "lanhopi1share") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (percentage)")
-    if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (total)")
-    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile in 2019 (percentage)")
+    if(col == "laaian1") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (total)")
+    if(col == "laaian1share") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (percentage)")
     if(col == "laomultir1") return("Low access, Other/multiple race population at 1 mile in 2019 (total)")
     if(col == "laomultir1share") return("Low access, Other/multiple population at 1 mile in 2019 (percentage)")
     if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile in 2019 (total)")
@@ -1760,7 +1779,7 @@ server <- function(input, output, session) {
   
   layer.titles <- function(col) {
     if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
-    if(col == "Green.Space") return("Normalized Difference Vegetation Index (NDVI)")
+    if(col == "Green.Space") return("NDVI")
     if(col == "Nighttime.Radiance") return(HTML("Light at Night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits  (%)")
     if(col == "Food.Insecurity") return("Food insecurity (%)")
@@ -1782,7 +1801,7 @@ server <- function(input, output, session) {
     if(col == "Arthritis.among.Adults") return("Arthritis (%)")
     if(col == "Asthma.among.Adults") return("Asthma (%)")
     if(col == "High.Blood.Pressure.among.Adults") return("High blood pressure (%)")
-    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence among adults (%)")
+    if(col == "Cancer.or.Melanoma.among.Adults") return("Cancer prevalence (%)")
     if(col == "High.Cholesterol.among.Screened.Adults") return("High cholesterol (%)")
     if(col == "COPD.among.Adults") return("Chronic obstructive pulmonary disease (%)")
     if(col == "Coronary.Heart.Disease.among.Adults") return("Coronary heart disease (%)")
@@ -1874,7 +1893,7 @@ server <- function(input, output, session) {
     if(col == "Environmental.Justice.Index") return("Environmental Justice Index (EJI)")
     if(col == "Unemployment") return("Unemployment (%)")
     
-    if(col == "UV.Index") return("UV Index (UVI)")
+    if(col == "UV.Index") return("UVI")
     
     if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>)"))
     
@@ -1999,38 +2018,38 @@ server <- function(input, output, session) {
   }
   
   var.info <- function(col) {
-    if(col == "Particulate.Matter.2.5") return("Concentration of particulate matter less than 2.5 microns in width using data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
-    if(col == "Green.Space") return("Green space vegetation health and intensity in a census tract measured using the Normalized Difference Vegetation Index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
+    if(col == "Particulate.Matter.2.5") return("Average concentration of particulate matter less than 2.5 microns in diameter in a census tract using data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
+    if(col == "Green.Space") return("Average green space vegetation health and intensity in a census tract measured using the normalized differernce vegetation index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
     if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN), also known as nighttime radiance or light pollution, from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
     if(col == "Food.Stamps") return("Estimate of the percentage of adults in a census tract who reported receiving food stamps, also called SNAP, the Supplemental Nutrition Assistance Program, on an EBT card from CDC PLACES (2025 release)")
     if(col == "Food.Insecurity") return("Estimate of the percentage of adults in a census tract who reported that the food that they bought always/usually/sometimes did not last, and they didn’t have money to get more from CDC PLACES (2025 release)")
     if(col == "Housing.Insecurity") return("Estimate of the percentage of adults in a census tract who reported they were not able to pay mortgage, rent, or utility bill in the past 12 months from CDC PLACES (2025 release)")
     if(col == "Utility.Services.Threat") return("Estimate of the percentage of adults in a census tract who reported that an electric, gas, oil, or water company threatened to shut off services at any time during the prior 12 months from CDC PLACES (2025 release)")
     if(col == "Lacking.Reliable.Transportation") return("Estimate of the percentage of adults in a census tract who reported a lack of reliable transportation keeping them from medical appointments, meetings, work, or from getting things needed for daily living in the past 12 months from CDC PLACES (2025 release)")
-    if(col == "Lack.of.Social.and.Emotional.Support") return("Estimate of the percentage of adults in a census tract who report sometimes, rarely, or never getting the social and emotional support needed from CDC PLACES (2025 release)")
-    if(col == "Lack.of.Health.Insurance") return("Estimate of the percentage of adults aged 18-64 in a census tract who report having no current health insurance coverage from CDC PLACES (2025 release)")
-    if(col == "Routine.Checkup.in.the.Past.Year") return("Estimate of the percentage of adults in a census tract who report having been to a doctor for a routine checkup (e.g., a general physical exam, not an exam for a specific injury, illness, or condition) in the previous year from CDC PLACES (2025 release)")
-    if(col == "Visited.Dentist.in.Past.Year") return("Estimate of the percentage of adults in a census tract who report having been to the dentist or dental clinic in the past year from CDC PLACES (2025 release)")
+    if(col == "Lack.of.Social.and.Emotional.Support") return("Estimate of the percentage of adults in a census tract who reported sometimes, rarely, or never getting the social and emotional support needed from CDC PLACES (2025 release)")
+    if(col == "Lack.of.Health.Insurance") return("Estimate of the percentage of adults aged 18-64 in a census tract who reported having no current health insurance coverage from CDC PLACES (2025 release)")
+    if(col == "Routine.Checkup.in.the.Past.Year") return("Estimate of the percentage of adults in a census tract who reported having been to a doctor for a routine checkup (e.g., a general physical exam, not an exam for a specific injury, illness, or condition) in the previous year from CDC PLACES (2025 release)")
+    if(col == "Visited.Dentist.in.Past.Year") return("Estimate of the percentage of adults in a census tract who reported having been to the dentist or dental clinic in the past year from CDC PLACES (2025 release)")
     if(col == "Taking.Medicine.to.Control.High.Blood.Pressure") return("Estimate of the percentage of adults in a census tract with high blood pressure who reported currently taking medicine for high blood pressure from CDC PLACES (2025 release)")
-    if(col == "Cholesterol.Screening") return("Estimate of the percentage of adults in a census tract who report having their cholesterol checked within the previous 5 years from CDC PLACES (2025 release)")
-    if(col == "Mammography.Use.among.Women.50.to.74") return("Estimate of the percentage of women in a census tract 50-74 years who report having had a mammogram within the previous 2 years from CDC PLACES (2025 release)")
-    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Estimate of the percentage of adults in a census tract who report having one of the following: a fecal occult blood test (FOBT) within the previous year, a fecal immunochemical test (FIT)-DNA test within the previous 3 years, a sigmoidoscopy within the previous 5 years, a sigmoidoscopy within the previous 10 years with a FIT in the past year, a colonoscopy within the previous 10 years, or a CT colonography (virtual colonoscopy) within the previous 5 years from CDC PLACES (2025 release)")
-    if(col == "Binge.Drinking.among.Adults") return("Estimate of the percentage of adults in a census tract who report having \U2265 5 drinks (men) or \U2265 4 drinks (women) on \U2265 1 occasion during the previous 30 days from CDC PLACES (2025 release)")
-    if(col == "Cigarette.Smoking.among.Adults") return("Estimate of the percentage of adults in a census tract who report having smoked \U2265 100 cigarettes in their lifetime and currently smoke every day or some days from CDC PLACES (2025 release)")
+    if(col == "Cholesterol.Screening") return("Estimate of the percentage of adults in a census tract who reported having their cholesterol checked within the previous 5 years from CDC PLACES (2025 release)")
+    if(col == "Mammography.Use.among.Women.50.to.74") return("Estimate of the percentage of women in a census tract 50-74 years who reported having had a mammogram within the previous 2 years from CDC PLACES (2025 release)")
+    if(col == "Colorectal.Cancer.Screening.among.Adults.45.to.75") return("Estimate of the percentage of adults in a census tract who reported having one of the following: a fecal occult blood test (FOBT) within the previous year, a fecal immunochemical test (FIT)-DNA test within the previous 3 years, a sigmoidoscopy within the previous 5 years, a sigmoidoscopy within the previous 10 years with a FIT in the past year, a colonoscopy within the previous 10 years, or a CT colonography (virtual colonoscopy) within the previous 5 years from CDC PLACES (2025 release)")
+    if(col == "Binge.Drinking.among.Adults") return("Estimate of the percentage of adults in a census tract who reported having \U2265 5 drinks (men) or \U2265 4 drinks (women) on \U2265 1 occasion during the previous 30 days from CDC PLACES (2025 release)")
+    if(col == "Cigarette.Smoking.among.Adults") return("Estimate of the percentage of adults in a census tract who reported having smoked \U2265 100 cigarettes in their lifetime and currently smoke every day or some days from CDC PLACES (2025 release)")
     if(col == "No.Leisure.time.Physical.Activity.among.Adults") return("Estimate of the percentage of adults in a census tract who reported 'no' to the question: 'During the past month, other than your regular job, did you participate in any physical activities or exercises such as running, calisthenics, golf, gardening, or walking for exercise?' from CDC PLACES (2025 release)")
-    if(col == "Short.Sleep.Duration") return("Estimate of the percentage of adults in a census tract who report usually getting insufficient sleep duration (\U003C 7 hours, on average, during a 24-hour period) from CDC PLACES (2025 release)")
+    if(col == "Short.Sleep.Duration") return("Estimate of the percentage of adults in a census tract who reported usually getting insufficient sleep duration (\U003C 7 hours, on average, during a 24-hour period) from CDC PLACES (2025 release)")
     if(col == "Arthritis.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor or other health professional that you have some form of arthritis, rheumatoid arthritis, gout, lupus, or fibromyalgia?' from CDC PLACES (2025 release)")
     if(col == "Asthma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to both of the questions, 'Have you ever been told by a doctor, nurse, or other health professional that you have asthma?' and 'Do you still have asthma?' from CDC PLACES (2025 release)")
     if(col == "High.Blood.Pressure.among.Adults") return("Estimate of the percentage of adults in a census tract who reported ever having been told by a doctor, nurse, or other health professional that they have high blood pressure from CDC PLACES (2025 release)")
     if(col == "Cancer.or.Melanoma.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had melanoma or any other types of cancer?' and 'no' to the question: 'Have you ever been told by a doctor, nurse, or other health professional that you had skin cancer that is not melanoma?' from CDC PLACES (2025 release)")
-    if(col == "High.Cholesterol.among.Screened.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been screened for high cholesterol and told by a doctor, nurse, or other health professional that they had high cholesterol from CDC PLACES (2025 release)")
-    if(col == "COPD.among.Adults") return("Estimate of the percentage of adults in a census tract who report having ever been told by a doctor, nurse, or other health professional they had chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis from CDC PLACES (2025 release)")
-    if(col == "Coronary.Heart.Disease.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they had angina or coronary heart disease from CDC PLACES (2025 release)")
+    if(col == "High.Cholesterol.among.Screened.Adults") return("Estimate of the percentage of adults in a census tract who reported having ever been screened for high cholesterol and told by a doctor, nurse, or other health professional that they had high cholesterol from CDC PLACES (2025 release)")
+    if(col == "COPD.among.Adults") return("Estimate of the percentage of adults in a census tract who reported having ever been told by a doctor, nurse, or other health professional they had chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis from CDC PLACES (2025 release)")
+    if(col == "Coronary.Heart.Disease.among.Adults") return("Estimate of the percentage of adults in a census tract who reported ever having been told by a doctor, nurse, or other health professional that they had angina or coronary heart disease from CDC PLACES (2025 release)")
     if(col == "Depression.among.Adults") return("Estimate of the percentage of adults in a census tract who responded 'yes' to having ever been told by a doctor, nurse, or other health professional they had a depressive disorder, including depression, major depression, dysthymia, or minor depression from CDC PLACES (2025 release)")
-    if(col == "Diagnosed.Diabetes.among.Adults") return("Estimate of the percentage of adults in a census tract who report being told by a doctor or other health professional that they have diabetes (other than diabetes during pregnancy for female respondents) from CDC PLACES (2025 release)")
+    if(col == "Diagnosed.Diabetes.among.Adults") return("Estimate of the percentage of adults in a census tract who reported being told by a doctor or other health professional that they have diabetes (other than diabetes during pregnancy for female respondents) from CDC PLACES (2025 release)")
     if(col == "Obesity.among.Adults") return("Estimate of the percentage of adults in a census tract who have a body mass index (BMI) \U2265 30.0 kg/m\U00B2 from CDC PLACES (2025 release)")
-    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("Estimate of the percentage of adults in a census tract \U2265 65 years who report having lost all of their natural teeth due to tooth decay and gum disease from CDC PLACES (2025 release)")
-    if(col == "Stroke.among.Adults") return("Estimate of the percentage of adults in a census tract who report ever having been told by a doctor, nurse, or other health professional that they have had a stroke from CDC PLACES (2025 release)")
+    if(col == "All.Teeth.Lost.among.Adults.65.and.Older") return("Estimate of the percentage of adults in a census tract \U2265 65 years who reported having lost all of their natural teeth due to tooth decay and gum disease from CDC PLACES (2025 release)")
+    if(col == "Stroke.among.Adults") return("Estimate of the percentage of adults in a census tract who reported ever having been told by a doctor, nurse, or other health professional that they have had a stroke from CDC PLACES (2025 release)")
     
     if(col == "Total.Population") return("Total number of individuals in a census tract using American Community Survey 5-year data (2019-2023)")
     if(col == "Hispanic.or.Latino") return("Total number of Hispanic or Latino individuals in a census tract using American Community Survey 5-year data (2019-2023)")
@@ -2116,7 +2135,7 @@ server <- function(input, output, session) {
     
     if(col == "UV.Index") return("Average ultraviolet radiation index from Tropospheric Emission Monitoring Internet Service (TEMIS) satellite data (2024)")
     
-    if(col == "Radon") return("Radon gas concentration using data from Li et al. Proc Natl Acad Sci 2024")
+    if(col == "Radon") return("Radon gas concentration using data from Li et al. Proc Natl Acad Sci (2024)")
     
     if(col == "Pesticide.Exposure") return("Agricultural pesticide use data from the Washington State Department of Health Washington Tracking Network (WTN) (2023 release)")
     
@@ -2151,15 +2170,15 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return("Average annual average temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
     if(col == "Precipitation") return("Precipitation (in.)")
     
-    if(col == "Wildfire.smoke") return("Wildfire smoke concentration estimate from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023 release)")
-    if(col == "Nitrogen.dioxide") return("Nitrogen dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
-    if(col == "Sulfur.dioxide") return("Sulfur dioxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
-    if(col == "Carbon.monoxide") return("Carbon monoxide concentration estimate from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
-    if(col == "Ozone") return("Ozone concentration estimate from Centers for Disease Control and Prevention (CDC) (2023 release)")
+    if(col == "Wildfire.smoke") return("Average concentration of wildfire smoke in a census tract from Stanford Environmental Change and Human Outcomes (ECHO) Lab (2023 release)")
+    if(col == "Nitrogen.dioxide") return("Average concentration of nitrogen dioxide in a census tract from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
+    if(col == "Sulfur.dioxide") return("Average concentration of sulfur dioxide in a census tract from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
+    if(col == "Carbon.monoxide") return("Average concentration of carbon monoxide in a census tract from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
+    if(col == "Ozone") return("Average concentration of ozone in a census tract from Centers for Disease Control and Prevention (CDC) (2023 release)")
     
     if(col == "Population.density") return("Population density in 2023 (population per square mile)")
     if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to avalanches from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
-    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture  due to coastal flooding from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
+    if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to coastal flooding from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to cold waves from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     if(col == "Drought.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to droughts from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     if(col == "Earthquake.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to earthquakes from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
@@ -3027,8 +3046,8 @@ server <- function(input, output, session) {
       
       proxy <- leafletProxy("geoexmap", data = map_cols()) %>% 
         clearControls() %>% 
-        clearShapes() #%>% 
-        # clearMarkers() %>% 
+        clearShapes() %>% 
+        clearMarkers()
         # addProviderTiles(providers$CartoDB.Positron)
       
       # TODO: 
@@ -3366,12 +3385,16 @@ server <- function(input, output, session) {
                               ordered = TRUE)
         pal <- colorFactor("OrRd", domain = levels(micro_data_conc), ordered = TRUE)
         proxy <- proxy %>% 
-          addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text),
+          addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text), group = "microplastics",
                            radius = 4, fillOpacity = 0.8, popup = ~paste("<b>Region:</b>", Region, "<b><br>Sampling method:</b>", Sampling.Method,
                                                                          "<b><br>Date of collection:</b>", Date..MM.DD.YYYY.)) %>% 
+          # TODO: add info text for Ocean vs. Beach-Nurdle Patrol, concentrations, data source and download date
           addLegend(pal = pal,
                     values = ~micro_data$Concentration.class.text,
-                    title = "Microplastics Concentration")
+                    title = "Microplastics concentration")
+      } else {
+        proxy <- proxy %>% 
+          clearGroup("microplastics")
       }
       
       ##### map (main data) #####
@@ -3395,7 +3418,7 @@ server <- function(input, output, session) {
             function(i) {
               row_vals <- m[i, , drop = TRUE]
               paste(
-                paste0("<b>", label_names, "</b>", ": ", prettyNum(row_vals, big.mark = ",")),
+                paste0("<b>", label_names, "</b>", ": ", prettyNum(round(row_vals, 2), big.mark = ",")),
                 collapse = "<br/>"
               )
             }
@@ -3494,6 +3517,7 @@ server <- function(input, output, session) {
         }
       
       ##### map (food environment) #####
+      # TODO: 
       for (i in seq_along(colnames(food_env_cols()))) {
         c_name <- colnames(food_env_cols())[i]
         x <- food_env_cols()[[c_name]]
@@ -3513,7 +3537,7 @@ server <- function(input, output, session) {
           function(i) {
             row_vals <- m[i, , drop = TRUE]
             paste(
-              paste0("<b>", label_names, "</b>", ": ", prettyNum(row_vals, big.mark = ",")),
+              paste0("<b>", label_names, "</b>", ": ", prettyNum(round(row_vals, 2), big.mark = ",")),
               collapse = "<br/>"
             )
           }
