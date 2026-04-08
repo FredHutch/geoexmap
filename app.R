@@ -88,45 +88,45 @@ df_vars <- data
 
 sociodemographics <- c("Population (total)" = "Total.Population")
 
-racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic White (percentage)" = "Percent.White.NonHispanic",
-          "Non-Hispanic Black (total)" = "Black.NonHispanic", "Non-Hispanic Black (percentage)" = "Percent.Black.NonHispanic",
-          "Non-Hispanic Asian (total)" = "Asian.NonHispanic", "Non-Hispanic Asian (percentage)" = "Percent.Asian.NonHispanic",
-          "Non-Hispanic American Indian or Alaska Native (total)" = "American.Indian.Alaska.Native.NonHispanic", "Non-Hispanic American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
-          "Non-Hispanic Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.NonHispanic",  "Non-Hispanic Native Hawaiian or Other Pacific Islander (percentage)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
-          "Non-Hispanic Other race (total)" = "Other.Race.NonHispanic", "Non-Hispanic Other race (percentage)" = "Percent.Other.Race.NonHispanic",
-          "Non-Hispanic two or more races (total)" = "Two.or.More.Races.NonHispanic", "Non-Hispanic two or more races (percentage)" = "Percent.Two.or.More.Races.NonHispanic",
-          "Hispanic or Latino (total)" = "Hispanic.or.Latino", "Hispanic or Latino (percentage)" = "Percent.Hispanic.or.Latino",
-          "Hispanic or Latino White (total)" = "White.Hispanic.or.Latino", "Hispanic or Latino White (percentage)" = "Percent.White.Hispanic.or.Latino",
-          "Hispanic or Latino Black (total)" = "Black.Hispanic.or.Latino", "Hispanic or Latino Black (percentage)" = "Percent.Black.Hispanic.or.Latino",
-          "Hispanic or Latino Asian (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino Asian (percentage)" = "Percent.Asian.Hispanic.or.Latino",
-          "Hispanic or Latino American Indian or Alaska Native (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (percentage)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
-          "Hispanic or Latino Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Other Pacific Islander (percentage)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
-          "Hispanic or Latino Other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino Other race (percentage)" = "Percent.Other.Race.Hispanic.or.Latino",
-          "Hispanic or Latino two or more races (total)" = "Two.or.More.Races.Hispanic.or.Latino", "Hispanic or Latino two or more races (percentage)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
+racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic White (%)" = "Percent.White.NonHispanic",
+          "Non-Hispanic Black (total)" = "Black.NonHispanic", "Non-Hispanic Black (%)" = "Percent.Black.NonHispanic",
+          "Non-Hispanic Asian (total)" = "Asian.NonHispanic", "Non-Hispanic Asian (%)" = "Percent.Asian.NonHispanic",
+          "Non-Hispanic American Indian or Alaska Native (total)" = "American.Indian.Alaska.Native.NonHispanic", "Non-Hispanic American Indian or Alaska Native (%)" = "Percent.American.Indian.Alaska.Native.NonHispanic",
+          "Non-Hispanic Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.NonHispanic",  "Non-Hispanic Native Hawaiian or Other Pacific Islander (%)" =  "Percent.Native.Hawaiian.Pacific.Islander.NonHispanic",
+          "Non-Hispanic Other race (total)" = "Other.Race.NonHispanic", "Non-Hispanic Other race (%)" = "Percent.Other.Race.NonHispanic",
+          "Non-Hispanic two or more races (total)" = "Two.or.More.Races.NonHispanic", "Non-Hispanic two or more races (%)" = "Percent.Two.or.More.Races.NonHispanic",
+          "Hispanic or Latino (total)" = "Hispanic.or.Latino", "Hispanic or Latino (%)" = "Percent.Hispanic.or.Latino",
+          "Hispanic or Latino White (total)" = "White.Hispanic.or.Latino", "Hispanic or Latino White (%)" = "Percent.White.Hispanic.or.Latino",
+          "Hispanic or Latino Black (total)" = "Black.Hispanic.or.Latino", "Hispanic or Latino Black (%)" = "Percent.Black.Hispanic.or.Latino",
+          "Hispanic or Latino Asian (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino Asian (%)" = "Percent.Asian.Hispanic.or.Latino",
+          "Hispanic or Latino American Indian or Alaska Native (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (%)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
+          "Hispanic or Latino Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Other Pacific Islander (%)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
+          "Hispanic or Latino Other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino Other race (%)" = "Percent.Other.Race.Hispanic.or.Latino",
+          "Hispanic or Latino two or more races (total)" = "Two.or.More.Races.Hispanic.or.Latino", "Hispanic or Latino two or more races (%)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
 
 sexv <- c("Male (total)" = "Total.Male.Population",
-          "Male (percentage)" = "Percent.Male",
+          "Male (%)" = "Percent.Male",
           "Female (total)" = "Total.Female.Population",
-         "Female (percentage)" = "Percent.Female")
+         "Female (%)" = "Percent.Female")
 
-agev <- c("0-4 years (total)" = "Total.0.to.4.years", "0-4 years (percentage)" = "Percent.0.to.4.years",
-         "5-9 years (total)" = "Total.5.to.9.years", "5-9 years (percentage)" = "Percent.5.to.9.years",
-         "10-14 years (total)" = "Total.10.to.14.years", "10-14 years (percentage)" = "Percent.10.to.14.years",
-         "15-19 years (total)" = "Total.15.to.19.years", "15-19 years (percentage)" = "Percent.15.to.19.years",
-         "20-24 years (total)" = "Total.20.to.24.years", "20-24 years (percentage)" = "Percent.20.to.24.years",
-         "25-29 years (total)" = "Total.25.to.29.years", "25-29 years (percentage)" = "Percent.25.to.29.years",
-         "30-34 years (total)" = "Total.30.to.34.years", "30-34 years (percentage)" = "Percent.30.to.34.years",
-         "35-39 years (total)" = "Total.35.to.39.years", "35-39 years (percentage)" = "Percent.35.to.39.years",
-         "40-44 years (total)" = "Total.40.to.44.years", "40-44 years (percentage)" = "Percent.40.to.44.years",
-         "45-49 years (total)" = "Total.45.to.49.years", "45-49 years (percentage)" = "Percent.45.to.49.years",
-         "50-54 years (total)" = "Total.50.to.54.years", "50-54 years (percentage)" = "Percent.50.to.54.years",
-         "55-59 years (total)" = "Total.55.to.59.years", "55-59 years (percentage)" = "Percent.55.to.59.years",
-         "60-64 years (total)" = "Total.60.to.64.years", "60-64 years (percentage)" = "Percent.60.to.64.years",
-         "65-69 years (total)" = "Total.65.to.69.years", "65-69 years (percentage)" = "Percent.65.to.69.years",
-         "70-74 years (total)" = "Total.70.to.74.years", "70-74 years (percentage)" = "Percent.70.to.74.years",
-         "75-79 years (total)" = "Total.75.to.79.years", "75-79 years (percentage)" = "Percent.75.to.79.years",
-         "80-84 years (total)" = "Total.80.to.84.years", "80-84 years (percentage)" = "Percent.80.to.84.years",
-         "85 years+ (total)" = "Total.85.and.older", "85 years+ (percentage)" = "Percent.85.and.older")
+agev <- c("0-4 years (total)" = "Total.0.to.4.years", "0-4 years (%)" = "Percent.0.to.4.years",
+         "5-9 years (total)" = "Total.5.to.9.years", "5-9 years (%)" = "Percent.5.to.9.years",
+         "10-14 years (total)" = "Total.10.to.14.years", "10-14 years (%)" = "Percent.10.to.14.years",
+         "15-19 years (total)" = "Total.15.to.19.years", "15-19 years (%)" = "Percent.15.to.19.years",
+         "20-24 years (total)" = "Total.20.to.24.years", "20-24 years (%)" = "Percent.20.to.24.years",
+         "25-29 years (total)" = "Total.25.to.29.years", "25-29 years (%)" = "Percent.25.to.29.years",
+         "30-34 years (total)" = "Total.30.to.34.years", "30-34 years (%)" = "Percent.30.to.34.years",
+         "35-39 years (total)" = "Total.35.to.39.years", "35-39 years (%)" = "Percent.35.to.39.years",
+         "40-44 years (total)" = "Total.40.to.44.years", "40-44 years (%)" = "Percent.40.to.44.years",
+         "45-49 years (total)" = "Total.45.to.49.years", "45-49 years (%)" = "Percent.45.to.49.years",
+         "50-54 years (total)" = "Total.50.to.54.years", "50-54 years (%)" = "Percent.50.to.54.years",
+         "55-59 years (total)" = "Total.55.to.59.years", "55-59 years (%)" = "Percent.55.to.59.years",
+         "60-64 years (total)" = "Total.60.to.64.years", "60-64 years (%)" = "Percent.60.to.64.years",
+         "65-69 years (total)" = "Total.65.to.69.years", "65-69 years (%)" = "Percent.65.to.69.years",
+         "70-74 years (total)" = "Total.70.to.74.years", "70-74 years (%)" = "Percent.70.to.74.years",
+         "75-79 years (total)" = "Total.75.to.79.years", "75-79 years (%)" = "Percent.75.to.79.years",
+         "80-84 years (total)" = "Total.80.to.84.years", "80-84 years (%)" = "Percent.80.to.84.years",
+         "85 years+ (total)" = "Total.85.and.older", "85 years+ (%)" = "Percent.85.and.older")
 
 behaviors <- c("Binge drinking" =  "Binge.Drinking.among.Adults",
                "Cigarette smoking" = "Cigarette.Smoking.among.Adults",
@@ -197,23 +197,23 @@ builtenv <- c("Walkability" = "Walkability",
               )
 
 noiseenv <- c("Population exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
-               "Population exposed to noise LAeq \U2265 45-50 dB (percentage)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
+               "Population exposed to noise LAeq \U2265 45-50 dB (%)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
                "Population exposed to noise LAeq \U2265 50-60 dB (total)" = "N.Noise.More.than.LAeq.50.to.60.db",
-               "Population exposed to noise LAeq \U2265 50-60 dB (percentage)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
+               "Population exposed to noise LAeq \U2265 50-60 dB (%)" = "Pct.Noise.More.than.LAeq.50.to.60.db",
                "Population exposed to noise LAeq \U2265 60-70 dB (total)" = "N.Noise.More.than.LAeq.60.to.70.db",
-               "Population exposed to noise LAeq \U2265 60-70 dB (percentage)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
+               "Population exposed to noise LAeq \U2265 60-70 dB (%)" = "Pct.Noise.More.than.LAeq.60.to.70.db",
                "Population exposed to noise LAeq \U2265 70-80 dB (total)" = "N.Noise.More.than.LAeq.70.to.80.db",
-               "Population exposed to noise LAeq \U2265 70-80 dB (percentage)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
+               "Population exposed to noise LAeq \U2265 70-80 dB (%)" = "Pct.Noise.More.than.LAeq.70.to.80.db",
                "Population exposed to noise LAeq \U2265 80-90 dB (total)" = "N.Noise.More.than.LAeq.80.to.90.db",
-               "Population exposed to noise LAeq \U2265 80-90 dB (percentage)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
+               "Population exposed to noise LAeq \U2265 80-90 dB (%)" = "Pct.Noise.More.than.LAeq.80.to.90.db",
                "Population exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
-               "Population exposed to noise LAeq \U2265 90 dB (percentage)" = "Pct.Noise.More.than.LAeq.90.db")
+               "Population exposed to noise LAeq \U2265 90 dB (%)" = "Pct.Noise.More.than.LAeq.90.db")
 
 landuseenv <- c("Open water" = "pct_Open_Water",
                  "Developed open land" = "pct_Developed_Open",
-                 "Low development" = "pct_Developed_Low",
-                 "Moderate development" = "pct_Developed_Medium",
-                 "High development" = "pct_Developed_High",
+                 "Minimally developed land" = "pct_Developed_Low",
+                 "Moderately developed land" = "pct_Developed_Medium",
+                 "Highly developed land" = "pct_Developed_High",
                  "Barren land" = "pct_Barren",
                  "Evergreen forest" = "pct_Evergreen_Forest",
                  "Shrubland" = "pct_Shrub",
@@ -253,31 +253,31 @@ crimeenv <- c("Part I offenses (count)" = "total_p1",
               "Part II offenses (rate)" = "p2_rate")
 
 foodenv <- c("Population > 1 mile from supermarket (total)" = "lapop1",
-             "Population > 1 mile from supermarket (percentage)" = "lapop1share",
+             "Population > 1 mile from supermarket (%)" = "lapop1share",
              "Low-income population > 1 mile from supermarket (total)" = "lalowi1",
-             "Low-income population > 1 mile from supermarket (percentage)" = "lalowi1share",
+             "Low-income population > 1 mile from supermarket (%)" = "lalowi1share",
              "Children age 0-17 > 1 mile from supermarket (total)"  = "lakids1",
-             "Children age 0-17 > 1 mile from supermarket (percentage)" = "lakids1share",
+             "Children age 0-17 > 1 mile from supermarket (%)" = "lakids1share",
              "Seniors age 65+ > 1 mile from supermarket (total)" = "laseniors1",
-             "Seniors age 65+ > 1 mile from supermarket (percentage)" = "laseniors1share",
+             "Seniors age 65+ > 1 mile from supermarket (%)" = "laseniors1share",
              "White population > 1 mile from supermarket (total)" = "lawhite1",
-             "White population > 1 mile from supermarket (percentage)" = "lawhite1share",
+             "White population > 1 mile from supermarket (%)" = "lawhite1share",
              "Black population > 1 mile from supermarket (total)" = "lablack1",
-             "Black population > 1 mile from supermarket (percentage)" = "lablack1share",
+             "Black population > 1 mile from supermarket (%)" = "lablack1share",
              "Asian population > 1 mile from supermarket (total)" = "laasian1",
-             "Asian population > 1 mile from supermarket (percentage)" = "laasian1share",
+             "Asian population > 1 mile from supermarket (%)" = "laasian1share",
              "Native Hawaiian or Other Pacific Islander population > 1 mile from supermarket (total)" = "lanhopi1",
-             "Native Hawaiian or Other Pacific Islander population > 1 mile from supermarket (percentage)" = "lanhopi1share",
+             "Native Hawaiian or Other Pacific Islander population > 1 mile from supermarket (%)" = "lanhopi1share",
              "American Indian or Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
-             "American Indian or Alaska Native population > 1 mile from supermarket (percentage)" = "laaian1share",
+             "American Indian or Alaska Native population > 1 mile from supermarket (%)" = "laaian1share",
              "Other/Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
-             "Other/Multiple race population > 1 mile from supermarket (percentage)" = "laomultir1share",
+             "Other/Multiple race population > 1 mile from supermarket (%)" = "laomultir1share",
              "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
-             "Hispanic or Latino population > 1 mile from supermarket (percentage)" = "lahisp1share",
+             "Hispanic or Latino population > 1 mile from supermarket (%)" = "lahisp1share",
              "Housing units without a vehicle > 1 mile from supermarket (total)" = "lahunv1",
-             "Housing units without a vehicle > 1 mile from supermarket (percentage)" = "lahunv1share",
+             "Housing units without a vehicle > 1 mile from supermarket (%)" = "lahunv1share",
              "Housing units receiving SNAP > 1 mile from supermarket (total)" = "lasnap1",
-             "Housing units receiving SNAP > 1 mile from supermarket (percentage)" = "lasnap1share")
+             "Housing units receiving SNAP > 1 mile from supermarket (%)" = "lasnap1share")
 
 # define filters
 health_outcomes <- df_vars %>% 
@@ -1750,37 +1750,37 @@ server <- function(input, output, session) {
     
     # TODO: add legend titles for food environment columns
     if(col == "lapop1") return("Low access population at 1 mile in 2019 (total)")
-    if(col == "lapop1share") return("Low access population at 1 mile in 2019 (percentage)")
+    if(col == "lapop1share") return("Low access population at 1 mile in 2019 (%)")
     if(col == "lalowi1") return("Low access, low income population at 1 mile in 2019 (total)")
-    if(col == "lalowi1share") return("Low access, low income population at 1 mile in 2019 (percentage)")
+    if(col == "lalowi1share") return("Low access, low income population at 1 mile in 2019 (%)")
     if(col == "lakids1") return("Low access, age 0-17 at 1 mile in 2019 (total)")
-    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile in 2019 (percentage)")
+    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile in 2019 (%)")
     if(col == "laseniors1") return("Low access, age 65+ at 1 mile in 2019 (total)")
-    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile in 2019 (percentage)")
+    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile in 2019 (%)")
     if(col == "lawhite1") return("Low access, White population at 1 mile in 2019 (total)")
-    if(col == "lawhite1share") return("Low access, White population at 1 mile in 2019 (percentage)")
+    if(col == "lawhite1share") return("Low access, White population at 1 mile in 2019 (%)")
     if(col == "lablack1") return("Low access, Black population at 1 mile in 2019 (total)")
-    if(col == "lablack1share") return("Low access, Black population at 1 mile in 2019 (percentage)")
+    if(col == "lablack1share") return("Low access, Black population at 1 mile in 2019 (%)")
     if(col == "laasian1") return("Low access, Asian population at 1 mile in 2019 (total)")
-    if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (percentage)")
+    if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (%)")
     if(col == "lanhopi1") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (total)")
-    if(col == "lanhopi1share") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (percentage)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (%)")
     if(col == "laaian1") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (total)")
-    if(col == "laaian1share") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (percentage)")
+    if(col == "laaian1share") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (%)")
     if(col == "laomultir1") return("Low access, Other/multiple race population at 1 mile in 2019 (total)")
-    if(col == "laomultir1share") return("Low access, Other/multiple population at 1 mile in 2019 (percentage)")
+    if(col == "laomultir1share") return("Low access, Other/multiple population at 1 mile in 2019 (%)")
     if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile in 2019 (total)")
-    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile in 2019 (percentage)")
+    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile in 2019 (%)")
     if(col == "lahunv1") return("Low access, households without vehicle at 1 mile in 2019 (total)")
-    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile in 2019 (percentage)")
+    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile in 2019 (%)")
     if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile in 2019 (total)")
-    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile in 2019 (percentage)")
+    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile in 2019 (%)")
   }
   
   layer.titles <- function(col) {
     if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Green.Space") return("NDVI")
-    if(col == "Nighttime.Radiance") return(HTML("Light at Night (nW/cm<sup>2</sup>/sr)"))
+    if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
     if(col == "Food.Stamps") return("SNAP benefits  (%)")
     if(col == "Food.Insecurity") return("Food insecurity (%)")
     if(col == "Housing.Insecurity") return("Housing insecurity (%)")
@@ -1987,40 +1987,38 @@ server <- function(input, output, session) {
     if(col == "total_p2") return("Part II offenses (total)")
     if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
-    # TODO: add legend titles for food environment columns
-    # TODO: multiple x100 to get percentage, not proportion
     if(col == "lapop1") return("Low access population at 1 mile (total)")
-    if(col == "lapop1share") return("Low access population at 1 mile (percentage)")
+    if(col == "lapop1share") return("Low access population at 1 mile (%)")
     if(col == "lalowi1") return("Low access, low income population at 1 mile (total)")
-    if(col == "lalowi1share") return("Low access, low income population at 1 mile (percentage)")
+    if(col == "lalowi1share") return("Low access, low income population at 1 mile (%)")
     if(col == "lakids1") return("Low access, age 0-17 at 1 mile (total)")
-    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile (percentage)")
+    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile (%)")
     if(col == "laseniors1") return("Low access, age 65+ at 1 mile (total)")
-    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile (percentage)")
+    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile (%)")
     if(col == "lawhite1") return("Low access, White population at 1 mile (total)")
-    if(col == "lawhite1share") return("Low access, White population at 1 mile (percentage)")
+    if(col == "lawhite1share") return("Low access, White population at 1 mile (%)")
     if(col == "lablack1") return("Low access, Black population at 1 mile (total)")
-    if(col == "lablack1share") return("Low access, Black population at 1 mile (percentage)")
+    if(col == "lablack1share") return("Low access, Black population at 1 mile (%)")
     if(col == "laasian1") return("Low access, Asian population at 1 mile (total)")
-    if(col == "laasian1share") return("Low access, Asian population at 1 mile (percentage)")
+    if(col == "laasian1share") return("Low access, Asian population at 1 mile (%)")
     if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (total)")
-    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (percentage)")
+    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (%)")
     if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile (total)")
-    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile (percentage)")
+    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile (%)")
     if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile (total)")
-    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile (percentage)")
+    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile (%)")
     if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile (total)")
-    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile (percentage)")
+    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile (%)")
     if(col == "lahunv1") return("Low access, households without vehicle at 1 mile (total)")
-    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile (percentage)")
+    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile (%)")
     if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile (total)")
-    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile (percentage)")
+    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile (%)")
   }
   
   var.info <- function(col) {
     if(col == "Particulate.Matter.2.5") return("Average concentration of particulate matter less than 2.5 microns in diameter in a census tract using data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
     if(col == "Green.Space") return("Average green space vegetation health and intensity in a census tract measured using the normalized differernce vegetation index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
-    if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN), also known as nighttime radiance or light pollution, from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
+    if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN) (also known as nighttime radiance or light pollution) in a census tract from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
     if(col == "Food.Stamps") return("Estimate of the percentage of adults in a census tract who reported receiving food stamps, also called SNAP, the Supplemental Nutrition Assistance Program, on an EBT card from CDC PLACES (2025 release)")
     if(col == "Food.Insecurity") return("Estimate of the percentage of adults in a census tract who reported that the food that they bought always/usually/sometimes did not last, and they didn’t have money to get more from CDC PLACES (2025 release)")
     if(col == "Housing.Insecurity") return("Estimate of the percentage of adults in a census tract who reported they were not able to pay mortgage, rent, or utility bill in the past 12 months from CDC PLACES (2025 release)")
@@ -2137,7 +2135,7 @@ server <- function(input, output, session) {
     
     if(col == "Radon") return("Radon gas concentration using data from Li et al. Proc Natl Acad Sci (2024)")
     
-    if(col == "Pesticide.Exposure") return("Agricultural pesticide use data from the Washington State Department of Health Washington Tracking Network (WTN) (2023 release)")
+    if(col == "Pesticide.Exposure") return("Average annual agricultural pesticide use data from the Washington State Department of Health Washington Tracking Network (WTN) (2023 release)")
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation, calculated using Duncan's multi-group dissimilarity index with 2020 race data by block group from the National Historical Geographic Information Systems (NHGIS) data portal")
     
@@ -2206,19 +2204,19 @@ server <- function(input, output, session) {
     
     if(col == "pct_Open_Water") return("Percent area in a census tract with open water, generally with less than 25% cover of vegetation or soil from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
     if(col == "pct_Developed_Open") return("Percent area in a census tract with a mixture of some constructed materials, but mostly vegetation in the form of lawn grasses from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for less than 20% of total cover. These areas most commonly include large-lot single-family housing units, parks, golf courses, and vegetation planted in developed settings for recreation, erosion control, or aesthetic purposes")
-    if(col == "pct_Developed_Low") return("Percent area in a census tract with minimally developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 20% to 49% percent of the total cover. These areas most commonly include single-family housing units")
-    if(col == "pct_Developed_Medium") return("Percent area in a census tract with moderately developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 50% to 79% of the total cover. These areas most commonly include single-family housing units")
-    if(col == "pct_Developed_High") return("Percent area in a census tract with highly developed land, where people reside or work in high numbers from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Examples include apartment complexes, row houses and commercial/industrial. Impervious surfaces account for 80% to 100% of the total cover")
+    if(col == "pct_Developed_Low") return("Percent area in a census tract with minimally developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 20% to 49% percent of the total cover. These areas most commonly include single-family housing units.")
+    if(col == "pct_Developed_Medium") return("Percent area in a census tract with moderately developed land from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for 50% to 79% of the total cover. These areas most commonly include single-family housing units.")
+    if(col == "pct_Developed_High") return("Percent area in a census tract with highly developed land, where people reside or work in high numbers from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Examples include apartment complexes, row houses and commercial/industrial. Impervious surfaces account for 80% to 100% of the total cover.")
     if(col == "pct_Barren") return("Percent area in a census tract with bedrock, desert pavement, scarps, talus, slides, volcanic material, glacial debris, sand dunes, strip mines, gravel pits and other accumulations of earthen material from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
-    if(col == "pct_Evergreen_Forest") return("Percent area in a census tract with areas dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). More than 75% of the tree species maintain their leaves all year. Canopy is never without green foliage")
-    if(col == "pct_Shrub") return("Percent area in a census tract dominated by shrubs; less than 5 meters tall with shrub canopy typically greater than 20% of total vegetation from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). This class includes true shrubs, young trees in an early successional stage or trees stunted from environmental conditions")
-    if(col == "pct_Grassland") return("Percent area in a census tract dominated by gramanoid or herbaceous vegetation, generally greater than 80% of total vegetation from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). These areas are not subject to intensive management such as tilling, but can be utilized for grazing")
-    if(col == "pct_Pasture") return("Percent area in a census tract with areas of grasses, legumes, or grass-legume mixtures planted for livestock grazing or the production of seed or hay crops, typically on a perennial cycle from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Pasture/hay vegetation accounts for greater than 20% of total vegetation")
-    if(col == "pct_Crops") return("Percent area in a census tract with areas used for the production of annual crops, such as corn, soybeans, vegetables, tobacco, and cotton, and also perennial woody crops such as orchards and vineyards from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Crop vegetation accounts for greater than 20% of total vegetation. This class also includes all land being actively tilled")
+    if(col == "pct_Evergreen_Forest") return("Percent area in a census tract with areas dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). More than 75% of the tree species maintain their leaves all year. Canopy is never without green foliage.")
+    if(col == "pct_Shrub") return("Percent area in a census tract dominated by shrubs; less than 5 meters tall with shrub canopy typically greater than 20% of total vegetation from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). This class includes true shrubs, young trees in an early successional stage or trees stunted from environmental conditions.")
+    if(col == "pct_Grassland") return("Percent area in a census tract dominated by gramanoid or herbaceous vegetation, generally greater than 80% of total vegetation from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). These areas are not subject to intensive management such as tilling, but can be utilized for grazing.")
+    if(col == "pct_Pasture") return("Percent area in a census tract with areas of grasses, legumes, or grass-legume mixtures planted for livestock grazing or the production of seed or hay crops, typically on a perennial cycle from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Pasture/hay vegetation accounts for greater than 20% of total vegetation.")
+    if(col == "pct_Crops") return("Percent area in a census tract with areas used for the production of annual crops, such as corn, soybeans, vegetables, tobacco, and cotton, and also perennial woody crops such as orchards and vineyards from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Crop vegetation accounts for greater than 20% of total vegetation. This class also includes all land being actively tilled.")
     if(col == "pct_Woody_Wetlands") return("Percent area in a census tract where forest or shrubland vegetation accounts for greater than 20% of vegetative cover and the soil or substrate is periodically saturated with or covered with water from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
     if(col == "pct_Herbaceous_Wetlands") return("Percent area in a census tract where perennial herbaceous vegetation accounts for greater than 80% of vegetative cover and the soil or substrate is periodically saturated with or covered with water from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
-    if(col == "pct_Deciduous_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). More than 75% of the tree species shed foliage simultaneously in response to seasonal change")
-    if(col == "pct_Mixed_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Neither deciduous nor evergreen species are greater than 75% of total tree cover")
+    if(col == "pct_Deciduous_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). More than 75% of the tree species shed foliage simultaneously in response to seasonal change.")
+    if(col == "pct_Mixed_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Neither deciduous nor evergreen species are greater than 75% of total tree cover.")
     if(col == "pct_Perennial_Ice") return("Percent area in a census tract characterized by a perennial cover of ice and/or snow, generally greater than 25% of total cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
     
     if(col == "total_p1") return("Total Part I offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
@@ -2228,30 +2226,30 @@ server <- function(input, output, session) {
     if(col == "p2_rate") return("Total Part II offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
     
     # TODO: add legend titles for food environment columns
-    if(col == "lapop1") return("Population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lapop1share") return("Percentage of tract population that are beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lalowi1") return("Low income population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lalowi1share") return("Percentage of tract population that are low income individuals beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lakids1") return("Children age 0-17 population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lakids1share") return("Percentage of tract population that are children age 0-17 beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laseniors1") return("Age 65+ population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laseniors1share") return("Percentage of tract population that are age 65+ beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lawhite1") return("White population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lawhite1share") return("Percentage of tract population that are white beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lablack1") return("Black or African American population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lablack1share") return("Percentage of tract population that are Black or African American beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laasian1") return("Asian population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laasian1share") return("Percentage of tract population that are Asian beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lanhopi1") return("Native Hawaiian or Other Pacific Islander population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lanhopi1share") return("Percentage of tract population that are Native Hawaiian or Other Pacific Islander beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laaian1") return("American Indian or Alaska Native population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laaian1share") return("Percentage of tract population that are American Indian or Alaska Native beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laomultir1") return("Other/Multiple race population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laomultir1share") return("Percentage of tract population that are Other/Multiple race beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lahisp1") return("Hispanic or Latino ethnicity population count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lahisp1share") return("Percentage of tract population that are of Hispanic or Latino ethnicity beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lahunv1") return("Housing units without vehicle count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lahunv1share") return("percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lapop1") return("Population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lapop1share") return("Percentage population that reside > 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lalowi1") return("Low income population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lalowi1share") return("Percentage of low income population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lakids1") return("Children age 0-17 population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lakids1share") return("Percentage of children age 0-17 population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laseniors1") return("Age 65+ population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laseniors1share") return("Percentage of age 65+ population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lawhite1") return("White population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lawhite1share") return("Percentage White population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lablack1") return("Black or African American population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lablack1share") return("Percentage Black or African American population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laasian1") return("Asian population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laasian1share") return("Percentage Asian population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lanhopi1") return("Native Hawaiian or Other Pacific Islander population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lanhopi1share") return("Percentage Native Hawaiian or Other Pacific Islander population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laaian1") return("American Indian or Alaska Native population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laaian1share") return("Percentage American Indian or Alaska Native population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laomultir1") return("Other/Multiple race population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laomultir1share") return("Percentage Other/Multiple race population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahisp1") return("Hispanic or Latino ethnicity population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahisp1share") return("Percentage Hispanic or Latino ethnicity population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahunv1") return("Housing units in a census tract without vehicle beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lahunv1share") return("Percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lasnap1") return("Housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
   }
