@@ -26,8 +26,12 @@ library(bsicons)
 library(dplyr)
 
 library(rlang)
+library(httr)
+library(emayili)
 
 #### LOAD DATA #### 
+# read Renviron
+readRenviron(".Renviron")
 # empty shapefiles
 city.bounds <- st_read("Geo/city/cities.gpkg")
 county.bounds <- st_read("Geo/county/counties.gpkg")
@@ -233,7 +237,7 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Lack of social and emotional support" =  "Lack.of.Social.and.Emotional.Support",
                "No internet" = "No.broadband.internet",
                "No high school education" = "No.high.school.diploma",
-               "Single parent households" = "Single.parent.households",
+               "Single-parent households" = "Single.parent.households",
                "Housing cost burden" = "Housing.cost.burden",
                "Household crowding" = "Crowding",
                "Poverty" = "Poverty",
@@ -468,17 +472,17 @@ soc_md_list <- list(
   "Crowding" = "- **Household crowding**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "Housing.cost.burden" = "- **Housing cost burden**: Call 2-1-1 or text '211WAOD' to 898211 for housing resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources, including emergency housing, from the <a href='https://www.dshs.wa.gov/esa/community-services-offices/housing-resources' target='_blank' rel='noopener noreferrer'>Washington State Department of Social and Health Services</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "No.high.school.diploma" = "- **No high school education**: Call 2-1-1 or text '211WAOD' to 898211 for education resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
-  "Poverty" = "- **People living below 150% of the poverty level**: 150% of the poverty level: Call 2-1-1 or text '211WAOD' to 898211 for financial resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
-  "Single.parent.households" = "- Single parent households: Find resources for families, including childcare, from the <a href='https://dcyf.wa.gov/services/housing-basic-needs' target='_blank' rel='noopener noreferrer'>Washington State Department of Children, Youth, and Families</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Poverty" = "- **Poverty**: Call 2-1-1 or text '211WAOD' to 898211 for financial resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
+  "Single.parent.households" = "- **Single-parent households**: Find resources for families, including childcare, from the <a href='https://dcyf.wa.gov/services/housing-basic-needs' target='_blank' rel='noopener noreferrer'>Washington State Department of Children, Youth, and Families</a> and <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
   "Unemployment" = "- **Unemployment**: Call 2-1-1 or text '211WAOD' to 898211 for employment resources from the <a href='https://search.wa211.org/' target='_blank' rel='noopener noreferrer'>Washington helpline</a>. Find other available resources from <a href='https://www.washingtonconnection.org/home/exploreoptions.go' target='_blank' rel='noopener noreferrer'>Washington Connection</a>.",
-  "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)*: What is the <a href='https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html' target='_blank' rel='noopener noreferrer'>Environmental Justice Index</a>?",
+  "Environmental.Justice.Index" = "- **Environmental Justice Index (EJI)**: What is the <a href='https://www.atsdr.cdc.gov/place-health/php/eji/eji-frequently-asked-questions-faqs.html' target='_blank' rel='noopener noreferrer'>Environmental Justice Index</a>?",
   "Social.Vulnerability.Index" = "- **Social Vulnerability Index (SVI)**: What is the <a href='https://www.atsdr.cdc.gov/place-health/php/svi/svi-frequently-asked-questions-faqs.html' target='_blank' rel='noopener noreferrer'>Social Vulnerability Index</a>?",
   "Median.HH.Income" = "- **Median household income**: What does a <a href='https://usafacts.org/answers/what-is-the-income-of-a-us-household/country/united-states/' target='_blank' rel='noopener noreferrer'>median household income</a> mean?",
   "HT_Index" = "- **Housing and Transportation (H + T\\U00AE) Affordability Index**: Why is it important to consider <a href='https://cnt.org/tools/housing-and-transportation-affordability-index' target='_blank' rel='noopener noreferrer'>transportation costs with affordability</a>?",
   "Racial.Residential.Segregation" = "- **Residential segregation**: What is the <a href='https://www.khanacademy.org/test-prep/mcat/social-inequality/social-class/v/residential-segregation' target='_blank' rel='noopener noreferrer'>Dissimilarity Index</a>, which is a measure of residential segregation?",
   "Historic.Redlining.Score" = "- **Redlining**: What is <a href='https://education.nationalgeographic.org/resource/mapmaker-redlining-united-states/' target='_blank' rel='noopener noreferrer'>redlining</a>?",
   "social_capital" = "- **Social capital**: What is <a href='https://aspe.hhs.gov/sites/default/files/private/pdf/263491/What-is-social-capital.pdf' target='_blank' rel='noopener noreferrer'>social capital</a>?",
-  "Population.density" = "- **Urbanicity/rurality**: What are resources to improve health and healthcare in <a href='https://doh.wa.gov/public-health-provider-resources/rural-health' target='_blank' rel='noopener noreferrer'>rural communities</a>?"
+  "Population.density" = "- **Population density**: What are resources to improve health and healthcare in <a href='https://doh.wa.gov/public-health-provider-resources/rural-health' target='_blank' rel='noopener noreferrer'>rural communities</a>?"
 )
 
 # -------- UI ELEMENTS --------
@@ -633,7 +637,8 @@ categories <- accordion(
     input_switch("showcities", "Show city boundaries", value = FALSE),
     input_switch("showchart", "Show graph", value = FALSE),
     fileInput("upload", htmltools::span("Upload shapefile (.shp, .shx, .dbf)", tooltip(bs_icon("question-circle"), "Help", title = "Upload all components of your shapefile. .shp, .shx, and .dbf are needed to display your uploaded shapefile.")), 
-              multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg"))
+              multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg")),
+    tags$span(textInput("email", "Sign up for geoexmap updates"), actionButton("subscribe", "Subscribe"))
   ),
 )
 
@@ -875,10 +880,12 @@ ui <- page_navbar(
             )),
   nav_panel("Documentation",
             h2("Version History"),
+            h4("Active: Version 1 [8 Apr 2026]"),
             h2("Technical Documentation"),
             a("Download", target = "_blank", href = "geoexmap_technical_doc.pdf")),
   nav_panel("Contact us",
-            h3("Contact us"),
+            h2("Contact us"),
+            span(textInput("email", "Sign up for geoexmap updates"), actionButton("subscribe", "Subscribe"), textOutput('message')),
             p("Connect with us regarding any questions, suggestions, and feedback at ", a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org"), "or reach out directly to Dr. Trang VoPham (", a("trang@fredhutch.org", href = "mailto:trang@fredhutch.org", .noWS = "outside"), ").")),
   window_title = "geoexmap | Geospatial Exposome Map at Fred Hutch Cancer Center"
   
@@ -886,6 +893,54 @@ ui <- page_navbar(
 
 # -------- SERVER --------
 server <- function(input, output, session) {
+  #### EMAIL SUB ####
+  observeEvent(input$subscribe, {
+    req(input$email)
+    
+    api_key <- Sys.getenv("MAILCHIMP_API_KEY")
+    list_id <- Sys.getenv("MAILCHIMP_LIST_ID")
+    #data_center <- sub("-[a-z0-9]+$", "", api_key)  # extracts 'us1' etc.
+    
+    url <- paste0("https://us15.api.mailchimp.com/3.0/lists/", list_id, "/members/")
+    
+    body <- list(
+      email_address = input$email,
+      status = "subscribed"  # Or "pending" for double opt-in
+    )
+    
+    response <- POST(
+      url = url,
+      config = authenticate("user", api_key, type = "basic"),  # 'user' is ignored; key authenticates
+      body = body,
+      encode = "json",
+      add_headers("Content-Type" = "application/json")
+    )
+    
+    print(status_code(response))
+    
+    if (status_code(response) == 200) {
+      output$message <- renderText("Successfully subscribed!")
+      # TODO: finish email after subscribe
+      smtp <- server(
+        host = Sys.getenv("SMTP_HOST")
+        port = as.integer(Sys.getenv("SMTP_PORT"))
+        username = Sys.getenv("SMTP_USER")
+        password = Sys.getenv("STMP_PASS")
+      )
+      
+      email <- envelope() %>% 
+        from(Sys.getenv("FROM_EMAIL")) %>% 
+        to(input$email) %>% 
+        subject(HTML("geo<b>ex</b>map updates")) %>% 
+        html("Thank you for signing up to receive geo<b>ex</b>map updates. Feel free to reach out with any questions, suggestions, and feedback at <a href=mailto:geoexmap@fredhutch.org>geoexmap@fredhutch.org</a><br> Unsubscribe anytime using...")
+    } else {
+      error <- content(response)$title
+      output$message <- renderText(paste("Error:", error))
+    }
+    
+    
+})
+  
   showModal(modalDialog(
     title = HTML("Welcome to geo<b>ex</b>map"),
     HTML("This geospatial web app allows you to map and download neighborhood-level health and environmental data across Washington state."),
@@ -1658,7 +1713,7 @@ server <- function(input, output, session) {
     
     if(col == "Radon") return(HTML("Radon gas concentration (Bq/m<sup>3</sup>) in 2021"))
     
-    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lb/mi<sup>2</sup>) in 2019 "))
+    if(col == "Pesticide.Exposure") return(HTML("Agricultural pesticide use (lb/mi<sup>2</sup>) in 2019"))
     
     if(col == "Racial.Residential.Segregation") return("Racial residential segregation in 2020")
     
@@ -1680,8 +1735,8 @@ server <- function(input, output, session) {
     
     if(col == "No.broadband.internet") return("No internet in 2021 (%)")
     if(col == "No.high.school.diploma") return("No high school diploma in 2021 (%)")
-    if(col == "Single.parent.households") return("Single parent households in 2021 (%)")
-    if(col == "Crowding") return("Crowding among households in 2021 (%)")
+    if(col == "Single.parent.households") return("Single-parent households in 2021 (%)")
+    if(col == "Crowding") return("Household crowding in 2021 (%)")
     if(col == "Poverty") return("Poverty in 2021 (%)")
     if(col == "Housing.cost.burden") return("Housing cost burden in 2021 (%)")
     
@@ -1697,7 +1752,7 @@ server <- function(input, output, session) {
     if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020"))
     if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb) in 2020"))
     
-    if(col == "Population.density") return("Population density in 2023 (population per square mile)")
+    if(col == "Population.density") return("Population density in 2023 (population per mi<sub2</sup>)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value in 2024 ($)")
     if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value in 2024 ($)")
     if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value in 2024 ($)")
@@ -1723,7 +1778,7 @@ server <- function(input, output, session) {
     if(col == "PFAS_dw") return("PFAS in drinking water in 2021")
     if(col == "Median.HH.Income") return("Median household income in 2023 ($)")
     if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index in 2022")
-    if(col == "Historic.Redlining.Score") return("Historic redlining score")
+    if(col == "Historic.Redlining.Score") return("Historic redlining")
     
     if(col == "pct_Open_Water") return("Open water in 2024 (%)")
     if(col == "pct_Developed_Open") return("Developed open land in 2024 (%)")
@@ -1748,33 +1803,32 @@ server <- function(input, output, session) {
     if(col == "total_p2") return("Part II offenses in 2023 (total)")
     if(col == "p2_rate") return("Part II offenses in 2023 (per 1,000 population)")
     
-    # TODO: add legend titles for food environment columns
-    if(col == "lapop1") return("Low access population at 1 mile in 2019 (total)")
-    if(col == "lapop1share") return("Low access population at 1 mile in 2019 (%)")
-    if(col == "lalowi1") return("Low access, low income population at 1 mile in 2019 (total)")
-    if(col == "lalowi1share") return("Low access, low income population at 1 mile in 2019 (%)")
-    if(col == "lakids1") return("Low access, age 0-17 at 1 mile in 2019 (total)")
-    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile in 2019 (%)")
-    if(col == "laseniors1") return("Low access, age 65+ at 1 mile in 2019 (total)")
-    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile in 2019 (%)")
-    if(col == "lawhite1") return("Low access, White population at 1 mile in 2019 (total)")
-    if(col == "lawhite1share") return("Low access, White population at 1 mile in 2019 (%)")
-    if(col == "lablack1") return("Low access, Black population at 1 mile in 2019 (total)")
-    if(col == "lablack1share") return("Low access, Black population at 1 mile in 2019 (%)")
-    if(col == "laasian1") return("Low access, Asian population at 1 mile in 2019 (total)")
-    if(col == "laasian1share") return("Low access, Asian population at 1 mile in 2019 (%)")
-    if(col == "lanhopi1") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (total)")
-    if(col == "lanhopi1share") return("Low access, Native Hawaiian or Other Pacific Islander population at 1 mile in 2019 (%)")
-    if(col == "laaian1") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (total)")
-    if(col == "laaian1share") return("Low access, Alaska Native or American Indian population at 1 mile in 2019 (%)")
-    if(col == "laomultir1") return("Low access, Other/multiple race population at 1 mile in 2019 (total)")
-    if(col == "laomultir1share") return("Low access, Other/multiple population at 1 mile in 2019 (%)")
-    if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile in 2019 (total)")
-    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile in 2019 (%)")
-    if(col == "lahunv1") return("Low access, households without vehicle at 1 mile in 2019 (total)")
-    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile in 2019 (%)")
-    if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile in 2019 (total)")
-    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile in 2019 (%)")
+    if(col == "lapop1") return("Population >1 mile from supermarket in 2019 (total)")
+    if(col == "lapop1share") return("Population >1 mile from supermarket in 2019 (%)")
+    if(col == "lalowi1") return("Low-income population >1 mile from supermarket in 2019 (total)")
+    if(col == "lalowi1share") return("Low-income population >1 mile from supermarket in 2019 (%)")
+    if(col == "lakids1") return("Children age 0-17 population >1 mile from supermarket in 2019 (total)")
+    if(col == "lakids1share") return("Children age 0-17 population >1 mile from supermarket in 2019 (%)")
+    if(col == "laseniors1") return("Age 65+ population >1 mile from supermarket in 2019 (total)")
+    if(col == "laseniors1share") return("Age 65+ population >1 mile from supermarket in 2019 (%)")
+    if(col == "lawhite1") return("White population >1 mile from supermarket in 2019 (total)")
+    if(col == "lawhite1share") return("White population >1 mile from supermarket in 2019 (%)")
+    if(col == "lablack1") return("Black population >1 mile from supermarket in 2019 (total)")
+    if(col == "lablack1share") return("Black population >1 mile from supermarket in 2019 (%)")
+    if(col == "laasian1") return("Asian population >1 mile from supermarket in 2019 (total)")
+    if(col == "laasian1share") return("Asian population >1 mile from supermarket in 2019 (%)")
+    if(col == "lanhopi1") return("Native Hawaiian or Other Pacific Islander population >1 mile from supermarket in 2019 (total)")
+    if(col == "lanhopi1share") return("Native Hawaiian or Other Pacific Islander population >1 mile from supermarket in 2019 (%)")
+    if(col == "laaian1") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (total)")
+    if(col == "laaian1share") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (%)")
+    if(col == "laomultir1") return("Other/multiple race population >1 mile from supermarket in 2019 (total)")
+    if(col == "laomultir1share") return("Other/multiple population >1 mile from supermarket in 2019 (%)")
+    if(col == "lahisp1") return("Hispanic or Latino population >1 mile from supermarket in 2019 (total)")
+    if(col == "lahisp1share") return("Hispanic or Latino population >1 mile from supermarket in 2019 (%)")
+    if(col == "lahunv1") return("Households without vehicle >1 mile in 2019 (total)")
+    if(col == "lahunv1share") return("Households without vehicle >1 mile from supermarket in 2019 (%)")
+    if(col == "lasnap1") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (total)")
+    if(col == "lasnap1share") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (%)")
   }
   
   layer.titles <- function(col) {
@@ -1919,8 +1973,8 @@ server <- function(input, output, session) {
     
     if(col == "No.broadband.internet") return("No internet (%)")
     if(col == "No.high.school.diploma") return("No high school diploma (%)")
-    if(col == "Single.parent.households") return("Single parent households (%)")
-    if(col == "Crowding") return("Crowding among housing units (%)")
+    if(col == "Single.parent.households") return("Single-parent households (%)")
+    if(col == "Crowding") return("Household crowding (%)")
     if(col == "Poverty") return("Poverty (%)")
     if(col == "Housing.cost.burden") return("Housing cost burden (%)")
     
@@ -1936,7 +1990,7 @@ server <- function(input, output, session) {
     if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm)"))
     if(col == "Ozone") return(HTML("Ozone (O<sub>3</sub>) (ppb)"))
     
-    if(col == "Population.density") return("Population density (persons per square mile)")
+    if(col == "Population.density") return("Population density (population per mi<sup2</sup>)")
     if(col == "Avalanche.Risk.Score") return("Avalanche risk value ($)")
     if(col == "Coastal.Flooding.Risk.Score") return("Coastal flooding risk value ($)")
     if(col == "Cold.Wave.Risk.Score") return("Cold wave risk value ($)")
@@ -1987,32 +2041,32 @@ server <- function(input, output, session) {
     if(col == "total_p2") return("Part II offenses (total)")
     if(col == "p2_rate") return("Part II offenses (per 1,000 population)")
     
-    if(col == "lapop1") return("Low access population at 1 mile (total)")
-    if(col == "lapop1share") return("Low access population at 1 mile (%)")
-    if(col == "lalowi1") return("Low access, low income population at 1 mile (total)")
-    if(col == "lalowi1share") return("Low access, low income population at 1 mile (%)")
-    if(col == "lakids1") return("Low access, age 0-17 at 1 mile (total)")
-    if(col == "lakids1share") return("Low access, age 0-17 at 1 mile (%)")
-    if(col == "laseniors1") return("Low access, age 65+ at 1 mile (total)")
-    if(col == "laseniors1share") return("Low access, age 65+  at 1 mile (%)")
-    if(col == "lawhite1") return("Low access, White population at 1 mile (total)")
-    if(col == "lawhite1share") return("Low access, White population at 1 mile (%)")
-    if(col == "lablack1") return("Low access, Black population at 1 mile (total)")
-    if(col == "lablack1share") return("Low access, Black population at 1 mile (%)")
-    if(col == "laasian1") return("Low access, Asian population at 1 mile (total)")
-    if(col == "laasian1share") return("Low access, Asian population at 1 mile (%)")
-    if(col == "lanhopi1") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (total)")
-    if(col == "lanhopi1share") return("Low access, Native Hawaiian and Pacific Islander population at 1 mile (%)")
-    if(col == "laaian1") return("Low access, American Indian or Alaska Native population at 1 mile (total)")
-    if(col == "laaian1share") return("Low access, American Indian or Alaska Native population at 1 mile (%)")
-    if(col == "laomultir1") return("Low access, other/multiple race population at 1 mile (total)")
-    if(col == "laomultir1share") return("Low access, other/multiple population at 1 mile (%)")
-    if(col == "lahisp1") return("Low access, Hispanic or Latino population at 1 mile (total)")
-    if(col == "lahisp1share") return("Low access, Hispanic or Latino population at 1 mile (%)")
-    if(col == "lahunv1") return("Low access, households without vehicle at 1 mile (total)")
-    if(col == "lahunv1share") return("Low access households without vehicle at 1 mile (%)")
-    if(col == "lasnap1") return("Low access households receiving SNAP benefits at 1 mile (total)")
-    if(col == "lasnap1share") return("Low access households receiving SNAP benefits at 1 mile (%)")
+    if(col == "lapop1") return("Population >1 mile from supermarket in 2019 (total)")
+    if(col == "lapop1share") return("Population >1 mile from supermarket in 2019 (%)")
+    if(col == "lalowi1") return("Low-income population >1 mile from supermarket in 2019 (total)")
+    if(col == "lalowi1share") return("Low-income population >1 mile from supermarket in 2019 (%)")
+    if(col == "lakids1") return("Children age 0-17 population >1 mile from supermarket in 2019 (total)")
+    if(col == "lakids1share") return("Children age 0-17 population >1 mile from supermarket in 2019 (%)")
+    if(col == "laseniors1") return("Age 65+ population >1 mile from supermarket in 2019 (total)")
+    if(col == "laseniors1share") return("Age 65+ population >1 mile from supermarket in 2019 (%)")
+    if(col == "lawhite1") return("White population >1 mile from supermarket in 2019 (total)")
+    if(col == "lawhite1share") return("White population >1 mile from supermarket in 2019 (%)")
+    if(col == "lablack1") return("Black population >1 mile from supermarket in 2019 (total)")
+    if(col == "lablack1share") return("Black population >1 mile from supermarket in 2019 (%)")
+    if(col == "laasian1") return("Asian population >1 mile from supermarket in 2019 (total)")
+    if(col == "laasian1share") return("Asian population >1 mile from supermarket in 2019 (%)")
+    if(col == "lanhopi1") return("Native Hawaiian or Other Pacific Islander population >1 mile from supermarket in 2019 (total)")
+    if(col == "lanhopi1share") return("Native Hawaiian or Other Pacific Islander population >1 mile from supermarket in 2019 (%)")
+    if(col == "laaian1") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (total)")
+    if(col == "laaian1share") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (%)")
+    if(col == "laomultir1") return("Other/multiple race population >1 mile from supermarket in 2019 (total)")
+    if(col == "laomultir1share") return("Other/multiple population >1 mile from supermarket in 2019 (%)")
+    if(col == "lahisp1") return("Hispanic or Latino population >1 mile from supermarket in 2019 (total)")
+    if(col == "lahisp1share") return("Hispanic or Latino population >1 mile from supermarket in 2019 (%)")
+    if(col == "lahunv1") return("Households without vehicle >1 mile in 2019 (total)")
+    if(col == "lahunv1share") return("Households without vehicle >1 mile from supermarket in 2019 (%)")
+    if(col == "lasnap1") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (total)")
+    if(col == "lasnap1share") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (%)")
   }
   
   var.info <- function(col) {
@@ -2155,12 +2209,12 @@ server <- function(input, output, session) {
     
     if(col == "Walkability") return("Walkability of a census tract using Environmental Protection Agency (EPA) data (2021 release)")
     
-    if(col == "No.broadband.internet") return("Estimate of the percentage of households without any type of broadband internet subscription from CDC PLACES (2023 release)")
-    if(col == "No.high.school.diploma") return("Estimate of the percentage of adults aged 25+ who have not completed 4 years of high school education or equivalent from CDC PLACES (2023 release)")
-    if(col == "Single.parent.households") return("Estimate of the percentage of households with a female or male householder with no spouse/partner present with children of the householder under 18 years from CDC PLACES (2023 release)")
-    if(col == "Crowding") return("Estimate of the percentage of occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room from CDC PLACES (2023 release)")
+    if(col == "No.broadband.internet") return("Estimate of the percentage of households in a census tract without any type of broadband internet subscription from CDC PLACES (2023 release)")
+    if(col == "No.high.school.diploma") return("Estimate of the percentage of adults in a census tract aged 25+ who have not completed 4 years of high school education or equivalent from CDC PLACES (2023 release)")
+    if(col == "Single.parent.households") return("Estimate of the percentage of households in a census tract with a female or male householder with no spouse/partner present with children of the householder under 18 years from CDC PLACES (2023 release)")
+    if(col == "Crowding") return("Estimate of the percentage of occupied housing units in a census tract with 1.01 to 1.50 and 1.51 or more occupants per room from CDC PLACES (2023 release)")
     if(col == "Poverty") return("Estimate of the percentage of individuals in a census tract living below 150% of the poverty threshold from CDC PLACES (2023 release)")
-    if(col == "Housing.cost.burden") return("Estimate of the percentage of households with annual income less than $75,000 that spend 30% or more of their household income on housing from CDC PLACES (2023 release)")
+    if(col == "Housing.cost.burden") return("Estimate of the percentage of households in a census tract with annual income less than $75,000 that spend 30% or more of their household income on housing from CDC PLACES (2023 release)")
     
     if(col == "Dew.point") return("Average annual mean dew point temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
     if(col == "Maximum.temperature") return("Average annual maximum temperature in a census tract from 1991-2020, Copyright\U00A9 2021 PRISM Climate Group at Oregon State University, https://prism.oregonstate.edu")
@@ -2174,7 +2228,7 @@ server <- function(input, output, session) {
     if(col == "Carbon.monoxide") return("Average concentration of carbon monoxide in a census tract from the Center for Air, Climate, & Energy Solutions (CACES) land use regression model (2025 release)")
     if(col == "Ozone") return("Average concentration of ozone in a census tract from Centers for Disease Control and Prevention (CDC) (2023 release)")
     
-    if(col == "Population.density") return("Population density in 2023 (population per square mile)")
+    if(col == "Population.density") return("Population density (population count per square mile), which is used as a measure of urbanicity/rurality, in 2023 using American Community Survey 5-year data (2019-2023)")
     if(col == "Avalanche.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to avalanches from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     if(col == "Coastal.Flooding.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to coastal flooding from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     if(col == "Cold.Wave.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to cold waves from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
@@ -2195,12 +2249,12 @@ server <- function(input, output, session) {
     if(col == "Winter.Weather.Risk.Score") return("Expected annual loss (EAL) on average in dollars to buildings, population, and/or agriculture due to winter weather from the Federal Emergency Management Agency (FEMA) National Risk Index (2025 release)")
     
     if(col == "bluespace") return("Percentage of blue space coverage in a census tract using the global surface water dataset from the European Commission (EC) Joint Research Commission (JRC)/Google and the Copernicus Programme (2024 release)")
-    if(col == "social_capital") return("Social capital index, indicating the overall strength of social infrastructures within communities of a census tract using data from Fraser et al. Scientific Reports 2022")
+    if(col == "social_capital") return("Social capital index, indicating the overall strength of social infrastructures within communities of a census tract using data from Fraser et al. Sci Rep (2022)")
     
     if(col == "PFAS_dw") return("Whether PFAS has been found in water within a census tract using data from the Environmental Protection Agency (EPA) Unregulated Contaminant Monitoring Rule (UCMR) 5 (2025 release)")
-    if(col == "Median.HH.Income") return("Median income of households within a census tract using data from American Community Survey 5-year data (2019-2023). Values are censored for tracts with a median household income of over $250,000") # TODO: reword this
+    if(col == "Median.HH.Income") return("Median income of households within a census tract using data from American Community Survey 5-year data (2019-2023). Values are censored for tracts with a median household income of over $250,000.") # TODO: reword this
     if(col == "HT_Index") return("Housing and Transportation (H + T\U00AE) Affordability Index from the Center for Neighborhood Technology. The Center for Neighborhood Technology bears no responsibility for the analyses or interpretations of the data presented here.")
-    if(col == "Historic.Redlining.Score") return("Historic Home Owners' Loan Corporation (HOLC) score of a census tract from 1-4. 1 = A (most 'desirable' neighborhoods); 4 = D (least 'desirable' neighborhoods)")
+    if(col == "Historic.Redlining.Score") return("Historic Home Owners' Loan Corporation (HOLC) score of a census tract from 1-4. 1 = A (most 'desirable' neighborhoods); 4 = D (least 'desirable' neighborhoods) using data from Meier and Mitchell. ICPSR [distributor] (2021)")
     
     if(col == "pct_Open_Water") return("Percent area in a census tract with open water, generally with less than 25% cover of vegetation or soil from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
     if(col == "pct_Developed_Open") return("Percent area in a census tract with a mixture of some constructed materials, but mostly vegetation in the form of lawn grasses from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Impervious surfaces account for less than 20% of total cover. These areas most commonly include large-lot single-family housing units, parks, golf courses, and vegetation planted in developed settings for recreation, erosion control, or aesthetic purposes")
@@ -2219,17 +2273,17 @@ server <- function(input, output, session) {
     if(col == "pct_Mixed_Forest") return("Percent area in a census tract dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release). Neither deciduous nor evergreen species are greater than 75% of total tree cover.")
     if(col == "pct_Perennial_Ice") return("Percent area in a census tract characterized by a perennial cover of ice and/or snow, generally greater than 25% of total cover from the National Land Cover Database (NLCD) of the Multi-Resolution Land Characteristics Consortium (MRLC) (2024 release)")
     
-    if(col == "total_p1") return("Total Part I offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
-    if(col == "p1_rate") return("Total Part I offenses per 1,000 population in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony")
+    if(col == "total_p1") return("Total Part I offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony.")
+    if(col == "p1_rate") return("Total Part I offenses per 1,000 population in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as criminal homicide, rape, robbery, aggravated assault, burglary (breaking or entering), larceny-theft (except motor vehicle theft), motor vehicle theft, arson, and human trafficking (2024 release). Animal cruelty is also included due to its recent classification by FBI as a felony.")
     
     if(col == "total_p2") return("Total Part II offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
-    if(col == "p2_rate") return("Total Part II offenses in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
+    if(col == "p2_rate") return("Total Part II offenses per 1,000 population in a county from the Federal Bureau of Investigation (FBI) Uniform Crime Reporting (UCR) National Incident-Based Reporting System (NIBRS), defined as simple assault, forgery & counterfeiting, fraud, embezzlement, stolen property (buying, receiving, possessing), vandalism, weapons violations, prostitution, sex offenses (except rape, prostitution, and commercialized vice), drug abuse violations, gambling, offenses against family and children, DUI, liquor laws violations, drunkenness, disorderly conduct, vagrancy, and curfew & loitering (2024 release)")
     
     # TODO: add legend titles for food environment columns
     if(col == "lapop1") return("Population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lapop1share") return("Percentage population that reside > 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lalowi1") return("Low income population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lalowi1share") return("Percentage of low income population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lalowi1") return("Low-income population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lalowi1share") return("Percentage of Low-income population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lakids1") return("Children age 0-17 population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lakids1share") return("Percentage of children age 0-17 population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laseniors1") return("Age 65+ population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
@@ -2699,7 +2753,7 @@ server <- function(input, output, session) {
     exts <- tools::file_ext(input$upload$name)
     need_ok <- all(c("shp", "shx", "dbf") %in% exts)  # + "prj" if you require it
     
-    validate(
+    shiny::validate(
       need(need_ok,
            "Please upload all shapefile components: .shp, .shx, .dbf (and .prj if available)."))
     req(input$upload)
@@ -2745,7 +2799,7 @@ server <- function(input, output, session) {
     gtypes <- unique(st_geometry_type(shp, by_geometry = TRUE))
     allowed <- c("POLYGON", "MULTIPOLYGON")
     
-    validate(need(all(as.character(gtypes) %in% allowed),
+    shiny::validate(need(all(as.character(gtypes) %in% allowed),
                   "Uploaded shapefile must contain only polygons or multipolygons."))
     
     # Ensure WGS84 for Leaflet
@@ -2987,7 +3041,7 @@ server <- function(input, output, session) {
   #### TABLE RENDER ####
   # TODO: add year for variables displayed
   output$ct_table <- renderReactable({
-    validate(need(base::ncol(ct_table_cols()) > 3, "Please select a variable."))
+    shiny::validate(need(base::ncol(ct_table_cols()) > 3, "Please select a variable."))
     
     reactable(ct_table_cols(),
               defaultColDef = colDef(
@@ -2998,7 +3052,7 @@ server <- function(input, output, session) {
     })
   
   output$food_table <- renderReactable({
-    validate(need(base::ncol(ct_food_table_cols()) > 1, "Please select a food environment variable."))
+    shiny::validate(need(base::ncol(ct_food_table_cols()) > 1, "Please select a food environment variable."))
     
     reactable(ct_food_table_cols(),
               defaultColDef = colDef(
@@ -3009,18 +3063,18 @@ server <- function(input, output, session) {
   })
   
   output$cnty_crime_table <- renderReactable({
-    validate(need(base::ncol(crime_cols_tab()) > 1, "Please select a crime variable."))
+    shiny::validate(need(base::ncol(crime_cols_tab()) > 1, "Please select a crime variable."))
     
     reactable(cnty_crime_table_cols())
   })
   
   output$cnty_mort_table <- renderReactable({
-    validate(need(base::nrow(cnty_wscr_table_mort()) > 1, "Please select variables for cancer mortality."))
+    shiny::validate(need(base::nrow(cnty_wscr_table_mort()) > 1, "Please select variables for cancer mortality."))
     reactable(cnty_wscr_table_mort())
   })
   
   output$cnty_inc_table <- renderReactable({
-    validate(need(base::nrow(cnty_wscr_table_inc()) > 1, "Please select variables for cancer incidence."))
+    shiny::validate(need(base::nrow(cnty_wscr_table_inc()) > 1, "Please select variables for cancer incidence."))
     reactable(cnty_wscr_table_inc())
   })
   
