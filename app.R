@@ -248,7 +248,6 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
                "Median household income" = "Median.HH.Income",
-               "Housing and Transportation (H+T\U00AE) Affordability Index" = "HT_Index",
                "Historic redlining" = "Historic.Redlining.Score")
 
 crimeenv <- c("Part I offenses (count)" = "total_p1",
@@ -297,7 +296,7 @@ natural_env <- df_vars %>%
   dplyr::select(c(107:108, 131:134, 161)) 
 
 hazard_env <- df_vars %>% 
-  dplyr::select(141:158)
+  dplyr::select(140:157)
 
 air_pol <- df_vars %>% 
   dplyr::select(c(2, 135:139)) 
@@ -324,7 +323,7 @@ age <- df_vars %>%
   dplyr::select(c(69:104))
 
 social_env <- df_vars %>% 
-  dplyr::select(c(5:10, 124:130, 105:106, 111, 140, 160, 162, 163, 164)) 
+  dplyr::select(c(5:10, 124:130, 105:106, 111, 140, 160, 162, 163)) 
 
 food_env <- food %>% 
   dplyr::select(c(11:37)) 
