@@ -103,7 +103,7 @@ racev <- c("Non-Hispanic White (total)" = "White.NonHispanic", "Non-Hispanic Whi
           "Hispanic or Latino White (total)" = "White.Hispanic.or.Latino", "Hispanic or Latino White (%)" = "Percent.White.Hispanic.or.Latino",
           "Hispanic or Latino Black (total)" = "Black.Hispanic.or.Latino", "Hispanic or Latino Black (%)" = "Percent.Black.Hispanic.or.Latino",
           "Hispanic or Latino Asian (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino Asian (%)" = "Percent.Asian.Hispanic.or.Latino",
-          "Hispanic or Latino American Indian or Alaska Native (total)" = "Asian.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (%)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
+          "Hispanic or Latino American Indian or Alaska Native (total)" = "American.Indian.Alaska.Native.Hispanic.or.Latino", "Hispanic or Latino American Indian or Alaska Native (%)" = "Percent.American.Indian.Alaska.Native.Hispanic.or.Latino",
           "Hispanic or Latino Native Hawaiian or Other Pacific Islander (total)" = "Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino", "Hispanic or Latino Native Hawaiian or Other Pacific Islander (%)" = "Percent.Native.Hawaiian.Pacific.Islander.Hispanic.or.Latino",
           "Hispanic or Latino Other race (total)" = "Other.Race.Hispanic.or.Latino", "Hispanic or Latino Other race (%)" = "Percent.Other.Race.Hispanic.or.Latino",
           "Hispanic or Latino two or more races (total)" = "Two.or.More.Races.Hispanic.or.Latino", "Hispanic or Latino two or more races (%)" = "Percent.Two.or.More.Races.Hispanic.or.Latino")
@@ -1594,7 +1594,7 @@ server <- function(input, output, session) {
         # TODO: make PFAS sentence case
         return(colorFactor(
           palette = c("#780000", "#fdf0d5"), domain = domain,
-          levels = c(TRUE, FALSE)
+          levels = c("True", "False")
         ))
       }
       
@@ -3487,7 +3487,7 @@ server <- function(input, output, session) {
             function(i) {
               row_vals <- m[i, , drop = TRUE]
               paste(
-                paste0("<b>", label_names, "</b>", ": ", prettyNum(round(row_vals, 2), big.mark = ",")),
+                paste0("<b>", label_names, "</b>", ": ", prettyNum(row_vals, big.mark = ",")),
                 collapse = "<br/>"
               )
             }
