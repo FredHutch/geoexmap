@@ -159,20 +159,20 @@ prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
                 "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
                 "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75")
 
-airpol <- c("Particulate matter <2.5 microns in diameter (PM\U2082.\U0323\U2085)" = "Particulate.Matter.2.5",
+airpol <- sort(c("Particulate matter <2.5 microns in diameter (PM\U2082.\U0323\U2085)" = "Particulate.Matter.2.5",
             "Wildfire smoke PM\U2082.\U0323\U2085" = "Wildfire.smoke",
             "Nitrogen dioxide (NO\U2082)" = "Nitrogen.dioxide",
             "Sulfur dioxide (SO\U2082)" = "Sulfur.dioxide",
             "Carbon monoxide (CO)" = "Carbon.monoxide",
-            "Ozone (O\U2083)" = "Ozone")
+            "Ozone (O\U2083)" = "Ozone"))
 
-naturalenv <- c("Ultraviolet radiation index (UVI)" = "UV.Index",
+naturalenv <- sort(c("Ultraviolet radiation index (UVI)" = "UV.Index",
                 "Maximum temperature" = "Maximum.temperature",
                 "Minimum temperature" = "Minimum.temperature",
                 "Average temperature" = "Average.temperature",
                 "Radon" = "Radon",
                 "Per- and polyfluoroalkyl substances (PFAS) in drinking water" = "PFAS_dw"
-                )
+                ))
 
 hazardenv <- c("Avalanche risk" = "Avalanche.Risk.Score",
                "Coastal flooding risk" = "Coastal.Flooding.Risk.Score",
@@ -193,12 +193,12 @@ hazardenv <- c("Avalanche risk" = "Avalanche.Risk.Score",
                "Wildfire risk" = "Wildfire.Risk.Score",
                "Winter weather risk" = "Winter.Weather.Risk.Score")
 
-builtenv <- c("Walkability" = "Walkability",
+builtenv <- sort(c("Walkability" = "Walkability",
               "Pesticide use" = "Pesticide.Exposure",
               "Green space" = "Green.Space",
               "Light at night" = "Nighttime.Radiance",
               "Blue space" = "bluespace"
-              )
+              ))
 
 noiseenv <- c("Population exposed to noise LAeq \U2265 45-50 dB (total)" = "N.Noise.More.than.LAeq.45.to.50.db",
                "Population exposed to noise LAeq \U2265 45-50 dB (%)" = "Pct.Noise.More.than.LAeq.45.to.50.db",
@@ -213,7 +213,7 @@ noiseenv <- c("Population exposed to noise LAeq \U2265 45-50 dB (total)" = "N.No
                "Population exposed to noise LAeq \U2265 90 dB (total)" = "N.Noise.More.than.LAeq.90.db",
                "Population exposed to noise LAeq \U2265 90 dB (%)" = "Pct.Noise.More.than.LAeq.90.db")
 
-landuseenv <- c("Open water" = "pct_Open_Water",
+landuseenv <- sort(c("Open water" = "pct_Open_Water",
                  "Developed open land" = "pct_Developed_Open",
                  "Minimally developed land" = "pct_Developed_Low",
                  "Moderately developed land" = "pct_Developed_Medium",
@@ -228,9 +228,9 @@ landuseenv <- c("Open water" = "pct_Open_Water",
                  "Herbaceous wetlands" = "pct_Herbaceous_Wetlands",
                  "Deciduous forest" = "pct_Deciduous_Forest",
                  "Mixed forest" = "pct_Mixed_Forest",
-                 "Perennial ice" = "pct_Perennial_Ice")
+                 "Perennial ice" = "pct_Perennial_Ice"))
 
-socialenv <- c("Food insecurity" = "Food.Insecurity",
+socialenv <- sort(c("Food insecurity" = "Food.Insecurity",
                "Housing insecurity" = "Housing.Insecurity",
                "Utility services threat" = "Utility.Services.Threat",
                "Lack of reliable transportation" = "Lacking.Reliable.Transportation",
@@ -248,7 +248,7 @@ socialenv <- c("Food insecurity" = "Food.Insecurity",
                "Population density" = "Population.density",
                "Social capital" = "social_capital",
                "Median household income" = "Median.HH.Income",
-               "Historic redlining" = "Historic.Redlining.Score")
+               "Historic redlining" = "Historic.Redlining.Score"))
 
 crimeenv <- c("Part I offenses (count)" = "total_p1",
               "Part I offenses (rate)" = "p1_rate",
