@@ -919,20 +919,37 @@ server <- function(input, output, session) {
     print(status_code(response))
     
     if (status_code(response) == 200) {
-      output$message <- renderText("Successfully subscribed!")
+      #output$message <- renderText("Successfully subscribed!")
+      updateTextInput(inputId = 'email', value = "")
+      showNotification("Successfully subscribed!", type = "message")
+      
+      # sub_data <- content(response, "parsed")
+      # sub_hash <- sub_data$md5hash
+      # 
+      # unsub_url <- paste0("https://us15.api.mailchimp.com/3.0/lists/", list_id, "/members/", sub_hash, "/actions/unsubscribe-link")
+      # 
+      # unsub_response <- GET(unsub_url, config = authenticate("user", api_key, type = "basic"))
+      # 
+      # unsubscribe_link <- content(unsub_response, "parsed")$unsub_url
+      
       # TODO: finish email after subscribe
-      smtp <- server(
-        host = Sys.getenv("SMTP_HOST")
-        port = as.integer(Sys.getenv("SMTP_PORT"))
-        username = Sys.getenv("SMTP_USER")
-        password = Sys.getenv("STMP_PASS")
+      smtp <- emayili::server(
+        host = Sys.getenv("SMTP_HOST"),
+        port = as.integer(Sys.getenv("SMTP_PORT")),
+        username = Sys.getenv("SMTP_USER"),
+        password = Sys.getenv("SMTP_PASS")
       )
       
       email <- envelope() %>% 
-        from(Sys.getenv("FROM_EMAIL")) %>% 
         to(input$email) %>% 
-        subject(HTML("geo<b>ex</b>map updates")) %>% 
-        html("Thank you for signing up to receive geo<b>ex</b>map updates. Feel free to reach out with any questions, suggestions, and feedback at <a href=mailto:geoexmap@fredhutch.org>geoexmap@fredhutch.org</a><br> Unsubscribe anytime using...")
+        from(Sys.getenv("FROM_EMAIL")) %>% 
+        subject("geoexmap updates") %>% 
+        emayili::html(paste0("<p>Thank you for signing up to receive geo<b>ex</b>map updates. Feel free to reach out with any questions, suggestions, and feedback at <a href=mailto:geoexmap@fredhutch.org>geoexmap@fredhutch.org</a></p> 
+                             <p>Unsubscribe anytime by replying with 'UNSUBSCRIBE'</p>"))
+      
+      smtp(email)
+      
+      
     } else {
       error <- content(response)$title
       output$message <- renderText(paste("Error:", error))
