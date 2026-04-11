@@ -273,8 +273,8 @@ foodenv <- c("Population > 1 mile from supermarket (total)" = "lapop1",
              "Native Hawaiian or Other Pacific Islander population > 1 mile from supermarket (%)" = "lanhopi1share",
              "American Indian or Alaska Native population > 1 mile from supermarket (total)" = "laaian1",
              "American Indian or Alaska Native population > 1 mile from supermarket (%)" = "laaian1share",
-             "Other/Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
-             "Other/Multiple race population > 1 mile from supermarket (%)" = "laomultir1share",
+             "Other or Multiple race population > 1 mile from supermarket (total)" = "laomultir1",
+             "Other or Multiple race population > 1 mile from supermarket (%)" = "laomultir1share",
              "Hispanic or Latino population > 1 mile from supermarket (total)" = "lahisp1",
              "Hispanic or Latino population > 1 mile from supermarket (%)" = "lahisp1share",
              "Housing units without a vehicle > 1 mile from supermarket (total)" = "lahunv1",
@@ -509,13 +509,21 @@ categories <- accordion(
                              id = "outcome_popover")), outcomes, selectize = TRUE, multiple = TRUE),
     # options to filter by cancer site, stage at diagnosis, gender
     accordion_panel("Cancer Incidence", icon = uiOutput("inc_icon"),
-                    selectInput('incsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('incsite', htmltools::span("Cancer Site", popover(bs_icon("lightbulb"),
+                                                                                  "Select a site, stage, and sex to see cancer incidence tips.",
+                                                                                  title = "Tips",
+                                                                                  placement = "right",
+                                                                                  id = "wscr_popover_inc")), choices = c("Please choose a site" = "", unique(wscr.inc$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('incstage', "Stage at Diagnosis", choices = c("Please choose a stage" = "", unique(wscr.inc$Stage.At.Diagnosis)), selectize = TRUE, selected = ""),
                     selectInput('incsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.inc$Gender)), selectize = TRUE, selected = ""),
                     actionButton('incbutton', "Reset filters")),
     # options to filter by cancer site, gender
     accordion_panel("Cancer Mortality", icon = uiOutput("mort_icon"),
-                    selectInput('mortsite', "Cancer Site", choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
+                    selectInput('mortsite', htmltools::span("Cancer Site", popover(bs_icon("lightbulb"),
+                                                                                  "Select a site and stage to see cancer mortality tips.",
+                                                                                  title = "Tips",
+                                                                                  placement = "right",
+                                                                                  id = "wscr_popover_mort")), choices = c("Please choose a site" = "", unique(wscr.mort$Cancer.Site)), selectize = TRUE, selected = ""),
                     selectInput('mortsex', "Sex", choices = c("Please choose a sex" = "", unique(wscr.mort$Gender)), selectize = TRUE, selected = ""),
                     actionButton('mortbutton', "Reset filters"))
   ),
@@ -1211,6 +1219,22 @@ server <- function(input, output, session) {
     paste(unlist(health_out_md[input$outcomes]), collapse = "\n")
   })
   
+  wscr_md_inc <- reactive({
+    if (!inc.ready()) {
+      return("Select a site, stage, and sex to view cancer incidence tips.")
+    }
+    
+    return("- **Cancer**: What are <a href='https://www.cancer.org/cancer/risk-prevention/understanding-cancer-risk.html' target='_blank' rel='noopener noreferrer'>risk factors for cancer</a>? What are ways to <a href='https://www.cdc.gov/cancer/prevention/index.html' target='_blank' rel='noopener noreferrer'>prevent cancer</a>? What are ways to <a href='https://www.cancer.org/cancer/managing-cancer.html' target='_blank' rel='noopener noreferrer'>treat cancer</a> and <a href='https://www.cancer.org/cancer/survivorship.html' target='_blank' rel='noopener noreferrer'>live well after cancer treatment</a>? What are <a href='https://www.cookforyourlife.org/' target='_blank' rel='noopener noreferrer'>healthy recipes and nutrition resources</a> for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a <a href='https://www.fredhutch.org/en/patient-care/services/survivorship/survivorship-clinic.html' target='_blank' rel='noopener noreferrer'>Survivorship Care Plan</a>?")
+    })
+  
+  wscr_md_mort <- reactive({
+    if (!mort.ready()) {
+      return("Select a site and stage to view cancer mortality tips.")
+    }
+    
+    return("- **Cancer**: What are <a href='https://www.cancer.org/cancer/risk-prevention/understanding-cancer-risk.html' target='_blank' rel='noopener noreferrer'>risk factors for cancer</a>? What are ways to <a href='https://www.cdc.gov/cancer/prevention/index.html' target='_blank' rel='noopener noreferrer'>prevent cancer</a>? What are ways to <a href='https://www.cancer.org/cancer/managing-cancer.html' target='_blank' rel='noopener noreferrer'>treat cancer</a> and <a href='https://www.cancer.org/cancer/survivorship.html' target='_blank' rel='noopener noreferrer'>live well after cancer treatment</a>? What are <a href='https://www.cookforyourlife.org/' target='_blank' rel='noopener noreferrer'>healthy recipes and nutrition resources</a> for people affected by cancer? How can you visit the Fred Hutch Cancer Center Survivorship Clinic to get a <a href='https://www.fredhutch.org/en/patient-care/services/survivorship/survivorship-clinic.html' target='_blank' rel='noopener noreferrer'>Survivorship Care Plan</a>?")
+  })
+  
   behaviors_md <- reactive({
     if (is.null(input$behaviors) || length(input$behaviors) == 0) {
       return("Select one or more health outcomes to see tips.")
@@ -1491,6 +1515,20 @@ server <- function(input, output, session) {
     update_popover(
       "outcome_popover",
       content = markdown(outcomes_md())
+    )
+  })
+  
+  observeEvent(inc.ready(), {
+    update_popover(
+      "wscr_popover_inc",
+      content = markdown(wscr_md_inc())
+    )
+  })
+  
+  observeEvent(mort.ready(), {
+    update_popover(
+      "wscr_popover_mort",
+      content = markdown(wscr_md_mort())
     )
   })
   
@@ -1837,14 +1875,14 @@ server <- function(input, output, session) {
     if(col == "lanhopi1share") return("Native Hawaiian or Other Pacific Islander population >1 mile from supermarket in 2019 (%)")
     if(col == "laaian1") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (total)")
     if(col == "laaian1share") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (%)")
-    if(col == "laomultir1") return("Other/multiple race population >1 mile from supermarket in 2019 (total)")
-    if(col == "laomultir1share") return("Other/multiple population >1 mile from supermarket in 2019 (%)")
+    if(col == "laomultir1") return("Other or Multiple race population >1 mile from supermarket in 2019 (total)")
+    if(col == "laomultir1share") return("Other or Multiple population >1 mile from supermarket in 2019 (%)")
     if(col == "lahisp1") return("Hispanic or Latino population >1 mile from supermarket in 2019 (total)")
     if(col == "lahisp1share") return("Hispanic or Latino population >1 mile from supermarket in 2019 (%)")
-    if(col == "lahunv1") return("Households without vehicle >1 mile in 2019 (total)")
-    if(col == "lahunv1share") return("Households without vehicle >1 mile from supermarket in 2019 (%)")
-    if(col == "lasnap1") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (total)")
-    if(col == "lasnap1share") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (%)")
+    if(col == "lahunv1") return("Housing units without a vehicle >1 mile from supermarket in 2019 (total)")
+    if(col == "lahunv1share") return("Housing units without a vehicle >1 mile from supermarket in 2019 (%)")
+    if(col == "lasnap1") return("Housing units receiving SNAP benefits benefits >1 mile from supermarket in 2019 (total)")
+    if(col == "lasnap1share") return("Housing units receiving SNAP benefits benefits >1 mile from supermarket in 2019 (%)")
   }
   
   layer.titles <- function(col) {
@@ -2075,14 +2113,14 @@ server <- function(input, output, session) {
     if(col == "lanhopi1share") return("Native Hawaiian or Other Pacific Islander population >1 mile from supermarket in 2019 (%)")
     if(col == "laaian1") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (total)")
     if(col == "laaian1share") return("Alaska Native or American Indian population >1 mile from supermarket in 2019 (%)")
-    if(col == "laomultir1") return("Other/multiple race population >1 mile from supermarket in 2019 (total)")
-    if(col == "laomultir1share") return("Other/multiple population >1 mile from supermarket in 2019 (%)")
+    if(col == "laomultir1") return("Other or Multiple race population >1 mile from supermarket in 2019 (total)")
+    if(col == "laomultir1share") return("Other or Multiple population >1 mile from supermarket in 2019 (%)")
     if(col == "lahisp1") return("Hispanic or Latino population >1 mile from supermarket in 2019 (total)")
     if(col == "lahisp1share") return("Hispanic or Latino population >1 mile from supermarket in 2019 (%)")
-    if(col == "lahunv1") return("Households without vehicle >1 mile in 2019 (total)")
-    if(col == "lahunv1share") return("Households without vehicle >1 mile from supermarket in 2019 (%)")
-    if(col == "lasnap1") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (total)")
-    if(col == "lasnap1share") return("Households receiving SNAP benefits >1 mile from supermarket in 2019 (%)")
+    if(col == "lahunv1") return("Housing units without a vehicle >1 mile from supermarket in 2019 (total)")
+    if(col == "lahunv1share") return("Housing units without a vehicle >1 mile from supermarket in 2019 (%)")
+    if(col == "lasnap1") return("Housing units receiving SNAP benefits benefits >1 mile from supermarket in 2019 (total)")
+    if(col == "lasnap1share") return("Housing units receiving SNAP benefits benefits >1 mile from supermarket in 2019 (%)")
   }
   
   var.info <- function(col) {
@@ -2228,7 +2266,7 @@ server <- function(input, output, session) {
     if(col == "No.broadband.internet") return("Estimate of the percentage of households in a census tract without any type of broadband internet subscription from CDC PLACES (2023 release)")
     if(col == "No.high.school.diploma") return("Estimate of the percentage of adults in a census tract aged 25+ who have not completed 4 years of high school education or equivalent from CDC PLACES (2023 release)")
     if(col == "Single.parent.households") return("Estimate of the percentage of households in a census tract with a female or male householder with no spouse/partner present with children of the householder under 18 years from CDC PLACES (2023 release)")
-    if(col == "Crowding") return("Estimate of the percentage of occupied housing units in a census tract with 1.01 to 1.50 and 1.51 or more occupants per room from CDC PLACES (2023 release)")
+    if(col == "Crowding") return("Estimate of the percentage of occupied households in a census tract with 1.01 to 1.50 and 1.51 or more occupants per room from CDC PLACES (2023 release)")
     if(col == "Poverty") return("Estimate of the percentage of individuals in a census tract living below 150% of the poverty threshold from CDC PLACES (2023 release)")
     if(col == "Housing.cost.burden") return("Estimate of the percentage of households in a census tract with annual income less than $75,000 that spend 30% or more of their household income on housing from CDC PLACES (2023 release)")
     
@@ -2314,14 +2352,14 @@ server <- function(input, output, session) {
     if(col == "lanhopi1share") return("Percentage Native Hawaiian or Other Pacific Islander population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laaian1") return("American Indian or Alaska Native population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "laaian1share") return("Percentage American Indian or Alaska Native population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laomultir1") return("Other/Multiple race population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "laomultir1share") return("Percentage Other/Multiple race population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laomultir1") return("Other or Multiple race population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "laomultir1share") return("Percentage Other or Multiple race population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lahisp1") return("Hispanic or Latino ethnicity population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lahisp1share") return("Percentage Hispanic or Latino ethnicity population in a census tract that reside >1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lahunv1") return("Housing units in a census tract without vehicle beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lahunv1share") return("Percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lasnap1") return("Housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
-    if(col == "lasnap1share") return("Percentage of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lasnap1") return("Housing units receiving Supplemental Nutrition Assistance Program (SNAP) benefits benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    if(col == "lasnap1share") return("Percentage of tract housing units receiving Supplemental Nutrition Assistance Program (SNAP) benefits benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
   }
   
   #### CLEAR BUTTON OBSERVERS ####
