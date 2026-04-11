@@ -3228,7 +3228,8 @@ server <- function(input, output, session) {
         
         proxy <- proxy %>% 
           addMarkers(data = alc,
-                     popup = ~Licensee,
+                     popup = ~paste0("Name: ", Licensee, 
+                                     "<br>Address: ", Address, ", ", City, ", ", State, " ", Zip),
                      group = "alc_retailers",
                      icon = ~ icons(iconUrl = symbol,
                                     iconWidth = 20,
@@ -3250,7 +3251,8 @@ server <- function(input, output, session) {
       if (input$superfund) {
         proxy <- proxy %>% 
           addPolygons(data = superfund,
-                      popup = ~SITE_NAME,
+                      popup = ~paste0("Name: ", SITE_NAME,
+                                      "Address: ", STREET_ADDR_TXT, ", ", CITY_NAME, ", ", STATE_CODE, " ", ZIP_CODE),
                       group = "superfund",
                       stroke = TRUE, weight = 0.9, color = "blue",
                       fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
@@ -3263,7 +3265,8 @@ server <- function(input, output, session) {
       if (input$parks) {
         proxy <- proxy %>% 
           addPolygons(data = parks,
-                      popup = ~NAME,
+                      popup = ~paste0("Name: ", NAME, 
+                                      "<br>Type: ", FEATTYPE),
                       group = "parks",
                       stroke = TRUE, weight = 0.9, color = "green",
                       fillOpacity = 0.3, highlightOptions = highlightOptions(color = "black", weight = 3, bringToFront = TRUE)) %>% 
