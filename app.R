@@ -645,7 +645,7 @@ categories <- accordion(
     input_switch("showchart", "Show graph", value = FALSE),
     fileInput("upload", htmltools::span("Upload shapefile (.shp, .shx, .dbf)", tooltip(bs_icon("question-circle"), "Help", title = "Upload all components of your shapefile. .shp, .shx, and .dbf are needed to display your uploaded shapefile.")), 
               multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg")),
-    tags$span(textInput("email", "Sign up for geoexmap updates"), actionButton("subscribe", "Subscribe"))
+    htmltools::span(textInput("email", "Sign up for geoexmap updates"), actionButton("subscribe", "Subscribe"))
   ),
 )
 
@@ -1631,7 +1631,7 @@ server <- function(input, output, session) {
         # TODO: make PFAS sentence case
         return(colorFactor(
           palette = c("#780000", "#fdf0d5"), domain = domain,
-          levels = c("True", "False")
+          levels = c(TRUE, FALSE)
         ))
       }
       
@@ -3523,8 +3523,13 @@ server <- function(input, output, session) {
             seq(nrow(m)),
             function(i) {
               row_vals <- m[i, , drop = TRUE]
+              if (is.logical(row_vals)) {
+                val <- row_vals
+              } else {
+                val <- round(as.numeric(row_vals), 2)
+              }
               paste(
-                paste0("<b>", label_names, "</b>", ": ", prettyNum(row_vals, big.mark = ",")),
+                paste0("<b>", label_names, "</b>", ": ", prettyNum(val, big.mark = ",")),
                 collapse = "<br/>"
               )
             }
