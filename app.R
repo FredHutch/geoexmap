@@ -2411,7 +2411,8 @@ server <- function(input, output, session) {
     # clear the map
     leafletProxy("geoexmap") %>%
       clearControls() %>%
-      clearShapes() 
+      clearShapes() %>% 
+      removeLayersControl()
   })
   
   observeEvent(input$clear2020, {
@@ -2610,8 +2611,7 @@ server <- function(input, output, session) {
   }) %>% 
     bindEvent(total_cols())
   
-  ## main map (census tract) columns
-  
+  ## main map (census tract) column
   map_cols <- reactive({
     df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env, noise_env, landuse_env, hazard_env)
     
