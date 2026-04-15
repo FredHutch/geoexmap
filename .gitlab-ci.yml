@@ -21,6 +21,7 @@ stages:
 build:
   stage: build
   script:
+    - echo $RENVIRON_BASE64_ENCODED | base64 -d > .Renviron
     - docker build -t sc-registry.fredhutch.org/geoexmap:test .
     - docker push sc-registry.fredhutch.org/geoexmap:test
 
