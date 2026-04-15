@@ -942,9 +942,7 @@ server <- function(input, output, session) {
       # TODO: finish email after subscribe
       smtp <- emayili::server(
         host = Sys.getenv("SMTP_HOST"),
-        port = as.integer(Sys.getenv("SMTP_PORT")),
-        username = Sys.getenv("SMTP_USER"),
-        password = Sys.getenv("SMTP_PASS")
+        port = as.integer(Sys.getenv("SMTP_PORT"))
       )
       
       email <- envelope() %>% 
