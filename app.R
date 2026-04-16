@@ -645,7 +645,7 @@ categories <- accordion(
     input_switch("showchart", "Show graph", value = FALSE),
     fileInput("upload", htmltools::span("Upload shapefile (.shp, .shx, .dbf)", tooltip(bs_icon("question-circle"), "Help", title = "Upload all components of your shapefile. .shp, .shx, and .dbf are needed to display your uploaded shapefile.")), 
               multiple = TRUE, accept = c(".shp", ".dbf", ".sbn", ".sbx", ".shx", ".prj", ".cpg")),
-    htmltools::span(textInput("email", "Sign up for geoexmap updates"), actionButton("subscribe", "Subscribe"))
+    htmltools::span(textInput("email", HTML("Sign up for geo<b>ex</b>map updates")), actionButton("subscribe", "Subscribe"))
   ),
 )
 
@@ -894,7 +894,7 @@ ui <- page_navbar(
             a("Download", target = "_blank", href = "geoexmap_technical_doc_V1-041026.pdf")),
   nav_panel("Contact us",
             h2("Contact us"),
-            span(textInput("email", "Sign up for geoexmap updates"), actionButton("subscribe", "Subscribe"), textOutput('message')),
+            span(textInput("email", HTML("Sign up for geo<b>ex</b>map updates")), actionButton("subscribe", "Subscribe"), textOutput('message')),
             p("Connect with us regarding any questions, suggestions, and feedback at ", a("geoexmap@fredhutch.org", href = "mailto:geoexmap@fredhutch.org"), "or reach out directly to Dr. Trang VoPham (", a("trang@fredhutch.org", href = "mailto:trang@fredhutch.org", .noWS = "outside"), ").")),
   window_title = "geoexmap | Geospatial Exposome Map at Fred Hutch Cancer Center"
   
@@ -1886,6 +1886,8 @@ server <- function(input, output, session) {
   }
   
   layer.titles <- function(col) {
+    if(col == "GEOID") return("Census tract code")
+    
     if(col == "Particulate.Matter.2.5") return(HTML(paste0("PM<sub>2.5</sub> ", "(\U03BC", "g/m<sup>3</sup>)")))
     if(col == "Green.Space") return("NDVI")
     if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr)"))
