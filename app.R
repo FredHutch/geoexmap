@@ -2637,14 +2637,14 @@ server <- function(input, output, session) {
   
   # food env
   food_env_cols <- reactive({
-    cbind(food_env) %>% 
-      dplyr::select(!!!input$foodenv)
-  })
+    food %>% 
+      dplyr::select(c("GEOID", !!!input$foodenv))
+  }) 
   
   food_env_cols_tab <- reactive({
     df <- food
     
-    df[, c("GEOID", input$foodenv_tab)]
+    df[, c(input$foodenv_tab)]
   })
   
   # county crime
@@ -2988,18 +2988,7 @@ server <- function(input, output, session) {
     active_variables = character(0)
   )
   
-  
-  
   #### DOWNLOAD HANDLERS ####
-  # TODO: add map download button
-  # output$download <- downloadHandler(
-  #   filename = function() {paste0(Sys.Date(), "geoexmap_download.gpkg")},
-  #   content = function(file) {
-  #     st_write(map_cols(), file)
-  #   }
-  # )
-  
-  # TODO: csv download instead of dbf
   output$downloadcttab <- downloadHandler(
     filename = function() {paste0(Sys.Date(), "_geoexmap_2020_tract_download.csv")},
     content = function(file) {
@@ -3085,7 +3074,6 @@ server <- function(input, output, session) {
   
   
   #### INITIAL MAP RENDER ####
-  
   output$geoexmap <- renderLeaflet({
     map <- leaflet(options = leafletOptions(zoomSnap = 0.1, zoomDelta = 0.5)) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
@@ -3526,7 +3514,7 @@ server <- function(input, output, session) {
           m <- map_cols() %>%
             sf::st_drop_geometry()
           
-          label_cols <- colnames(m)
+          label_cols <- c(colnames(m))
           label_names <- sapply(label_cols, layer.titles, USE.NAMES = FALSE)
           
           # construct label
@@ -3535,13 +3523,17 @@ server <- function(input, output, session) {
             seq(nrow(m)),
             function(i) {
               row_vals <- m[i, , drop = TRUE]
-              if (is.logical(row_vals)) {
-                val <- row_vals
-              } else {
-                val <- round(as.numeric(row_vals), 2)
-              }
+              val_list <- sapply(names(row_vals), function(col) {
+                v <- row_vals[[col]]
+                if (is.numeric(v)) {
+                  prettyNum(round(v, 2), big.mark = ",")
+                } else {
+                  v
+                }
+              })
+              
               paste(
-                paste0("<b>", label_names, "</b>", ": ", prettyNum(val, big.mark = ",")),
+                paste0("<b>", label_names, "</b>", ": ", val_list),
                 collapse = "<br/>"
               )
             }
@@ -3659,8 +3651,13 @@ server <- function(input, output, session) {
           seq(nrow(m)),
           function(i) {
             row_vals <- m[i, , drop = TRUE]
+            if (is.numeric(row_vals)) {
+              val <- prettyNum(round(row_vals, 2), big.mark = ",")
+            } else {
+              val <- row_vals
+            }
             paste(
-              paste0("<b>", label_names, "</b>", ": ", prettyNum(round(row_vals, 2), big.mark = ",")),
+              paste0("<b>", label_names, "</b>", ": ", val, big.mark = ","),
               collapse = "<br/>"
             )
           }
