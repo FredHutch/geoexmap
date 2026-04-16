@@ -972,17 +972,17 @@ server <- function(input, output, session) {
   #### APP TUTORIAL ####
   steps <- reactive({
     data.frame(
-      element = c("#geoexmap", "#geoexmap", "#main_acc", "#help_icon", "#access-panel", "#acc_options"),
+      element = c("#geoexmap", "#geoexmap", "#geoexmap", "#main_acc", "#help_icon", "#access-panel", "#acc_options"),
       # TODO: add neighborhood search
       # TODO: add point locations
       intro = c("This is the main map. It displays up to three layers of neighborhood- and county-level data at a time.",
                 "Hover over the <i class='bi bi-info-circle-fill'></i> icon in the legend to see details for each data layer such as data sources.",
-                #"Click on the *magnifying glass* icon to search for an address.",
+                "Click on the *magnifying glass* icon to search for an address.",
                 "Use these categories to choose which variables or features appear on the map.",
                 "Click on this icon to learn about health and prevention tips related to the variables that you selected.",
                 "For variables that are point locations (rather than census tracts or counties), you can use the toggle buttons to add as many layers as you would like.",
                 "In Options, you can choose to show different boundaries, show graphs of the selected variables, and upload a shapefile."),
-      position = c("right", "right", "right", "right", "right", "right"),
+      position = c("right", "right", "right", "right", "right", "right", "right"),
       stringsAsFactors = FALSE)
   })
   
@@ -2410,7 +2410,8 @@ server <- function(input, output, session) {
     leafletProxy("geoexmap") %>%
       clearControls() %>%
       clearShapes() %>% 
-      removeLayersControl()
+      removeLayersControl() %>% 
+      clearSearchOSM()
   })
   
   observeEvent(input$clear2020, {
@@ -3489,8 +3490,7 @@ server <- function(input, output, session) {
         # TODO: reorder microplastics legend (Very Low to High)
         micro_data <- micro.dat()
         micro_data_conc <- factor(micro_data$Concentration.class.text,
-                              levels = c("Very Low", "Low", "Medium", "High"),
-                              ordered = TRUE)
+                              levels = c("Very Low", "Low", "Medium", "High"))
         pal <- colorFactor("OrRd", domain = levels(micro_data_conc), ordered = TRUE)
         proxy <- proxy %>% 
           addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text), group = "microplastics",
