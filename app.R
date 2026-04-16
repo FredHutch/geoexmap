@@ -2614,9 +2614,13 @@ server <- function(input, output, session) {
   
   ## main map (census tract) column
   map_cols <- reactive({
-    df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env, noise_env, landuse_env, hazard_env)
     
-    df[, c(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv, input$noise, input$land, input$hazards), drop = FALSE]
+    df <- data
+    #df <- cbind(health_outcomes, sociodemo, age, sex, race, social_env, health_prevention, air_pol, health_behaviors, natural_env, built_env, noise_env, landuse_env, hazard_env)
+    
+    selected <- c("GEOID", input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$airpol, input$naturalenv, input$builtenv, input$noise, input$land, input$hazards)
+    
+    data[, selected, drop = FALSE]
   }) %>% 
     bindCache(input$outcomes, input$sociodemo, input$age, input$sex, input$race, input$socialenv, input$prevention, input$behaviors, input$naturalenv, input$airpol, input$builtenv, input$noise, input$land, input$hazards) # reduce work by server
   
@@ -2638,7 +2642,7 @@ server <- function(input, output, session) {
   food_env_cols_tab <- reactive({
     df <- food
     
-    df[, c(input$foodenv_tab)]
+    df[, c("GEOID", input$foodenv_tab)]
   })
   
   # county crime
@@ -3540,7 +3544,7 @@ server <- function(input, output, session) {
           ) %>% 
             lapply(htmltools::HTML)
           
-          if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+          if (ncol(map_cols()) > 1 && c_name != "geometry" && c_name != "geom" && c_name != "GEOID") {
             k <- isolate(layer_counter()) + 1
             layer_counter(k) # set the new layer count
             print(paste("LAYER COUNTER", layer_counter()))
@@ -3659,7 +3663,7 @@ server <- function(input, output, session) {
         ) %>% 
           lapply(htmltools::HTML)
         
-        if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom") {
+        if (ncol(food_env_cols()) > 1 && c_name != "geometry" && c_name != "geom" && c_name != "GEOID") {
           k <- isolate(layer_counter()) + 1
           layer_counter(k) # set the new layer count
           print(paste("LAYER COUNTER", layer_counter()))
