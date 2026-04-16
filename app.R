@@ -3048,7 +3048,8 @@ server <- function(input, output, session) {
   #### PLOTLY RENDER ####
   output$chart <- renderPlotly({
     plotly.dat <- map_cols() %>%
-      st_drop_geometry()
+      st_drop_geometry() %>% 
+      select(-c("GEOID"))
 
     if (ncol(plotly.dat) == 1) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1]) %>% 
@@ -3056,7 +3057,7 @@ server <- function(input, output, session) {
           plot_bgcolor = '#e5ecf6',
           xaxis = list(title = layer.titles(names(plotly.dat)[1])),
           yaxis = list(title = "Frequency")) %>% 
-        config()
+        plotly::config()
     } else if (ncol(plotly.dat) == 2) {
       plot_ly(data = plotly.dat, type = "scatter", x = plotly.dat[,1], y = plotly.dat[,2],
               text = ~paste0("<b>", layer.titles(names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
@@ -3065,7 +3066,7 @@ server <- function(input, output, session) {
           plot_bgcolor = '#e5ecf6',
           xaxis = list(title = layer.titles(names(plotly.dat)[1])),
           yaxis = list(title = layer.titles(names(plotly.dat)[2]))) %>% 
-        config(scrollZoom = TRUE)
+        plotly::config(scrollZoom = TRUE)
     } else if (ncol(plotly.dat) == 3) {
       plot_ly(data = plotly.dat, x = plotly.dat[,1], y = plotly.dat[,2], z = plotly.dat[,3],
               text = ~paste0("<b>", layer.titles(names(plotly.dat)[1]), ": ", round(plotly.dat[,1], digits = 2),
@@ -3074,7 +3075,7 @@ server <- function(input, output, session) {
         layout(scene = list(xaxis = list(title = layer.titles(names(plotly.dat)[1])),
                             yaxis = list(title = layer.titles(names(plotly.dat)[2])),
                             zaxis = list(title = layer.titles(names(plotly.dat)[3])))) %>% 
-        config()
+        plotly::config()
     } else {
       #TODO: add to render UI to choose at least 1 variable
     }
