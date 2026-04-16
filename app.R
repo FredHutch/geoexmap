@@ -3532,10 +3532,16 @@ server <- function(input, output, session) {
                 }
               })
               
-              paste(
-                paste0("<b>", label_names, "</b>", ": ", val_list),
-                collapse = "<br/>"
-              )
+              lines <- mapply(function(name, val, col) {
+                line <- paste0(name, ": ", val)
+                if (col == "GEOID") {
+                  paste0("<b>", line, "</b>")
+                } else {
+                  line
+                }
+              }, label_names, val_list, names(row_vals), USE.NAMES = FALSE) 
+              
+              paste(lines, collapse = "<br>")
             }
           ) %>% 
             lapply(htmltools::HTML)
