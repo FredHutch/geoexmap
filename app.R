@@ -2500,8 +2500,8 @@ server <- function(input, output, session) {
   # keep track of total layers
   total_cols <- reactive({
     tot <- 0
-    n_map <- if (is.null(map_cols())) 0 else max(ncol(map_cols()) - 1, 0)
-    n_food <- if (is.null(food_env_cols())) 0 else max(ncol(food_env_cols()) - 1, 0)
+    n_map <- if (is.null(map_cols())) 0 else max(ncol(map_cols()) - 2, 0)
+    n_food <- if (is.null(food_env_cols())) 0 else max(ncol(food_env_cols()) - 2, 0)
     n_crime <- if (is.null(crime_cols())) 0 else max(ncol(crime_cols()) - 1, 0)
     
     if (mort.ready()) {
@@ -2555,7 +2555,7 @@ server <- function(input, output, session) {
     tot <- total_cols()
     ptot <- prev_total()
     
-    if (ptot <= 3 && tot > 3) {
+    if (ptot == 3 && tot > 3) {
       print("entered if prev <= 3 && tot > 3\n")
       exceed <- last_changed()
       
@@ -2922,7 +2922,8 @@ server <- function(input, output, session) {
     
     leafletProxy("geoexmap") %>% 
       clearGroup("cancerincidence") %>% 
-      removeControl("cancerincidence")
+      removeControl("cancerincidence") %>% 
+      removeLayersControl()
   })
   
   filtered.mort <- reactive({
