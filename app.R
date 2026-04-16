@@ -780,8 +780,10 @@ ui <- page_navbar(
     }
     
   ")),
-    tags$link(rel = "stylesheet", 
+    tags$link(rel = "stylesheet", # add bootstrap icon stylesheet
               href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
+    tags$link(rel = "stylesheet", # add fontawesome stylesheet
+              href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"),
     tags$script(
     HTML("
     document.addEventListener('shown.bs.modal', function(){}); // no-op to ensure BS is loaded
@@ -977,7 +979,7 @@ server <- function(input, output, session) {
       # TODO: add point locations
       intro = c("This is the main map. It displays up to three layers of neighborhood- and county-level data at a time.",
                 "Hover over the <i class='bi bi-info-circle-fill'></i> icon in the legend to see details for each data layer such as data sources.",
-                "Click on the *magnifying glass* icon to search for an address.",
+                "Click on the <i class='fa-solid fa-magnifying-glass'></i> icon to search for an address.",
                 "Use these categories to choose which variables or features appear on the map.",
                 "Click on this icon to learn about health and prevention tips related to the variables that you selected.",
                 "For variables that are point locations (rather than census tracts or counties), you can use the toggle buttons to add as many layers as you would like.",
