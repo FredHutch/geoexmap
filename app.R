@@ -889,7 +889,12 @@ ui <- page_navbar(
             )),
   nav_panel("Documentation",
             h2("Version History"),
-            h4("Active: Version 1 [8 Apr 2026]"),
+            h4("Active: Version 1.0 [10 Apr 2026]"),
+            h5("Release Notes"),
+            accordion(open = FALSE, accordion_panel("April 2026",
+                                      tags$b(tags$p("Version 1.0 Changes")),
+                                      tags$li("Added census tract codes to labels when hovering over a census tract"),
+                                      tags$li("Fixed subscribe button for geo<b>ex</b>map mailing list"))),
             h2("Technical Documentation"),
             a("Download", target = "_blank", href = "geoexmap_technical_doc_V1-041026.pdf")),
   nav_panel("Contact us",
@@ -1883,6 +1888,8 @@ server <- function(input, output, session) {
     if(col == "lahunv1share") return("Housing units without a vehicle >1 mile from supermarket in 2019 (%)")
     if(col == "lasnap1") return("Housing units receiving SNAP benefits benefits >1 mile from supermarket in 2019 (total)")
     if(col == "lasnap1share") return("Housing units receiving SNAP benefits benefits >1 mile from supermarket in 2019 (%)")
+    
+    if(col == "Concentration.class.text") return("Microplastics concentration")
   }
   
   layer.titles <- function(col) {
@@ -2362,6 +2369,8 @@ server <- function(input, output, session) {
     if(col == "lahunv1share") return("Percentage of tract housing units that are without vehicle and beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lasnap1") return("Housing units receiving Supplemental Nutrition Assistance Program (SNAP) benefits benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
     if(col == "lasnap1share") return("Percentage of tract housing units receiving Supplemental Nutrition Assistance Program (SNAP) benefits benefits count beyond 1 mile from supermarket from the US Department of Agriculture (USDA) Food Access Research Atlas (2021 release)")
+    
+    if(col == "Concentration.class.text") return("Concentration of microplastics from the National Oceanic and Atmospheric Administration (NOAA) Marine Microplastics Database (downloaded July 13, 2025). Ocean microplastics are typically estimated using a net or grab sample, while Beach/Nurdle patrol microplastics are estimated with hand picking (e.g., pieces counted in 10 minutes).")
   }
   
   #### CLEAR BUTTON OBSERVERS ####
@@ -3484,20 +3493,37 @@ server <- function(input, output, session) {
       }
       
       if (input$microplastics) {
-        # duplicate to avoid error with retrieving cols from reactive dataset
+        # duplicate to avoid error with retrieving cols from reactive datase
         # TODO: reorder microplastics legend (Very Low to High)
         micro_data <- micro.dat()
         micro_data_conc <- factor(micro_data$Concentration.class.text,
-                              levels = c("Very Low", "Low", "Medium", "High"))
+                              levels = c("Very Low", "Low", "Medium", "High"), ordered = TRUE)
         pal <- colorFactor("OrRd", domain = levels(micro_data_conc), ordered = TRUE)
         proxy <- proxy %>% 
           addCircleMarkers(data = micro_data, lng = ~x, lat = ~y, color = ~pal(Concentration.class.text), group = "microplastics",
-                           radius = 4, fillOpacity = 0.8, popup = ~paste("<b>Region:</b>", Region, "<b><br>Sampling method:</b>", Sampling.Method,
+                           radius = 4, fillOpacity = 0.8, popup = ~paste("<b>Region:</b>", Region,
+                                                                         "<b><br>Concentration:</b>", Concentration.class.range, Unit,
+                                                                         "<b><br>Sampling method:</b>", Sampling.Method,
                                                                          "<b><br>Date of collection:</b>", Date..MM.DD.YYYY.)) %>% 
           # TODO: add info text for Ocean vs. Beach-Nurdle Patrol, concentrations, data source and download date
-          addLegend(pal = pal,
-                    values = ~micro_data$Concentration.class.text,
-                    title = "Microplastics concentration")
+          addLegendFactor(pal = pal, values = micro_data_conc, 
+                          orientation = "horizontal", shape = "circle", 
+                          title = htmltools::tags$div(style = "display:flex; align-items:center; justify-content:center; gap:6px; width:100%;",
+                                                      htmltools::tags$span(
+                                                        legend.titles("Concentration.class.text"),
+                                                        style = "flex:0 1 auto; text-align:center; font-weight: bold; font-size: 12px;"
+                                                      ),
+                                                      htmltools::tags$span(
+                                                        bs_icon('info-circle-fill'), # circled 'i'
+                                                        `data-bs-toggle` = "tooltip",
+                                                        `data-bs-placement` = "top",
+                                                        title = var.info("Concentration.class.text"),
+                                                        style = "cursor:pointer; font-weight:bold; text-align: center;"
+                                                      )
+                          ),
+                          labelStyle = "text-align: center;",
+                          className  = "my-centered-num-legend",
+                          position   = "bottomright")
       } else {
         proxy <- proxy %>% 
           clearGroup("microplastics")
