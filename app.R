@@ -779,6 +779,10 @@ ui <- page_navbar(
     background-color: #0A799A;
     }
     
+    ul {
+    padding-left: 20px;
+    }
+    
   ")),
     tags$link(rel = "stylesheet", # add bootstrap icon stylesheet
               href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
@@ -895,7 +899,8 @@ ui <- page_navbar(
                                       tags$b(tags$p("Version 1.1 Changes")),
                                       tags$li("Added tract codes to labels when hovering over a census tract"),
                                       tags$li("Fixed subscribe button for mailing list"),
-                                      tags$li("Microplastics: added data source information and concentration amounts, and fixed legend ordering"))),
+                                      tags$li("Microplastics: added data source information and concentration amounts, and fixed legend ordering"),
+                                      tags$li(HTML("PM<sub>2.5</sub>: added most recent data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group")))),
             h2("Technical Documentation"),
             a("Download", target = "_blank", href = "geoexmap_technical_doc_V1-041026.pdf")),
   nav_panel("Contact us",
