@@ -843,7 +843,7 @@ ui <- page_navbar(
         <li>geo<b>ex</b>map was designed with <b>reproducible</b> and <b>scalable</b> methods that can be adopted by other cancer centers and institutions, created using open-source software (R Shiny, leaflet, Docker) and publicly available geospatial data. See our <a href='https://github.com/FredHutch/geoexmap'>GitHub repository</a>.</li>
       </ul>
       <br>
-      <h6> Feel free to contact us with any questions, suggestions, and feedback at <a href='mailto:geoexmap@fredhutch.org'>geoexmap@fredhutch.org</a>.</h6><br>
+      <h6> Feel free to contact us with any questions, suggestions, and feedback at <a href='mailto:geoexmap@fredhutch.org'>geoexmap@fredhutch.org</a> or reach out directly to Dr. Trang VoPham (<a href=mailto:trang@fredhutch.org>trang@fredhutch.org</a>).</h6><br>
       <h6>geo<b>ex</b>map is supported by funding from the Dillon Family Foundation. </h6>
       <br>
       "
@@ -1654,7 +1654,7 @@ server <- function(input, output, session) {
   # defines legend titles based on defined column
   #TODO: fix title sub and superscripts to work with leaflegend
   legend.titles <- function(col) {
-    if(col == "Particulate.Matter.2.5") return(HTML("PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) concentrations in 2022 "))
+    if(col == "Particulate.Matter.2.5") return(HTML("PM<sub>2.5</sub> (&#956;g/m<sup>3</sup>) concentrations in 2023"))
     if(col == "Green.Space") return("Normalized difference vegetation index (NDVI) in July 2024")
     if(col == "Nighttime.Radiance") return(HTML("Light at night (nW/cm<sup>2</sup>/sr) in 2022"))
     if(col == "Food.Stamps") return("SNAP benefits in 2023 (%)")
@@ -1806,7 +1806,7 @@ server <- function(input, output, session) {
     if(col == "Average.temperature") return(paste0("Average temperature in 2020 ", "(\U00B0", "F)"))
     if(col == "Precipitation") return("Precipitation in 2020 (in.)")
     
-    if(col == "Wildfire.smoke") return(HTML("Wildfire smoke PM<sub>2.5</sub> (\U03BC", "g/m<sup>3</sup>) in 2023"))
+    if(col == "Wildfire.smoke") return(HTML("Wildfire smoke PM<sub>2.5</sub> (&#956;g/m<sup>3</sup>) in 2023"))
     if(col == "Nitrogen.dioxide") return(HTML("Nitrogen dioxide (NO<sub>2</sub>) (ppb) in 2020"))
     if(col == "Sulfur.dioxide") return(HTML("Sulfur dioxide (SO<sub>2</sub>) (ppb) in 2020"))
     if(col == "Carbon.monoxide") return(HTML("Carbon monoxide (CO) (ppm) in 2020"))
@@ -2134,7 +2134,7 @@ server <- function(input, output, session) {
   }
   
   var.info <- function(col) {
-    if(col == "Particulate.Matter.2.5") return("Average concentration of particulate matter less than 2.5 microns in diameter in a census tract using data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2024 release)")
+    if(col == "Particulate.Matter.2.5") return("Average concentration of particulate matter less than 2.5 microns in diameter in a census tract using data from the Washington University in St. Louis (WUSTL) Atmospheric Composition Analysis Group (2025 release)")
     if(col == "Green.Space") return("Average green space vegetation health and intensity in a census tract measured using the normalized differernce vegetation index (NDVI) using Sentinel-2 Multi-Spectral Instrument (MSI) satellite data (daily average from July 2024)")
     if(col == "Nighttime.Radiance") return("Outdoor light at night (LAN) (also known as nighttime radiance or light pollution) in a census tract from the National Aeronautics and Space Administration Visible Infrared Imaging Radiometer Suite (VIIRS) (average from Jan. 1 - Dec. 31 2023)")
     if(col == "Food.Stamps") return("Estimate of the percentage of adults in a census tract who reported receiving food stamps, also called SNAP, the Supplemental Nutrition Assistance Program, on an EBT card from CDC PLACES (2025 release)")
