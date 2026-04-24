@@ -159,8 +159,8 @@ prevention <- c("Cholesterol screening" = "Cholesterol.Screening",
                 "Mammography screening for breast cancer" = "Mammography.Use.among.Women.50.to.74",
                 "Colorectal cancer screening" = "Colorectal.Cancer.Screening.among.Adults.45.to.75")
 
-airpol <- sort(c("Particulate matter <2.5 microns in diameter (PM\U2082.\U0323\U2085)" = "Particulate.Matter.2.5",
-            "Wildfire smoke PM\U2082.\U0323\U2085" = "Wildfire.smoke",
+airpol <- sort(c("Particulate matter <2.5 microns in diameter (PM\U2082\U002E\U2085)" = "Particulate.Matter.2.5",
+            "Wildfire smoke PM\U2082\U002E\U2085" = "Wildfire.smoke",
             "Nitrogen dioxide (NO\U2082)" = "Nitrogen.dioxide",
             "Sulfur dioxide (SO\U2082)" = "Sulfur.dioxide",
             "Carbon monoxide (CO)" = "Carbon.monoxide",
