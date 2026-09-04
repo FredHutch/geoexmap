@@ -3089,7 +3089,7 @@ server <- function(input, output, session) {
   
   
   #### INITIAL MAP RENDER ####
-  #readRenviron()
+  readRenviron("~/.Renviron")
   cartodb_url <- paste0("https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png", '?key=', Sys.getenv('CARTO_MAPS_API_KEY'))
   
   output$geoexmap <- renderLeaflet({
