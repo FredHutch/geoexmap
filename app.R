@@ -3089,10 +3089,17 @@ server <- function(input, output, session) {
   
   
   #### INITIAL MAP RENDER ####
+  #readRenviron()
+  cartodb_url <- paste0("https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png", '?key=', Sys.getenv('CARTO_MAPS_API_KEY'))
+  
   output$geoexmap <- renderLeaflet({
     map <- leaflet(options = leafletOptions(zoomSnap = 0.1, zoomDelta = 0.5)) %>% 
       setView(lng = -120.74, lat = 47.75, zoom = 7) %>% 
-      addProviderTiles(providers$CartoDB.Positron) %>%
+      addTiles(urlTemplate = cartodb_url,
+               attribution = paste(
+                 '&copy; <a href="https://carto.com/attributions">CARTO</a>,',
+                 '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+               )) %>%
       addSearchOSM(options = searchOptions(textPlaceholder = "Search", zoom = 15)) %>% 
       addEasyButton(easyButton(
         icon = 'fa-remove',
